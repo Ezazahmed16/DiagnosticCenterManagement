@@ -12,6 +12,8 @@ import { MdOutlineDashboard } from "react-icons/md";
 import { FaUserTag } from "react-icons/fa";
 import { MdAccountBalanceWallet } from "react-icons/md";
 import { CiSettings } from "react-icons/ci";
+import { role } from "@/lib/data";
+
 
 
 interface SidebarProps {
@@ -35,6 +37,10 @@ const menuGroups = [
         label: "Receptionist",
         route: "/receptionist",
         visible: ["admin", "receptionist"],
+        children: [
+          { label: "All Patients", route: "/receptionist/all-patients" },
+          { label: "All Memos", route: "/receptionist/all-memos" },
+        ],
       },
       {
         icon: <MdAccountBalanceWallet />,
@@ -62,7 +68,7 @@ const menuGroups = [
   },
 ];
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen, userRole = 'admin' }: SidebarProps) => {
+const Sidebar = ({ sidebarOpen, setSidebarOpen, userRole = role }: SidebarProps) => {
   const pathname = usePathname();
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
 
