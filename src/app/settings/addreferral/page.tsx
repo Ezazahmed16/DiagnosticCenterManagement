@@ -1,40 +1,45 @@
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
-import { expensesData, role } from "@/lib/data";  // Updated to import expensesData
+import { referalsData } from "@/lib/data";  // Updated to import referalsData
 import Link from "next/link";
 import { CiSearch } from "react-icons/ci";
 import { FaEdit, FaPlus, FaPrint, FaRegEye } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 
-type ExpenseData = {
-  expenseId: string;
-  expenseTitle: string;
-  expenseAmount: number;
-  expenseCategory: string;
-  expenseDate: string;
+type ReferalData = {
+  referalsId: string;
+  referalsName: string;
+  referalsCommission: string;
+  totalAmmount: number;
+  ammountPaid: number;
+  totalDue: number;
 };
 
 const columns = [
   {
-    header: "Expense ID",
-    accessor: "expenseId",
+    header: "Referral ID",
+    accessor: "referalsId",
   },
   {
-    header: "Title",
-    accessor: "expenseTitle",
+    header: "Referral Name",
+    accessor: "referalsName",
   },
   {
-    header: "Amount",
-    accessor: "expenseAmount",
+    header: "Commission",
+    accessor: "referalsCommission",
   },
   {
-    header: "Category",
-    accessor: "expenseCategory",
+    header: "Total Amount",
+    accessor: "totalAmmount",
   },
   {
-    header: "Date",
-    accessor: "expenseDate",
+    header: "Amount Paid",
+    accessor: "ammountPaid",
+  },
+  {
+    header: "Total Due",
+    accessor: "totalDue",
   },
   {
     header: "Actions",
@@ -42,22 +47,23 @@ const columns = [
   },
 ];
 
-const AllExpensesPage = () => {
-  const renderRow = (item: ExpenseData) => (
-    <tr key={item.expenseId} className="border-b text-sm hover:bg-lamaPurpleLight">
-      <td>{item.expenseId}</td>
-      <td>{item.expenseTitle}</td>
-      <td>{item.expenseAmount}</td>
-      <td>{item.expenseCategory}</td>
-      <td>{item.expenseDate}</td>
+const AllReferralsPage = () => {
+  const renderRow = (item: ReferalData) => (
+    <tr key={item.referalsId} className="border-b text-sm hover:bg-lamaPurpleLight">
+      <td>{item.referalsId}</td>
+      <td>{item.referalsName}</td>
+      <td>{item.referalsCommission}</td>
+      <td>{item.totalAmmount}</td>
+      <td>{item.ammountPaid}</td>
+      <td>{item.totalDue}</td>
       <td>
         <div className="flex items-center justify-start gap-1">
-          <Link href={`/expenses/${item.expenseId}`}>
+          <Link href={`/referrals/${item.referalsId}`}>
             <button className="w-7 h-7 flex items-center justify-center rounded-full">
               <FaRegEye />
             </button>
           </Link>
-          <Link href={`/expenses/${item.expenseId}/edit`}>
+          <Link href={`/referrals/${item.referalsId}/edit`}>
             <button className="w-7 h-7 flex items-center justify-center rounded-full">
               <FaEdit />
             </button>
@@ -71,11 +77,11 @@ const AllExpensesPage = () => {
   );
 
   return (
-    <DefaultLayout userRole={role}>
+    <DefaultLayout>
       <div className="min-h-screen">
         {/* Top */}
         <div className="flex justify-between items-center p-4 gap-5">
-          <h1 className="text-lg font-semibold">All Expenses</h1>
+          <h1 className="text-lg font-semibold">All Referrals</h1>
           <div className="flex justify-center items-center gap-2">
             <div className="relative">
               <button className="absolute left-2 top-1/2 -translate-y-1/2">
@@ -98,7 +104,7 @@ const AllExpensesPage = () => {
         </div>
 
         {/* Table */}
-        <Table columns={columns} renderRow={renderRow} data={expensesData} />
+        <Table columns={columns} renderRow={renderRow} data={referalsData} />
 
         {/* Pagination */}
         <Pagination />
@@ -107,4 +113,4 @@ const AllExpensesPage = () => {
   );
 };
 
-export default AllExpensesPage;
+export default AllReferralsPage;

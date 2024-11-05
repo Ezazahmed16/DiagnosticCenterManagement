@@ -19,7 +19,7 @@ import { role } from "@/lib/data";
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (arg: boolean) => void;
-  userRole: string;  // Add userRole as a prop
+  userRole: string;  
 }
 
 const menuGroups = [
@@ -62,6 +62,7 @@ const menuGroups = [
         children: [
           { label: "Add Role", route: "/settings/addrole" },
           { label: "Add Test", route: "/settings/addtest" },
+          { label: "Add Referral", route: "/settings/addreferral" },
         ],
       },
     ],

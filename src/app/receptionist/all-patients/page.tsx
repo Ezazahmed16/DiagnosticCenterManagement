@@ -39,7 +39,7 @@ const columns = [
   },
 ];
 
-const page = () => {
+const AllPatientsPage = () => {
   const renderRow = (item: PatientData) => {
     // Determine status based on memos
     const hasDue = item.memoId.some((memoId) => {
@@ -59,7 +59,7 @@ const page = () => {
         <td>{status}</td>
         <td>
           <div className="flex items-center justify-start gap-1">
-            <Link href={`/list/patients/${item.id}`}>
+            <Link href={`/receptionist/all-patients/${item.id}`}>
               <button className="w-7 h-7 flex items-center justify-center rounded-full">
                 <FaRegEye />
               </button>
@@ -121,4 +121,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default AllPatientsPage;
