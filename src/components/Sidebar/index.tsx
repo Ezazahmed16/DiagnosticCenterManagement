@@ -13,13 +13,14 @@ import { FaUserTag } from "react-icons/fa";
 import { MdAccountBalanceWallet } from "react-icons/md";
 import { CiSettings } from "react-icons/ci";
 import { role } from "@/lib/data";
+import { CgProfile } from "react-icons/cg";
 
 
 
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (arg: boolean) => void;
-  userRole: string;  
+  userRole: string;
 }
 
 const menuGroups = [
@@ -64,6 +65,12 @@ const menuGroups = [
           { label: "Add Test", route: "/settings/addtest" },
           { label: "Add Referral", route: "/settings/addreferral" },
         ],
+      },
+      {
+        icon: <CgProfile />,
+        label: "Profile",
+        route: "/profile",
+        visible: ["admin", "accounts", "receptionist"],
       },
     ],
   },

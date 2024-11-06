@@ -83,7 +83,7 @@ const AllTestsPage = () => {
     );
   };
   return (
-    <DefaultLayout>
+    <DefaultLayout userRole={role}>
       <div className="min-h-screen">
         {/* Top */}
         <div className="flex justify-between items-center p-4 gap-5">

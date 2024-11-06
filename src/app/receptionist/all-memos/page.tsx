@@ -57,7 +57,7 @@ const AllPatientsPage = () => {
         <td>{item.issueDate}</td>
         <td>
           <div className="flex items-center justify-start gap-1">
-            <Link href={`/receptionist/all-patients/${item.id}`}>
+            <Link href={`/receptionist/all-memos/${item.id}`}>
               <button className="w-7 h-7 flex items-center justify-center rounded-full">
                 <FaRegEye />
               </button>
@@ -67,11 +67,11 @@ const AllPatientsPage = () => {
                 <FaEdit />
               </button>
             </Link>
-            {/* <Link href={`/list/patients/${item.id}/print`}>
+            <Link href={`/list/patients/${item.id}/print`}>
               <button className="w-7 h-7 flex items-center justify-center rounded-full">
                 <FaPrint />
               </button>
-            </Link> */}
+            </Link>
             {role === "admin" && (
               <button className="w-8 h-8 flex items-center justify-center rounded-full">
                 <MdDeleteOutline />
@@ -83,7 +83,7 @@ const AllPatientsPage = () => {
     );
   };
   return (
-    <DefaultLayout>
+    <DefaultLayout userRole={role}>
       <div className="min-h-screen">
         {/* Top */}
         <div className="flex justify-between items-center p-4 gap-5">

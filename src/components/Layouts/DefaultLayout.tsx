@@ -2,10 +2,11 @@
 import React, { useState, ReactNode } from "react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import { role } from "@/lib/data";
 
 interface DefaultLayoutProps {
   children: ReactNode;
-  userRole: string; // Define userRole prop
+  userRole: string; 
 }
 
 export default function DefaultLayout({ children, userRole }: DefaultLayoutProps) {
@@ -19,7 +20,7 @@ export default function DefaultLayout({ children, userRole }: DefaultLayoutProps
         <Sidebar 
           sidebarOpen={sidebarOpen} 
           setSidebarOpen={setSidebarOpen} 
-          userRole={userRole} // Pass userRole to Sidebar
+          userRole={role} // Pass userRole to Sidebar
         />
         {/* <!-- ===== Sidebar End ===== --> */}
 
