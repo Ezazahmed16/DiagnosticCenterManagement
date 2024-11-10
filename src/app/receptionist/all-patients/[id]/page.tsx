@@ -61,22 +61,22 @@ const SinglePatientPage = () => {
                     <div className="flex items-center justify-start gap-1">
                         <Link href={`/receptionist/all-patients/${item.id}`}>
                             <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                                <FaRegEye />
+                                <FaRegEye size={18}/>
                             </button>
                         </Link>
                         <Link href={`/list/patients/${item.id}/edit`}>
                             <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                                <FaEdit />
+                                <FormModal type="update" />
                             </button>
                         </Link>
                         {/* <Link href={`/list/patients/${item.id}/print`}>
                   <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                    <FaPrint />
+                    <FaPrint size={18} />
                   </button>
                 </Link> */}
                         {role === "admin" && (
                             <button className="w-8 h-8 flex items-center justify-center rounded-full">
-                                <MdDeleteOutline />
+                                <FormModal type="delete" />
                             </button>
                         )}
                     </div>

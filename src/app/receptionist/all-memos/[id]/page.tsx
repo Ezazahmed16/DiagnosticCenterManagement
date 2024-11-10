@@ -49,7 +49,7 @@ const SinglePatientPage = () => {
                             href="#"
                             className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
                         >
-                            <FaPlus className="h-4 w-4" />
+                            <FormModal type="create" />
                             Add
                         </Link>
                     </div>
