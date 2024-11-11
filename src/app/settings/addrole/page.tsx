@@ -8,7 +8,7 @@ import { CiSearch } from "react-icons/ci";
 import { FaRegEye } from "react-icons/fa";
 
 type UserData = {
-  userId: string;
+  userId: number;
   userName: string;
   userEmail: string;
   userPassword: string;
@@ -65,7 +65,7 @@ const AllRolesPage = () => {
           </Link>
           {role === "admin" && (
             <button className="w-8 h-8 flex items-center justify-center rounded-full">
-              <FormModal table="UserData" type="delete" />
+              <FormModal table="UserData" type="delete" id={item.userId} />
             </button>
           )}
         </div>
@@ -94,8 +94,8 @@ const AllRolesPage = () => {
               href="#"
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
-              <FormModal table="UserData" type="create" />
-              Add
+              <FormModal table="UserData" type="create"/>
+              Add Role
             </Link>
           </div>
         </div>

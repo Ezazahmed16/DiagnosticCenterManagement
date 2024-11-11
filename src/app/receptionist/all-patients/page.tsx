@@ -7,7 +7,7 @@ import Link from "next/link";
 import { CiSearch } from "react-icons/ci";
 import { FaRegEye } from "react-icons/fa";
 
-type PatientData = {
+type patientData = {
   id: number;
   patientId: string;
   name: string;
@@ -40,7 +40,7 @@ const columns = [
 ];
 
 const AllPatientsPage = () => {
-  const renderRow = (item: PatientData) => {
+  const renderRow = (item: patientData) => {
     // Determine status based on memos
     const hasDue = item.memoId.some((memoId) => {
       const memo = memoData.find((m) => m.memoId === memoId);
@@ -66,16 +66,15 @@ const AllPatientsPage = () => {
               </button>
             </Link>
             {/* Edit Button */}
-            <Link href={`/list/patients/${item.id}/edit`}>
-              <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                <FormModal table="patient" type="update" />
-              </button>
-            </Link>
+            <button className="w-7 h-7 flex items-center justify-center rounded-full">
+              <FormModal table="patientData" type="update" />
+            </button>
 
             {/* Delete Button (Only visible for admin) */}
             {role === "admin" && (
               <button className="w-8 h-8 flex items-center justify-center rounded-full">
-                <FormModal table="patient" type="delete" />
+                {/* <FormModal table="patientData" type="delete" /> */}
+                <FormModal table="patientData" type="delete" id={item.id} />
               </button>
             )}
           </div>
@@ -102,13 +101,12 @@ const AllPatientsPage = () => {
               />
             </div>
             {/* Add Button */}
-            <Link
-              href="#"
+            <button
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
-              <FormModal table="patient" type="create" />
+              <FormModal table="patientData" type="create" data="" />
               Add Patient
-            </Link>
+            </button>
           </div>
         </div>
 

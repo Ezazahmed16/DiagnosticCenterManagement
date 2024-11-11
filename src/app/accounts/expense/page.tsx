@@ -9,7 +9,7 @@ import { FaEdit, FaPlus, FaPrint, FaRegEye } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 
 type ExpenseData = {
-  expenseId: string;
+  expenseId: number;
   expenseTitle: string;
   expenseAmount: number;
   expenseCategory: string;
@@ -65,7 +65,7 @@ const AllExpensesPage = () => {
           </Link>
           {role === "admin" && (
               <button className="w-8 h-8 flex items-center justify-center rounded-full">
-                <FormModal table="ExpenseData" type="delete" />
+                <FormModal table="ExpenseData" type="delete" id={item.expenseId} />
               </button>
             )}
         </div>

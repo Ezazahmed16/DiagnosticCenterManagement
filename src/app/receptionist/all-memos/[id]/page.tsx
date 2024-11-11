@@ -1,9 +1,10 @@
+import FormModal from "@/components/FormModal"
 import DefaultLayout from "@/components/Layouts/DefaultLayout"
 import Table from "@/components/Table"
 import { role, testData } from "@/lib/data"
 import Link from "next/link"
 import { CgCalendarDue } from "react-icons/cg"
-import { FaHistory, FaPlus, FaPrint, FaUser } from "react-icons/fa"
+import { FaPrint, FaUser } from "react-icons/fa"
 import { FaMapLocationDot, FaMoneyBillTransfer } from "react-icons/fa6"
 import { IoIosCall } from "react-icons/io"
 import { MdPaid } from "react-icons/md"
@@ -49,7 +50,7 @@ const SinglePatientPage = () => {
                             href="#"
                             className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
                         >
-                            <FormModal type="create" />
+                            <FormModal table="memoData" type="create" />
                             Add
                         </Link>
                     </div>

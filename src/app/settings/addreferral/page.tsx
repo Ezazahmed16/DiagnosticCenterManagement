@@ -9,7 +9,7 @@ import { FaEdit, FaPlus, FaPrint, FaRegEye } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 
 type ReferalData = {
-  referalsId: string;
+  referalsId: number;
   referalsName: string;
   referalsCommission: string;
   totalAmmount: number;
@@ -64,13 +64,11 @@ const AllReferralsPage = () => {
               <FaRegEye size={18} />
             </button>
           </Link>
-          <Link href={`/referrals/${item.referalsId}/edit`}>
-            <button className="w-7 h-7 flex items-center justify-center rounded-full">
-              <FormModal table="ReferalData" type="update" />
-            </button>
-          </Link>
+          <button className="w-7 h-7 flex items-center justify-center rounded-full">
+            <FormModal table="ReferalData" type="update" />
+          </button>
           <button className="w-8 h-8 flex items-center justify-center rounded-full">
-            <FormModal table="ReferalData" type="delete" />
+            <FormModal table="ReferalData" type="delete" id={item.referalsId} />
           </button>
         </div>
       </td>

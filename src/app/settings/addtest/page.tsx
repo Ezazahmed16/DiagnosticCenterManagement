@@ -8,8 +8,7 @@ import { CiSearch } from "react-icons/ci";
 import { FaRegEye } from "react-icons/fa";
 
 type testData = {
-  id: number;
-  testId: string;
+  testId: number;
   testName: string;
   price: string;
   additionalCost: string;
@@ -57,19 +56,17 @@ const AllTestsPage = () => {
         <td>{item.totalCost}</td>
         <td>
           <div className="flex items-center justify-start gap-1">
-            <Link href={`/receptionist/all-patients/${item.id}`}>
+            <Link href={`/receptionist/all-patients/${item.testId}`}>
               <button className="w-7 h-7 flex items-center justify-center rounded-full">
                 <FaRegEye size={18} />
               </button>
             </Link>
-            <Link href={`/list/patients/${item.id}/edit`}>
-              <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                <FormModal table="testData" type="update" />
-              </button>
-            </Link>
+            <button className="w-7 h-7 flex items-center justify-center rounded-full">
+              <FormModal table="testData" type="update" />
+            </button>
             {role === "admin" && (
               <button className="w-8 h-8 flex items-center justify-center rounded-full">
-                <FormModal table="testData" type="delete" />
+                <FormModal table="testData" type="delete" id={item.testId} />
               </button>
             )}
           </div>

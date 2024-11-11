@@ -74,7 +74,7 @@ const AllPatientsPage = () => {
             </Link>
             {role === "admin" && (
               <button className="w-8 h-8 flex items-center justify-center rounded-full">
-                <FormModal table="memoData" type="delete" />
+                <FormModal table="memoData" type="delete" id={item.id} />
               </button>
             )}
           </div>

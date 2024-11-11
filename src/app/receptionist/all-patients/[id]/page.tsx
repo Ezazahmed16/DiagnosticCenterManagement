@@ -1,3 +1,4 @@
+import FormModal from "@/components/FormModal"
 import DefaultLayout from "@/components/Layouts/DefaultLayout"
 import Table from "@/components/Table"
 import { memoData, role } from "@/lib/data"
@@ -61,12 +62,12 @@ const SinglePatientPage = () => {
                     <div className="flex items-center justify-start gap-1">
                         <Link href={`/receptionist/all-patients/${item.id}`}>
                             <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                                <FaRegEye size={18}/>
+                                <FaRegEye size={18} />
                             </button>
                         </Link>
                         <Link href={`/list/patients/${item.id}/edit`}>
                             <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                                <FormModal type="update" />
+                                <FormModal table="memoData" type="update" />
                             </button>
                         </Link>
                         {/* <Link href={`/list/patients/${item.id}/print`}>
@@ -76,7 +77,8 @@ const SinglePatientPage = () => {
                 </Link> */}
                         {role === "admin" && (
                             <button className="w-8 h-8 flex items-center justify-center rounded-full">
-                                <FormModal type="delete" />
+                                {/* <FormModal type="delete" /> */}
+                                <FormModal table="memoData" type="delete" id={item.id} />
                             </button>
                         )}
                     </div>
