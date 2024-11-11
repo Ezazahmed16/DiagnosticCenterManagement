@@ -85,7 +85,7 @@ export const memoData = [
 // All Tests Data 
 export const testData = [
     {
-        testId: "1",
+        testId: 1,
         testName: "Complete Blood Count",
         price: 1000,
         additionalCost: 0,
@@ -93,7 +93,7 @@ export const testData = [
         description: "A test that evaluates overall health and detects a variety of disorders, including anemia and infection."
     },
     {
-        testId: "2",
+        testId: 2,
         testName: "Liver Function Test",
         price: 1200,
         additionalCost: 150,
@@ -101,7 +101,7 @@ export const testData = [
         description: "Assesses liver health by measuring levels of proteins, liver enzymes, and bilirubin in the blood."
     },
     {
-        testId: "3",
+        testId: 3,
         testName: "Kidney Function Test",
         price: 900,
         additionalCost: 100,
@@ -109,7 +109,7 @@ export const testData = [
         description: "Measures levels of substances like creatinine and urea to assess kidney function and health."
     },
     {
-        testId: "4",
+        testId: 4,
         testName: "Blood Glucose Test",
         price: 500,
         additionalCost: 0,
@@ -117,7 +117,7 @@ export const testData = [
         description: "Measures blood glucose levels to diagnose and monitor diabetes and other glucose-related conditions."
     },
     {
-        testId: "5",
+        testId: 5,
         testName: "Thyroid Function Test",
         price: 1100,
         additionalCost: 150,
@@ -125,7 +125,7 @@ export const testData = [
         description: "Evaluates thyroid gland function by measuring levels of T3, T4, and TSH hormones in the blood."
     },
     {
-        testId: "6",
+        testId: 6,
         testName: "Lipid Profile",
         price: 1300,
         additionalCost: 0,
@@ -133,7 +133,7 @@ export const testData = [
         description: "A panel of blood tests measuring cholesterol and triglyceride levels to assess cardiovascular health."
     },
     {
-        testId: "7",
+        testId: 7,
         testName: "Urine Analysis",
         price: 400,
         additionalCost: 0,
@@ -141,7 +141,7 @@ export const testData = [
         description: "Examines urine content and properties to detect a variety of conditions, including infections and kidney disease."
     },
     {
-        testId: "8",
+        testId: 8,
         testName: "Electrolyte Panel",
         price: 800,
         additionalCost: 0,
@@ -149,7 +149,7 @@ export const testData = [
         description: "Measures electrolyte levels, including sodium, potassium, and chloride, to assess hydration and organ function."
     },
     {
-        testId: "9",
+        testId: 9,
         testName: "Hemoglobin A1c Test",
         price: 700,
         additionalCost: 0,
@@ -157,7 +157,7 @@ export const testData = [
         description: "Measures average blood glucose levels over the past 3 months to monitor diabetes management."
     },
     {
-        testId: "10",
+        testId: 10,
         testName: "Vitamin D Test",
         price: 900,
         additionalCost: 0,
@@ -169,7 +169,7 @@ export const testData = [
 // All User Data 
 export const userData = [
     {
-        userId: "1",
+        userId: 1,
         userName: "Ezaz Ahmed",
         userEmail: "ezazrahul794@gmail.com",
         userPassword: "123456",
@@ -177,7 +177,7 @@ export const userData = [
         userNumber: "017234567"
     },
     {
-        userId: "2",
+        userId: 2,
         userName: "Ayesha Rahman",
         userEmail: "ayesha.rahman@example.com",
         userPassword: "654321",
@@ -185,7 +185,7 @@ export const userData = [
         userNumber: "017987654"
     },
     {
-        userId: "3",
+        userId: 3,
         userName: "Fahim Islam",
         userEmail: "fahim.islam@example.com",
         userPassword: "112233",
@@ -193,7 +193,7 @@ export const userData = [
         userNumber: "017345678"
     },
     {
-        userId: "4",
+        userId: 4,
         userName: "Nadia Karim",
         userEmail: "nadia.karim@example.com",
         userPassword: "998877",
@@ -205,7 +205,7 @@ export const userData = [
 // All Referals Data
 export const referalsData = [
     {
-        referalsId: "1",
+        referalsId: 1,
         referalsName: "JR. Hasan",
         referalsCommission: "5%",
         totalAmmount: 10000,
@@ -213,7 +213,7 @@ export const referalsData = [
         totalDue: 3000,
     },
     {
-        referalsId: "2",
+        referalsId: 2,
         referalsName: "Ayesha Khan",
         referalsCommission: "7%",
         totalAmmount: 15000,
@@ -221,7 +221,7 @@ export const referalsData = [
         totalDue: 4500,
     },
     {
-        referalsId: "3",
+        referalsId: 3,
         referalsName: "Robert Lee",
         referalsCommission: "4%",
         totalAmmount: 8000,
@@ -229,7 +229,7 @@ export const referalsData = [
         totalDue: 4000,
     },
     {
-        referalsId: "4",
+        referalsId: 4,
         referalsName: "Sophia Brown",
         referalsCommission: "6%",
         totalAmmount: 20000,
@@ -237,7 +237,7 @@ export const referalsData = [
         totalDue: 8000,
     },
     {
-        referalsId: "5",
+        referalsId: 5,
         referalsName: "Ali Khan",
         referalsCommission: "5%",
         totalAmmount: 12000,
@@ -249,74 +249,60 @@ export const referalsData = [
 // All Expenses Data
 export const expensesData = [
     {
-        expenseId: "1",
+        expenseId: 1,
         expenseTitle: "Office Rent",
         expenseAmount: 3000,
         expenseCategory: "Rent",
         expenseDate: "2024-10-01",
     },
     {
-        expenseId: "2",
+        expenseId: 2,
         expenseTitle: "Internet Bill",
         expenseAmount: 100,
         expenseCategory: "Utilities",
         expenseDate: "2024-10-05",
     },
     {
-        expenseId: "3",
+        expenseId: 3,
         expenseTitle: "Office Supplies",
         expenseAmount: 150,
         expenseCategory: "Supplies",
         expenseDate: "2024-10-08",
     },
     {
-        expenseId: "4",
+        expenseId: 4,
         expenseTitle: "Electricity Bill",
         expenseAmount: 200,
         expenseCategory: "Utilities",
         expenseDate: "2024-10-10",
     },
     {
-        expenseId: "5",
+        expenseId: 5,
         expenseTitle: "Employee Lunch",
         expenseAmount: 250,
         expenseCategory: "Meals",
         expenseDate: "2024-10-12",
     },
     {
-        expenseId: "6",
+        expenseId: 6,
         expenseTitle: "Software Subscription",
         expenseAmount: 50,
         expenseCategory: "Software",
         expenseDate: "2024-10-15",
     },
     {
-        expenseId: "7",
+        expenseId: 7,
         expenseTitle: "Travel Expenses",
         expenseAmount: 500,
         expenseCategory: "Travel",
         expenseDate: "2024-10-18",
     },
     {
-        expenseId: "8",
+        expenseId: 8,
         expenseTitle: "Marketing Materials",
         expenseAmount: 300,
         expenseCategory: "Marketing",
         expenseDate: "2024-10-20",
-    },
-    {
-        expenseId: "9",
-        expenseTitle: "Client Meeting",
-        expenseAmount: 150,
-        expenseCategory: "Entertainment",
-        expenseDate: "2024-10-25",
-    },
-    {
-        expenseId: "10",
-        expenseTitle: "Office Cleaning",
-        expenseAmount: 100,
-        expenseCategory: "Maintenance",
-        expenseDate: "2024-10-28",
     },
 ];
 

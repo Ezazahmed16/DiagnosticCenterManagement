@@ -1,14 +1,15 @@
+import FormModal from "@/components/FormModal";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
-import { referalsData } from "@/lib/data";  // Updated to import referalsData
+import { referalsData, role } from "@/lib/data";  // Updated to import referalsData
 import Link from "next/link";
 import { CiSearch } from "react-icons/ci";
 import { FaEdit, FaPlus, FaPrint, FaRegEye } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 
 type ReferalData = {
-  referalsId: string;
+  referalsId: number;
   referalsName: string;
   referalsCommission: string;
   totalAmmount: number;
@@ -60,16 +61,14 @@ const AllReferralsPage = () => {
         <div className="flex items-center justify-start gap-1">
           <Link href={`/referrals/${item.referalsId}`}>
             <button className="w-7 h-7 flex items-center justify-center rounded-full">
-              <FaRegEye />
+              <FaRegEye size={18} />
             </button>
           </Link>
-          <Link href={`/referrals/${item.referalsId}/edit`}>
-            <button className="w-7 h-7 flex items-center justify-center rounded-full">
-              <FaEdit />
-            </button>
-          </Link>
+          <button className="w-7 h-7 flex items-center justify-center rounded-full">
+            <FormModal table="ReferalData" type="update" />
+          </button>
           <button className="w-8 h-8 flex items-center justify-center rounded-full">
-            <MdDeleteOutline />
+            <FormModal table="ReferalData" type="delete" id={item.referalsId} />
           </button>
         </div>
       </td>
@@ -77,7 +76,7 @@ const AllReferralsPage = () => {
   );
 
   return (
-    <DefaultLayout>
+    <DefaultLayout userRole={role}>
       <div className="min-h-screen">
         {/* Top */}
         <div className="flex justify-between items-center p-4 gap-5">
@@ -97,7 +96,7 @@ const AllReferralsPage = () => {
               href="#"
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
-              <FaPlus className="h-4 w-4" />
+              <FormModal table="ReferalData" type="create" />
               Add
             </Link>
           </div>

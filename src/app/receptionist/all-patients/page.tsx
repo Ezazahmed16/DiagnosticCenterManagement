@@ -1,13 +1,13 @@
+import FormModal from "@/components/FormModal";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import { memoData, patientData, role } from "@/lib/data";
 import Link from "next/link";
 import { CiSearch } from "react-icons/ci";
-import { FaEdit, FaPlus, FaPrint, FaRegEye } from "react-icons/fa";
-import { MdDeleteOutline } from "react-icons/md";
+import { FaRegEye } from "react-icons/fa";
 
-type PatientData = {
+type patientData = {
   id: number;
   patientId: string;
   name: string;
@@ -40,7 +40,7 @@ const columns = [
 ];
 
 const AllPatientsPage = () => {
-  const renderRow = (item: PatientData) => {
+  const renderRow = (item: patientData) => {
     // Determine status based on memos
     const hasDue = item.memoId.some((memoId) => {
       const memo = memoData.find((m) => m.memoId === memoId);
@@ -59,24 +59,22 @@ const AllPatientsPage = () => {
         <td>{status}</td>
         <td>
           <div className="flex items-center justify-start gap-1">
+            {/* View Button */}
             <Link href={`/receptionist/all-patients/${item.id}`}>
               <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                <FaRegEye />
+                <FaRegEye size={18} />
               </button>
             </Link>
-            <Link href={`/list/patients/${item.id}/edit`}>
-              <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                <FaEdit />
-              </button>
-            </Link>
-            {/* <Link href={`/list/patients/${item.id}/print`}>
-              <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                <FaPrint />
-              </button>
-            </Link> */}
+            {/* Edit Button */}
+            <button className="w-7 h-7 flex items-center justify-center rounded-full">
+              <FormModal table="patientData" type="update" />
+            </button>
+
+            {/* Delete Button (Only visible for admin) */}
             {role === "admin" && (
               <button className="w-8 h-8 flex items-center justify-center rounded-full">
-                <MdDeleteOutline />
+                {/* <FormModal table="patientData" type="delete" /> */}
+                <FormModal table="patientData" type="delete" id={item.id} />
               </button>
             )}
           </div>
@@ -84,10 +82,11 @@ const AllPatientsPage = () => {
       </tr>
     );
   };
+
   return (
     <DefaultLayout userRole={role}>
       <div className="min-h-screen">
-        {/* Top */}
+        {/* Top Section */}
         <div className="flex justify-between items-center p-4 gap-5">
           <h1 className="text-lg font-semibold">All Patient</h1>
           <div className="flex justify-center items-center gap-2">
@@ -101,13 +100,13 @@ const AllPatientsPage = () => {
                 className="w-full bg-transparent pl-9 pr-4 font-medium focus:outline-none lg:w-60 border-2 py-2 rounded-3xl"
               />
             </div>
-            <Link
-              href="#"
+            {/* Add Button */}
+            <button
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
-              <FaPlus className="h-4 w-4" />
-              Add
-            </Link>
+              <FormModal table="patientData" type="create" data="" />
+              Add Patient
+            </button>
           </div>
         </div>
 
