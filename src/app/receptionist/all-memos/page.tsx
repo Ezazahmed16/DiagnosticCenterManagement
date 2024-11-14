@@ -62,11 +62,9 @@ const AllPatientsPage = () => {
                 <FaRegEye size={18} />
               </button>
             </Link>
-            <Link href={`/list/patients/${item.id}/edit`}>
-              <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                <FormModal table="memoData" type="update" />
-              </button>
-            </Link>
+            <button className="w-7 h-7 flex items-center justify-center rounded-full">
+              <FormModal table="memoData" type="update" />
+            </button>
             <Link href={`/list/patients/${item.id}/print`}>
               <button className="w-7 h-7 flex items-center justify-center rounded-full">
                 <FaPrint size={18} />
@@ -99,13 +97,12 @@ const AllPatientsPage = () => {
                 className="w-full bg-transparent pl-9 pr-4 font-medium focus:outline-none lg:w-60 border-2 py-2 rounded-3xl"
               />
             </div>
-            <Link
-              href="#"
+            <button
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
               <FormModal table="memoData" type="create" />
               Add
-            </Link>
+            </button>
           </div>
         </div>
 

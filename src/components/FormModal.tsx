@@ -1,8 +1,10 @@
-'use client'
+'use client';
 import { useState } from "react";
 import { AiOutlineDelete } from "react-icons/ai";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
+import MemoForm from "./forms/MemoForm";
+import PatientForm from "./forms/PatientForm";
 
 type FormModalProps = {
     table: "account" | "receptionist" | "patientData" | "memoData" | "testData" | "patient" | "ExpenseData" | "UserData" | "ReferalData";
@@ -32,9 +34,8 @@ const FormModal = ({ table, type, data, id }: FormModalProps) => {
                 </button>
             </form>
         ) : (
-            <div className="p-4">
-                <span className="font-medium">Create or Update Form</span>
-            </div>
+            // <PatientForm type="create" />
+            <MemoForm type="create" />
         );
     };
 
@@ -54,7 +55,9 @@ const FormModal = ({ table, type, data, id }: FormModalProps) => {
             </button>
             {open && (
                 <div className="w-full h-full fixed left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
-                    <div className="bg-white text-black p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%]">
+                    <div
+                        className="bg-white text-black p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%] max-h-[90%] overflow-y-auto"
+                    >
                         <button
                             className="absolute top-4 right-4 cursor-pointer text-gray-700"
                             onClick={() => setOpen(false)}
