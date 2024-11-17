@@ -65,16 +65,11 @@ const SinglePatientPage = () => {
                                 <FaRegEye size={18} />
                             </button>
                         </Link>
-                        <Link href={`/list/patients/${item.id}/edit`}>
+                        {/* <Link href={`/list/patients/${item.id}/edit`}> */}
                             <button className="w-7 h-7 flex items-center justify-center rounded-full">
                                 <FormModal table="memoData" type="update" />
                             </button>
-                        </Link>
-                        {/* <Link href={`/list/patients/${item.id}/print`}>
-                  <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                    <FaPrint size={18} />
-                  </button>
-                </Link> */}
+                        {/* </Link> */}
                         {role === "admin" && (
                             <button className="w-8 h-8 flex items-center justify-center rounded-full">
                                 {/* <FormModal type="delete" /> */}

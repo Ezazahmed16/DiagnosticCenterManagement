@@ -63,7 +63,28 @@ const AllPatientsPage = () => {
               </button>
             </Link>
             <button className="w-7 h-7 flex items-center justify-center rounded-full">
-              <FormModal table="memoData" type="update" />
+              <FormModal
+                table="memoData"
+                type="update"
+                data={{
+                  id: 1,
+                  memoId: "5251",
+                  patientName: "Ezaz Ahmed",
+                  age: 27,
+                  phone: '01726065822',
+                  gender: 'male',
+                  email: 'ezazrahul794@gmail.com',
+                  address: "123 Main St, Dhaka, Bangladesh",
+                  memoTest: ["Blood Test", "MRI"], 
+                  totalAmount: 1500,
+                  pay: 1000,
+                  dueAmount: 300,
+                  status: "Due",
+                  issueDate: "2024-11-01",
+                  paymentDueDate: "2024-11-10"
+                }}
+              />
+
             </button>
             <Link href={`/list/patients/${item.id}/print`}>
               <button className="w-7 h-7 flex items-center justify-center rounded-full">

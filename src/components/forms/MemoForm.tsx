@@ -20,20 +20,22 @@ const schema = z.object({
   age: z
     .preprocess(
       (val) => (val !== null && val !== "" ? Number(val) : undefined),
-      z.number().min(1, { message: "Age must be at least 1!" }).max(120, { message: "Age must be at most 120!" })
+      z
+        .number()
+        .min(1, { message: "Age must be at least 1!" })
+        .max(120, { message: "Age must be at most 120!" })
     ),
   gender: z.enum(["male", "female", "other"], { message: "Gender is required!" }),
   address: z.string().min(5, { message: "Address is required!" }),
   paidAmount: z
-    .number()
-    .min(0, { message: "Paid amount cannot be negative!" })
-    .max(1000000, { message: "Paid amount is too large!" })
+    .preprocess((val) => (val !== null && val !== "" ? Number(val) : undefined), z.number())
     .optional(),
+  dueAmount: z.number().optional(),
+  memoTest: z.array(z.string()).optional(),
 });
 
 type Inputs = z.infer<typeof schema>;
 
-// Dummy data for test options
 const testOptions = [
   { id: 1, name: "Blood Test", cost: 50 },
   { id: 2, name: "X-Ray", cost: 100 },
@@ -52,17 +54,19 @@ const MemoForm = ({
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
     watch,
   } = useForm<Inputs>({
     resolver: zodResolver(schema),
     defaultValues: data,
   });
 
-  const [selectedTests, setSelectedTests] = useState<
-    { id: number; name: string; cost: number }[]
-  >([]);
+  const [selectedTests, setSelectedTests] = useState(() =>
+    type === "update" && data?.memoTest
+      ? testOptions.filter((test) => data.memoTest?.includes(test.name))
+      : []
+  );
 
+  // Add a test
   const handleAddTest = (testId: number) => {
     const selectedTest = testOptions.find((test) => test.id === testId);
     if (selectedTest && !selectedTests.some((test) => test.id === testId)) {
@@ -70,79 +74,74 @@ const MemoForm = ({
     }
   };
 
+  // Remove a test
   const handleRemoveTest = (testId: number) => {
     setSelectedTests((prev) => prev.filter((test) => test.id !== testId));
   };
 
   const totalCost = selectedTests.reduce((sum, test) => sum + test.cost, 0);
-  const paidAmount = watch("paidAmount") || 0;  // Get the paid amount value
-  const dueAmount = totalCost - paidAmount;
-  const paymentStatus = dueAmount > 0 ? "Due" : "Paid";
-
-  // Ensuring the due amount doesn't go negative
-  const finalDueAmount = dueAmount > 0 ? dueAmount : 0;
-
-  // Calculate the returnable amount if any
-  const returnableAmount = paidAmount > totalCost ? paidAmount - totalCost : 0;
+  const paidAmount = Number(watch("paidAmount") || 0);
+  const dueAmount = Math.max(0, totalCost - paidAmount); // calculate dueAmount dynamically
+  const returnableAmount = Math.max(0, paidAmount - totalCost); // handle returnable amount
+  const paymentStatus = dueAmount > 0 ? "Due" : "Paid"; // payment status based on dueAmount
 
   const onSubmit = (formData: Inputs) => {
-    console.log("Form Submitted with Data:", formData);
+    console.log("Form Submitted:", formData);
     console.log("Selected Tests:", selectedTests);
     console.log("Total Cost:", totalCost);
     console.log("Paid Amount:", paidAmount);
-    console.log("Due Amount:", finalDueAmount);
+    console.log("Due Amount:", dueAmount);
     console.log("Payment Status:", paymentStatus);
-    alert(`Form Submitted. Total Cost: $${totalCost}. Status: ${paymentStatus}`);
+    alert(`Memo Submitted! Total Cost: $${totalCost}, Payment Status: ${paymentStatus}`);
   };
 
   return (
     <form className="flex flex-col gap-2" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-xl font-semibold">
-        {type === "create" ? "Create a new Memo" : "Update Memo"}
+        {type === "create" ? "Create Memo" : "Update Memo"}
       </h1>
 
-      <span className="text-xl text-gray-400 font-medium">
-        Patient Information
-      </span>
-      <div className="flex justify-between flex-wrap gap-4">
+      {/* Patient Information Section */}
+      <span className="text-xl text-gray-400 font-medium">Patient Information</span>
+      <div className="flex flex-wrap gap-2 justify-between items-center">
         <InputFields
           label="Patient Name"
           name="patientName"
           register={register("patientName")}
           error={errors.patientName}
         />
-        <InputFields
-          label="Email"
-          name="email"
-          register={register("email")}
-          error={errors.email}
-        />
+        <InputFields label="Age" name="age" register={register("age")} error={errors.age} />
         <InputFields
           label="Phone"
           name="phone"
           register={register("phone")}
           error={errors.phone}
         />
-        <InputFields
-          label="Age"
-          name="age"
-          register={register("age")}
-          error={errors.age}
-        />
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Gender</label>
+        <div className="w-full md:w-1/4">
+          <label htmlFor="gender" className="text-xs text-gray-500 block m-1">
+            Gender
+          </label>
           <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+            id="gender"
+            className={`p-2 border rounded-md ${errors.gender ? "border-red-400" : "border-gray-300"
+              }`}
             {...register("gender")}
           >
+            <option value="" disabled>
+              Select Gender
+            </option>
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="other">Other</option>
           </select>
-          {errors.gender?.message && (
-            <p className="text-xs text-red-400">{errors.gender.message}</p>
-          )}
+          {errors.gender && <p className="text-xs text-red-400 mt-1">{errors.gender.message}</p>}
         </div>
+        <InputFields
+          label="Email"
+          name="email"
+          register={register("email")}
+          error={errors.email}
+        />
         <InputFields
           label="Address"
           name="address"
@@ -151,68 +150,55 @@ const MemoForm = ({
         />
       </div>
 
+      {/* Test Information Section */}
       <span className="text-xl text-gray-400 font-medium">Test Information</span>
-
-      <div className="flex flex-row justify-between items-start gap-2">
-        {/* Select Test Dropdown */}
-        <div className="flex flex-col w-1/3">
-          <label className="text-sm font-medium text-gray-500">Select Test</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            onChange={(e) => handleAddTest(Number(e.target.value))}
-            defaultValue=""
-          >
-            <option value="" disabled>
-              Select a Test
-            </option>
-            {testOptions.map((test) => (
-              <option key={test.id} value={test.id}>
-                {test.name} - ${test.cost}
+      <div className="flex justify-between gap-2">
+        {type === "create" && (
+          <div className="w-1/3">
+            <label className="text-xs text-gray-500 block">Select Test</label>
+            <select
+              className="p-2 border rounded-md"
+              onChange={(e) => handleAddTest(Number(e.target.value))}
+              defaultValue=""
+            >
+              <option value="" disabled>
+                Select Test
               </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Selected Tests */}
-        <div className="flex flex-col w-2/3">
-          <label className="text-sm font-medium text-gray-500">
-            Selected Tests
-          </label>
-          <div className="flex flex-col gap-2 border p-4 rounded-md">
-            {selectedTests.length > 0 ? (
+              {testOptions.map((test) => (
+                <option key={test.id} value={test.id}>
+                  {test.name} - ${test.cost}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        <div className="w-2/3 bg-gray-100 rounded-md">
+          <label className="text-xs text-gray-500">Selected Tests</label>
+          <div className="px-1">
+            {selectedTests.length ? (
               selectedTests.map((test) => (
-                <div
-                  key={test.id}
-                  className="flex justify-between items-center text-sm"
-                >
-                  <span>{test.name}</span>
-                  <span>${test.cost}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTest(test.id)}
-                    className="text-red-400 text-xs"
-                  >
-                    <MdCancelPresentation />
-                  </button>
+                <div className="flex justify-between items-center" key={test.id}>
+                  <span>{test.name} - ${test.cost}</span>
+                  {type === "create" && (
+                    <button type="button" onClick={() => handleRemoveTest(test.id)}>
+                      <MdCancelPresentation />
+                    </button>
+                  )}
                 </div>
               ))
             ) : (
-              <span className="text-gray-500 text-xs">
-                No tests selected yet.
-              </span>
+              <p>No tests selected</p>
             )}
-
-            {/* Total Cost */}
-            <div className="flex flex-col text-sm font-medium">
-              <span>Total Amount: ${totalCost}</span>
-            </div>
+            <p>
+              Total Cost: <span className="font-semibold">${totalCost}</span>
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Payment Information */}
+      {/* Payment Information Section */}
       <span className="text-xl text-gray-400 font-medium">Payment Information</span>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 justify-between items-center">
         <InputFields
           label="Paid Amount"
           name="paidAmount"
@@ -220,39 +206,41 @@ const MemoForm = ({
           register={register("paidAmount")}
           error={errors.paidAmount}
         />
-        <div className="flex flex-col w-full md:w-1/5">
-          <label className="text-sm font-medium text-gray-500">Due Amount</label>
-          <input
-            type="text"
-            value={finalDueAmount}
-            readOnly
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm"
-          />
-        </div>
-        <div className="flex flex-col w-full md:w-1/5">
-          <label className="text-sm font-medium text-gray-500">Returnable Amount</label>
-          <input
-            type="text"
-            value={returnableAmount > 0 ? returnableAmount : 0}
-            readOnly
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm"
-          />
-        </div>
-        <div className="flex flex-col w-full md:w-1/5">
-          <label className="text-sm font-medium text-gray-500">Payment Status</label>
-          <input
-            type="text"
-            value={paymentStatus}
-            readOnly
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm"
-          />
+        <div className="flex space-x-4">
+          <div className="w-1/3">
+            <label className="text-xs text-gray-500 block m-1">Due</label>
+            <input
+              type="text"
+              value={dueAmount} // updated to use calculated dueAmount
+              readOnly
+              className="p-2 border rounded-md"
+            />
+          </div>
+          <div className="w-1/3">
+            <label className="text-xs text-gray-500 block m-1">Returnable</label>
+            <input
+              type="text"
+              value={returnableAmount} // updated to show returnableAmount
+              readOnly
+              className="p-2 border rounded-md"
+            />
+          </div>
+          <div className="w-1/3">
+            <label className="text-xs text-gray-500 block m-1">Payment Status</label>
+            <input
+              type="text"
+              value={paymentStatus}
+              readOnly
+              className="p-2 border rounded-md"
+            />
+          </div>
         </div>
       </div>
 
       {/* Submit Button */}
       <button
         type="submit"
-        className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-md"
+        className="bg-blue-500 text-white py-2 rounded-md mt-4"
       >
         {type === "create" ? "Create Memo" : "Update Memo"}
       </button>
@@ -261,4 +249,3 @@ const MemoForm = ({
 };
 
 export default MemoForm;
-

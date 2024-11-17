@@ -67,7 +67,19 @@ const AllPatientsPage = () => {
             </Link>
             {/* Edit Button */}
             <button className="w-7 h-7 flex items-center justify-center rounded-full">
-              <FormModal table="patientData" type="update" />
+              <FormModal table="patientData" type="update" data={{
+                id: 1,
+                patientId: "P1234567890",
+                patientName: "Ezaz Ahmed",
+                phone: "+8801726065822",
+                email: "ezazrahul794@gmail.com",
+                age: 28,
+                gender: "male",
+                address: "123 Main St, Dhaka, Bangladesh",
+                status: "Due",
+                memoId: ["5251", "16282"],
+                registrationDate: "2024-10-25"
+              }} />
             </button>
 
             {/* Delete Button (Only visible for admin) */}

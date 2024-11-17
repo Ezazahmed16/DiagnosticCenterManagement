@@ -6,6 +6,14 @@ import { IoMdCloseCircle } from "react-icons/io";
 import MemoForm from "./forms/MemoForm";
 import PatientForm from "./forms/PatientForm";
 
+const forms: {
+    [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
+} = {
+    patientData: (type, data) => <PatientForm type={type} data={data} />,
+    memoData: (type, data) => <MemoForm type={type} data={data} />,
+};
+
+
 type FormModalProps = {
     table: "account" | "receptionist" | "patientData" | "memoData" | "testData" | "patient" | "ExpenseData" | "UserData" | "ReferalData";
     type: "create" | "update" | "delete" | "";
@@ -33,10 +41,9 @@ const FormModal = ({ table, type, data, id }: FormModalProps) => {
                     Delete
                 </button>
             </form>
-        ) : (
-            // <PatientForm type="create" />
-            <MemoForm type="create" />
-        );
+        ) : type === "create" || type === "update" ? (
+            forms[table](type, data)
+        ) : "Form Not Found!"
     };
 
     return (

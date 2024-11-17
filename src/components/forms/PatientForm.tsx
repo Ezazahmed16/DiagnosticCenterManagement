@@ -85,17 +85,24 @@ const PatientForm = ({
           error={errors.age}
         />
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Gender</label>
+          <label htmlFor="gender" className="text-xs text-gray-500">
+            Gender
+          </label>
           <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("gender")}
+            id="gender"
+            className={`ring-[1.5px] p-2 rounded-md text-sm w-full ${errors.gender ? "ring-red-400" : "ring-gray-300"
+              }`}
+            {...register("gender", { required: "Gender is required" })}
           >
+            <option selected value="" disabled>
+              Select Gender
+            </option>
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="other">Other</option>
           </select>
-          {errors.gender?.message && (
-            <p className="text-xs text-red-400">{errors.gender.message}</p>
+          {errors.gender && (
+            <p className="text-xs text-red-400 mt-1">{errors.gender.message}</p>
           )}
         </div>
         <InputFields

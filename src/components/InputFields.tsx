@@ -4,7 +4,7 @@ import { FieldError, UseFormRegisterReturn } from "react-hook-form";
 type InputFieldProps = {
   label: string;
   type?: string;
-  register: UseFormRegisterReturn; // Correct type for register
+  register: UseFormRegisterReturn; 
   name: string;
   defaultValue?: string;
   error?: FieldError;
