@@ -81,9 +81,9 @@ const MemoForm = ({
 
   const totalCost = selectedTests.reduce((sum, test) => sum + test.cost, 0);
   const paidAmount = Number(watch("paidAmount") || 0);
-  const dueAmount = Math.max(0, totalCost - paidAmount); // calculate dueAmount dynamically
-  const returnableAmount = Math.max(0, paidAmount - totalCost); // handle returnable amount
-  const paymentStatus = dueAmount > 0 ? "Due" : "Paid"; // payment status based on dueAmount
+  const dueAmount = Math.max(0, totalCost - paidAmount);
+  const returnableAmount = Math.max(0, paidAmount - totalCost); 
+  const paymentStatus = dueAmount > 0 ? "Due" : "Paid";
 
   const onSubmit = (formData: Inputs) => {
     console.log("Form Submitted:", formData);

@@ -5,12 +5,14 @@ import { FaEdit, FaPlus } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 import MemoForm from "./forms/MemoForm";
 import PatientForm from "./forms/PatientForm";
+import ExpenseForm from "./forms/ExpenseForm";
 
 const forms: {
     [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
 } = {
     patientData: (type, data) => <PatientForm type={type} data={data} />,
     memoData: (type, data) => <MemoForm type={type} data={data} />,
+    ExpenseData: (type, data) => <ExpenseForm type={type} data={data} />,
 };
 
 

@@ -5,8 +5,7 @@ import Table from "@/components/Table";
 import { expensesData, role } from "@/lib/data";
 import Link from "next/link";
 import { CiSearch } from "react-icons/ci";
-import { FaEdit, FaPlus, FaPrint, FaRegEye } from "react-icons/fa";
-import { MdDeleteOutline } from "react-icons/md";
+import { FaRegEye } from "react-icons/fa";
 
 type ExpenseData = {
   expenseId: number;
@@ -58,16 +57,16 @@ const AllExpensesPage = () => {
               <FaRegEye size={18} />
             </button>
           </Link>
-          <Link href={`/expenses/${item.expenseId}/edit`}>
-            <button className="w-7 h-7 flex items-center justify-center rounded-full">
-              <FormModal table="ExpenseData" type="update" />
-            </button>
-          </Link>
           {role === "admin" && (
-              <button className="w-8 h-8 flex items-center justify-center rounded-full">
-                <FormModal table="ExpenseData" type="delete" id={item.expenseId} />
-              </button>
-            )}
+            <button className="w-7 h-7 flex items-center justify-center rounded-full">
+              <FormModal table="ExpenseData" type="update" data={item} />
+            </button>
+          )}
+          {role === "admin" && (
+            <button className="w-8 h-8 flex items-center justify-center rounded-full">
+              <FormModal table="ExpenseData" type="delete" id={item.expenseId} />
+            </button>
+          )}
         </div>
       </td>
     </tr>
