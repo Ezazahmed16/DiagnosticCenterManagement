@@ -8,6 +8,7 @@ import CardDataStats from "../CardDataStats";
 import { FaMoneyCheck, FaUserTie } from "react-icons/fa";
 import { GiExpense } from "react-icons/gi";
 import { PiMathOperationsFill } from "react-icons/pi";
+import PopularTestChart from "../Charts/PopularTestChart";
 
 
 const ChartThree = dynamic(() => import("@/components/Charts/ChartThree"), {
@@ -15,6 +16,8 @@ const ChartThree = dynamic(() => import("@/components/Charts/ChartThree"), {
 });
 
 const Dashboard: React.FC = () => {
+  const seriesData = [44, 33, 22, 11, 30]; 
+
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
@@ -36,6 +39,7 @@ const Dashboard: React.FC = () => {
         <ChartOne />
         <ChartTwo />
         <ChartThree />
+        <PopularTestChart series={seriesData} />
       </div>
     </>
   );

@@ -43,13 +43,10 @@ const columns = [
   },
 ];
 
-const AllPatientsPage = () => {
+const AllMemosPage = () => {
   const renderRow = (item: memoData) => {
     return (
-      <tr
-        key={item.id}
-        className="border-b text-sm hover:bg-lamaPurpleLight"
-      >
+      <tr key={item.id} className="border-b text-sm hover:bg-lamaPurpleLight">
         <td>{item.memoId}</td>
         <td>{item.patientId}</td>
         <td>{item.totalAmount}</td>
@@ -71,26 +68,24 @@ const AllPatientsPage = () => {
                   memoId: "5251",
                   patientName: "Ezaz Ahmed",
                   age: 27,
-                  phone: '01726065822',
-                  gender: 'male',
-                  email: 'ezazrahul794@gmail.com',
+                  phone: "01726065822",
+                  gender: "male",
+                  email: "ezazrahul794@gmail.com",
                   address: "123 Main St, Dhaka, Bangladesh",
-                  memoTest: ["Blood Test", "MRI"], 
+                  memoTest: ["Blood Test", "MRI"],
                   totalAmount: 1500,
                   pay: 1000,
                   dueAmount: 300,
                   status: "Due",
                   issueDate: "2024-11-01",
-                  paymentDueDate: "2024-11-10"
+                  paymentDueDate: "2024-11-10",
                 }}
               />
-
             </button>
-            <Link href={`/list/patients/${item.id}/print`}>
-              <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                <FaPrint size={18} />
-              </button>
-            </Link>
+            {/* Print Button */}
+            <button className="w-7 h-7 flex items-center justify-center rounded-full">
+              <FaPrint size={18} />
+            </button>
             {role === "admin" && (
               <button className="w-8 h-8 flex items-center justify-center rounded-full">
                 <FormModal table="memoData" type="delete" id={item.id} />
@@ -101,10 +96,11 @@ const AllPatientsPage = () => {
       </tr>
     );
   };
+
   return (
     <DefaultLayout userRole={role}>
       <div className="min-h-screen">
-        {/* Top */}
+        {/* Top Section */}
         <div className="flex justify-between items-center p-4 gap-5">
           <h1 className="text-lg font-semibold">All Memos</h1>
           <div className="flex justify-center items-center gap-2">
@@ -137,4 +133,4 @@ const AllPatientsPage = () => {
   );
 };
 
-export default AllPatientsPage;
+export default AllMemosPage;

@@ -6,6 +6,8 @@ import { IoMdCloseCircle } from "react-icons/io";
 import MemoForm from "./forms/MemoForm";
 import PatientForm from "./forms/PatientForm";
 import ExpenseForm from "./forms/ExpenseForm";
+import ExpenseTypeForm from "./forms/ExpenseTypeForm ";
+import AssetsForm from "./forms/AssetsForm";
 
 const forms: {
     [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
@@ -13,12 +15,25 @@ const forms: {
     patientData: (type, data) => <PatientForm type={type} data={data} />,
     memoData: (type, data) => <MemoForm type={type} data={data} />,
     ExpenseData: (type, data) => <ExpenseForm type={type} data={data} />,
+    ExpenseType: (type, data) => <ExpenseTypeForm type={type} data={data} />,
+    AssetsData: (type, data) => <AssetsForm type={type} data={data} />,
 };
 
 
 type FormModalProps = {
-    table: "account" | "receptionist" | "patientData" | "memoData" | "testData" | "patient" | "ExpenseData" | "UserData" | "ReferalData";
-    type: "create" | "update" | "delete" | "";
+    table:
+        | "account"
+        | "receptionist"
+        | "patientData"
+        | "memoData"
+        | "testData"
+        | "patient"
+        | "ExpenseData"
+        | "UserData"
+        | "ExpenseType"
+        | "AssetsData"
+        | "ReferalData";
+    type: "create" | "update" | "delete";
     data?: any;
     id?: number;
 };

@@ -8,14 +8,11 @@ import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
 
-import { MdOutlineDashboard } from "react-icons/md";
+import { MdInventory, MdOutlineDashboard } from "react-icons/md";
 import { FaUserTag } from "react-icons/fa";
 import { MdAccountBalanceWallet } from "react-icons/md";
 import { CiSettings } from "react-icons/ci";
 import { role } from "@/lib/data";
-import { CgProfile } from "react-icons/cg";
-
-
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -31,7 +28,7 @@ const menuGroups = [
         icon: <MdOutlineDashboard />,
         label: "Dashboard",
         route: "/",
-        visible: ["admin", "accounts", "receptionist"],
+        visible: ["admin", "accounts", "receptionist", "inventory"],
       },
       {
         icon: <FaUserTag />,
@@ -50,6 +47,13 @@ const menuGroups = [
         visible: ["admin", "accounts"],
         children: [{ label: "Expense", route: "/accounts/expense" }],
       },
+      {
+        icon: <MdInventory />,
+        label: "Inventory",
+        route: "/inventory",
+        visible: ["admin", "inventory"],
+        children: [{ label: "Assets", route: "/inventory/inventoryassets" }],
+      },
     ],
   },
   {
@@ -63,14 +67,9 @@ const menuGroups = [
         children: [
           { label: "Add Role", route: "/settings/addrole" },
           { label: "Add Test", route: "/settings/addtest" },
+          { label: "Add Expense Type", route: "/settings/addexpensetype" },
           { label: "Add Referral", route: "/settings/addreferral" },
         ],
-      },
-      {
-        icon: <CgProfile />,
-        label: "Profile",
-        route: "/profile",
-        visible: ["admin", "accounts", "receptionist"],
       },
     ],
   },
