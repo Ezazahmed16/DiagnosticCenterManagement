@@ -32,6 +32,8 @@ const schema = z.object({
     .optional(),
   dueAmount: z.number().optional(),
   memoTest: z.array(z.string()).optional(),
+  referredBy: z.string().optional(),
+
 });
 
 type Inputs = z.infer<typeof schema>;
@@ -82,7 +84,7 @@ const MemoForm = ({
   const totalCost = selectedTests.reduce((sum, test) => sum + test.cost, 0);
   const paidAmount = Number(watch("paidAmount") || 0);
   const dueAmount = Math.max(0, totalCost - paidAmount);
-  const returnableAmount = Math.max(0, paidAmount - totalCost); 
+  const returnableAmount = Math.max(0, paidAmount - totalCost);
   const paymentStatus = dueAmount > 0 ? "Due" : "Paid";
 
   const onSubmit = (formData: Inputs) => {
@@ -206,12 +208,33 @@ const MemoForm = ({
           register={register("paidAmount")}
           error={errors.paidAmount}
         />
+        {/* Referral Doctor Select */}
+        <div className="w-full md:w-1/3">
+          <label htmlFor="referredBy" className="text-xs text-gray-500 block m-1">
+            Referred By
+          </label>
+          <select
+            id="referredBy"
+            className="p-2 border rounded-md w-full"
+            {...register("referredBy")}
+          >
+            <option value="" disabled>
+              Select Doctor
+            </option>
+            <option value="Ali Hasan">Ali Hasan</option>
+            <option value="Sarah Khan">Sarah Khan</option>
+            <option value="John Doe">John Doe</option>
+          </select>
+          {errors.referredBy && (
+            <p className="text-xs text-red-400 mt-1">{errors.referredBy.message}</p>
+          )}
+        </div>
         <div className="flex space-x-4">
           <div className="w-1/3">
             <label className="text-xs text-gray-500 block m-1">Due</label>
             <input
               type="text"
-              value={dueAmount} // updated to use calculated dueAmount
+              value={dueAmount}
               readOnly
               className="p-2 border rounded-md"
             />

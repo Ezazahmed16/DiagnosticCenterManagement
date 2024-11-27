@@ -8,6 +8,7 @@ import PatientForm from "./forms/PatientForm";
 import ExpenseForm from "./forms/ExpenseForm";
 import ExpenseTypeForm from "./forms/ExpenseTypeForm ";
 import AssetsForm from "./forms/AssetsForm";
+import AddRoleForm from "./forms/AddRole";
 
 const forms: {
     [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
@@ -17,6 +18,7 @@ const forms: {
     ExpenseData: (type, data) => <ExpenseForm type={type} data={data} />,
     ExpenseType: (type, data) => <ExpenseTypeForm type={type} data={data} />,
     AssetsData: (type, data) => <AssetsForm type={type} data={data} />,
+    UserData: (type, data) => <AddRoleForm type={type} data={data} />,
 };
 
 

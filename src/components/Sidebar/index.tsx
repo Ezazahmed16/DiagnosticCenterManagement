@@ -89,8 +89,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, userRole = role }: SidebarProps)
         <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5 mx-auto">
           <Link href="/">
             <Image
-              width={170}
-              height={30}
+              width={160}
+              height={80}
               src={"/images/logo/logo.png"}
               alt="Logo"
               priority

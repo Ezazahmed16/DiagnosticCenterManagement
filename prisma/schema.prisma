@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// model Admin {
+//   id       String @id
+//   username String @unique
+// }
+
+// model Patients {
+//   id           String  @id
+//   name         String  @unique
+//   email        String? @unique
+//   phone        String  @unique
+//   age          Int
+//   address      String
+//   gender       Gender
+//   memosHistory Memos[]
+// }
+
+// model Memos {
+//   id String @id
+   
+//   Patients   Patients? @relation(fields: [patientsId], references: [id])
+//   patientsId String?
+// }
+
+// model Tests {
+//   id        String @id
+//   title      String
+// }
+
+
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
