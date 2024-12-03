@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // Replace with your actual database URL
+  url      = env("DATABASE_URL")
 }
 
 model Patient {
@@ -15,7 +15,7 @@ model Patient {
   bloodType   String?
   gender      Gender
   dateOfBirth DateTime
-  memos       Memo[]   @relation("PatientMemos")
+  memos       Memo[]   @relation("PatientToMemos")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -23,7 +23,7 @@ model Patient {
 model Memo {
   id            String      @id @default(uuid())
   patientId     String
-  patient       Patient     @relation(fields: [patientId], references: [id], name: "PatientMemos")
+  patient       Patient     @relation(fields: [patientId], references: [id], name: "PatientToMemos")
   testId        String
   test          Test        @relation(fields: [testId], references: [id])
   referredById  String?
