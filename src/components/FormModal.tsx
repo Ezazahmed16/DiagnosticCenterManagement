@@ -37,7 +37,7 @@ type FormModalProps = {
         | "ReferalData";
     type: "create" | "update" | "delete";
     data?: any;
-    id?: number;
+    id?: string;
 };
 
 const FormModal = ({ table, type, data, id }: FormModalProps) => {

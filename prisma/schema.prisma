@@ -15,34 +15,39 @@ model Patient {
   bloodType   String?
   gender      Gender
   dateOfBirth DateTime
-  memos       Memo[]   @relation("PatientToMemos")
+  memos       Memo[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
 model Memo {
-  id            String      @id @default(uuid())
-  patientId     String
-  patient       Patient     @relation(fields: [patientId], references: [id], name: "PatientToMemos")
+  id            String        @id @default(uuid())
   testId        String
-  test          Test        @relation(fields: [testId], references: [id])
+  test          Test          @relation(fields: [testId], references: [id])
   referredById  String?
-  referredBy    ReferredBy? @relation(fields: [referredById], references: [id])
+  referredBy    ReferredBy?   @relation(fields: [referredById], references: [id])
   performedById String
-  performedBy   PerformedBy @relation(fields: [performedById], references: [id])
-  amount        Float
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  performedBy   PerformedBy   @relation(fields: [performedById], references: [id])
+  paymentMethod PaymentMethod @default(DUE)
+  dueAmount     Float         @default(0)
+  paidAmount    Float         @default(0)
+  totalAmount   Float         @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  Patient       Patient?      @relation(fields: [patientId], references: [id])
+  patientId     String?
 }
 
 model Test {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  description String?
-  price       Float
-  memos       Memo[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(uuid())
+  name           String   @unique
+  description    String?
+  additionalCost Float    @default(0)
+  testCost       Float    @default(0)
+  price          Float
+  memos          Memo[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Expense {
@@ -96,4 +101,9 @@ enum Gender {
   MALE
   FEMALE
   OTHER
+}
+
+enum PaymentMethod {
+  PAID
+  DUE
 }

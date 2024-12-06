@@ -1,145 +1,146 @@
-import FormModal from "@/components/FormModal"
-import DefaultLayout from "@/components/Layouts/DefaultLayout"
-import Table from "@/components/Table"
-import { memoData, role } from "@/lib/data"
-import Link from "next/link"
-import { CgCalendarDue } from "react-icons/cg"
-import { FaEdit, FaHistory, FaRegEye, FaUser } from "react-icons/fa"
-import { FaMapLocationDot, FaMoneyBillTransfer } from "react-icons/fa6"
-import { IoIosCall } from "react-icons/io"
-import { MdDeleteOutline, MdPaid } from "react-icons/md"
-import { SiGmail } from "react-icons/si"
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import Table from "@/components/Table";
+import prisma from "@/lib/prisma";
+import { format } from "date-fns";
+import Link from "next/link";
+import {
+    FaUser,
+    FaHistory,
+    FaRegEye,
+} from "react-icons/fa";
+import { IoIosCall } from "react-icons/io";
+import { MdPaid } from "react-icons/md";
+import { CgCalendarDue } from "react-icons/cg";
+import { FaMapLocationDot, FaMoneyBillTransfer } from "react-icons/fa6";
 
-type memoData = {
-    id: number;
-    memoId: string;
-    patientId: string;
-    totalAmount: number;
-    status: string;
-    issueDate: string;
-};
-
+// Define the columns for the table
 const columns = [
-    {
-        header: "Memo ID",
-        accessor: "memoId",
-    },
-    {
-        header: "Patient Name",
-        accessor: "patientId",
-    },
-    {
-        header: "Total Amount",
-        accessor: "totalAmount",
-    },
-    {
-        header: "Status",
-        accessor: "status",
-    },
-    {
-        header: "Date",
-        accessor: "issueDate",
-    },
-    {
-        header: "Actions",
-        accessor: "actions",
-    },
+    { header: "Memo ID", accessor: "id" },
+    { header: "Total Amount", accessor: "totalAmount" },
+    { header: "Payment Method", accessor: "paymentMethod" },
+    { header: "Date", accessor: "issueDate" },
+    { header: "Actions", accessor: "actions" },
 ];
 
-const SinglePatientPage = () => {
-    const renderRow = (item: memoData) => {
+export default async function SinglePatientPage({ params }: { params: { id: string } }) {
+    const patientId = params.id;
+
+    const patient = await prisma.patient.findUnique({
+        where: { id: patientId },
+    });
+
+    if (!patient) {
         return (
-            <tr
-                key={item.id}
-                className="border-b text-sm hover:bg-lamaPurpleLight"
-            >
-                <td>{item.memoId}</td>
-                <td>{item.patientId}</td>
-                <td>{item.totalAmount}</td>
-                <td>{item.status}</td>
-                <td>{item.issueDate}</td>
-                <td>
-                    <div className="flex items-center justify-start gap-1">
-                        <Link href={`/receptionist/all-patients/${item.id}`}>
-                            <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                                <FaRegEye size={18} />
-                            </button>
-                        </Link>
-                        {/* <Link href={`/list/patients/${item.id}/edit`}> */}
-                            <button className="w-7 h-7 flex items-center justify-center rounded-full">
-                                <FormModal table="memoData" type="update" />
-                            </button>
-                        {/* </Link> */}
-                        {role === "admin" && (
-                            <button className="w-8 h-8 flex items-center justify-center rounded-full">
-                                {/* <FormModal type="delete" /> */}
-                                <FormModal table="memoData" type="delete" id={item.id} />
-                            </button>
-                        )}
-                    </div>
-                </td>
-            </tr>
+            <DefaultLayout userRole="receptionist">
+                <div className="text-center p-4">
+                    <h1>Patient not found</h1>
+                </div>
+            </DefaultLayout>
         );
-    };
+    }
+
+    const memos = await prisma.memo.findMany({
+        where: { patientId },
+        select: {
+            id: true,
+            totalAmount: true,
+            paymentMethod: true,
+            createdAt: true,
+        },
+    });
+
+    const totalAmount = memos.reduce((acc, memo) => acc + memo.totalAmount, 0);
+    const dueAmount = memos
+        .filter((memo) => memo.paymentMethod === "DUE")
+        .reduce((acc, memo) => acc + memo.totalAmount, 0);
+    const paidAmount = memos
+        .filter((memo) => memo.paymentMethod === "PAID")
+        .reduce((acc, memo) => acc + memo.totalAmount, 0);
+
+    const renderRow = (item: any) => (
+        <tr key={item.id} className="border-b text-md">
+            <td>{item.id}</td>
+            <td>{item.totalAmount}</td>
+            <td>
+                {
+                item.paymentMethod === "DUE" ?
+                <p className="bg-red-600 text-white w-min p-2 rounded-full">{item.paymentMethod}</p> :
+                <p className="bg-success text-white w-min p-2 rounded-full">{item.paymentMethod}</p>
+                }
+            </td>
+            <td>{format(new Date(item.createdAt), "MMMM dd, yyyy")}</td>
+            <td>
+                <div className="flex items-center gap-2">
+                    <Link href={`/receptionist/all-memos/${item.id}`}>
+                        <button className="w-7 h-7 flex items-center justify-center rounded-full">
+                            <FaRegEye size={18} />
+                        </button>
+                    </Link>
+                </div>
+            </td>
+        </tr>
+    );
+
     return (
-        <DefaultLayout userRole={role}>
-            <div className="flex flex-col gap-4">
-                {/* top (User Info Card) */}
-                <div className="card flex flex-1 p-4 rounded-xl">
-                    <div className="w-1/3">
-                        <FaUser className="h-20 w-20" />
-                        <h1 className="text-xl font-semibold mt-2">Ezaz Ahmed</h1>
-                        <p>Age: 37</p>
-                        <p>Gender: Male</p>
-                    </div>
-                    <div className="w-2/3 grid grid-cols-2 gap-4 text-white">
-                        <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3">
-                            <IoIosCall className="h-8 w-8" />
-                            <p>+8801726065822</p>
-                        </div>
-                        <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3">
-                            <SiGmail className="h-8 w-8" />
-                            <p>dev.ezazahmed@gmail.com</p>
-                        </div>
-                        <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3">
-                            <FaMapLocationDot className="h-8 w-8" />
-                            <p>1B, Test, Dhaka, Bangladesh</p>
-                        </div>
+        <DefaultLayout userRole="receptionist">
+            {/* Patient Info */}
+            <div className="card flex flex-col gap-4 p-4 rounded-lg">
+                <div className="flex gap-6 items-center">
+                    <FaUser size={80} />
+                    <div>
+                        <h1 className="text-2xl font-semibold">{patient.name}</h1>
+                        <p>
+                            <span className="font-bold">Date of Birth:</span>
+                            {format(new Date(patient.dateOfBirth), "MMMM dd, yyyy")}</p>
+                        <p>
+                            <span className="font-bold">Gender: </span>
+                            {patient.gender}</p>
                     </div>
                 </div>
-                <div className="">
-                    {/* bottom (User History) */}
-                    <div className="card">
-                        <h1 className="text-xl font-semibold">History</h1>
-                        <div className="flex flex-1 p-4 rounded-xl gap-4 text-white items-center">
-                            <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3 w-full">
-                                <FaHistory className="h-8 w-8" />
-                                <p>History: 03</p>
-                            </div>
-                            <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3 w-full">
-                                <FaMoneyBillTransfer className="h-8 w-8" />
-                                <p>Total Ammount: 5,000</p>
-                            </div>
-                            <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3 w-full">
-                                <CgCalendarDue className="h-8 w-8" />
-                                <p>Due Ammount: 1,000</p>
-                            </div>
-                            <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3 w-full">
-                                <MdPaid className="h-8 w-8" />
-                                <p>Paid: 4,000</p>
-                            </div>
-
-                        </div>
+                <div className="grid grid-cols-3 gap-4 text-white">
+                    <div className="p-4 bg-gray-700 flex gap-3 items-center">
+                        <IoIosCall size={24} />
+                        <p>{patient.phone}</p>
+                    </div>
+                    <div className="p-4 bg-gray-700 flex gap-3 items-center">
+                        <FaMapLocationDot size={24} />
+                        <p>{patient.bloodType || "Not Provided"}</p>
+                    </div>
+                    <div className="p-4 bg-gray-700 flex gap-3 items-center">
+                        <FaMapLocationDot size={24} />
+                        <p>{patient.address || "Not Provided"}</p>
                     </div>
                 </div>
             </div>
-            {/* All Memos */}
-            <div className="p-4">
-                <h1 className="text-xl font-semibold">All History List</h1>
-                <Table columns={columns} renderRow={renderRow} data={memoData} />
+
+            {/* History */}
+            <div className="card p-4 rounded-lg mt-4">
+                <h2 className="text-xl font-semibold">Patient History</h2>
+                <div className="grid grid-cols-4 gap-6 mt-4">
+                    <div className="p-4 bg-gray-700 text-white text-center rounded-lg">
+                        <FaHistory size={24} />
+                        <p>History: {memos.length}</p>
+                    </div>
+                    <div className="p-4 bg-gray-700 text-white text-center rounded-lg">
+                        <FaMoneyBillTransfer size={24} />
+                        <p>Total Amount: {totalAmount.toFixed(2)}</p>
+                    </div>
+                    <div className="p-4 bg-gray-700 text-white text-center rounded-lg">
+                        <CgCalendarDue size={24} />
+                        <p>Due Amount: {dueAmount.toFixed(2)}</p>
+                    </div>
+                    <div className="p-4 bg-gray-700 text-white text-center rounded-lg">
+                        <MdPaid size={24} />
+                        <p>Paid: {paidAmount.toFixed(2)}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Memo Table */}
+            <div className="card p-4 rounded-lg mt-4">
+                <h2 className="text-xl font-semibold">All History List</h2>
+                <Table columns={columns} renderRow={renderRow} data={memos} />
             </div>
         </DefaultLayout>
-    )
+    );
 }
-
-export default SinglePatientPage

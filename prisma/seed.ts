@@ -1,151 +1,140 @@
-import { PrismaClient, Gender } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Seed ExpenseType
-  const expenseType1 = await prisma.expenseType.create({
-    data: {
-      name: "Office Supplies",
-      description: "Expenses related to office supplies",
-    },
-  });
-
-  const expenseType2 = await prisma.expenseType.create({
-    data: {
-      name: "Maintenance",
-      description: "Building and equipment maintenance",
-    },
-  });
-
-  // Seed Test
-  const test1 = await prisma.test.create({
-    data: {
-      name: "Blood Test",
-      description: "Routine blood test",
-      price: 500.0,
-    },
-  });
-
-  const test2 = await prisma.test.create({
-    data: {
-      name: "X-Ray",
-      description: "Chest X-Ray",
-      price: 1000.0,
-    },
-  });
-
   // Seed Patients
   const patient1 = await prisma.patient.create({
     data: {
-      name: "John Doe",
-      phone: "1234567890",
-      address: "123 Main St",
-      bloodType: "O+",
-      gender: Gender.MALE,
-      dateOfBirth: new Date("1990-01-01"),
+      name: 'John Doe',
+      phone: '12345678907',
+      address: '123 Main Street',
+      bloodType: 'O+',
+      gender: 'MALE',
+      dateOfBirth: new Date('1990-01-01'),
     },
   });
 
   const patient2 = await prisma.patient.create({
     data: {
-      name: "Jane Smith",
-      phone: "9876543210",
-      address: "456 Elm St",
-      bloodType: "A-",
-      gender: Gender.FEMALE,
-      dateOfBirth: new Date("1985-05-15"),
+      name: 'Jane Smith',
+      phone: '09876543241',
+      address: '456 Elm Street',
+      bloodType: 'A+',
+      gender: 'FEMALE',
+      dateOfBirth: new Date('1985-06-15'),
     },
   });
 
-  // Seed ReferredBy
+  // Seed Expense Types
+  const expenseType1 = await prisma.expenseType.create({
+    data: {
+      name: 'Utilities',
+      description: 'Expenses related to utilities like electricity, water, etc.',
+    },
+  });
+
+  const expenseType2 = await prisma.expenseType.create({
+    data: {
+      name: 'Maintenance',
+      description: 'General maintenance expenses for the center.',
+    },
+  });
+
+  // Seed Expenses
+  await prisma.expense.createMany({
+    data: [
+      {
+        description: 'Electricity bill for June',
+        amount: 200.5,
+        expenseTypeId: expenseType1.id,
+      },
+      {
+        description: 'Air conditioning repair',
+        amount: 150.75,
+        expenseTypeId: expenseType2.id,
+      },
+    ],
+  });
+
+  // Seed Tests
+  const test1 = await prisma.test.create({
+    data: {
+      name: 'Complete Blood Count (CBC)',
+      description: 'A basic blood test to check overall health.',
+      testCost: 100.0,
+      additionalCost: 20.0,
+      price: 120.0,
+    },
+  });
+
+  const test2 = await prisma.test.create({
+    data: {
+      name: 'Lipid Panel',
+      description: 'A test to measure cholesterol and triglycerides.',
+      testCost: 150.0,
+      additionalCost: 30.0,
+      price: 180.0,
+    },
+  });
+
+  // Seed ReferredBy and PerformedBy
   const referredBy1 = await prisma.referredBy.create({
     data: {
-      name: "Dr. Miller",
-      phone: "5551234567",
+      name: 'Dr. Alex Johnson',
+      phone: '1122334455',
     },
   });
 
-  const referredBy2 = await prisma.referredBy.create({
-    data: {
-      name: "Dr. Davis",
-      phone: "5559876543",
-    },
-  });
-
-  // Seed PerformedBy
   const performedBy1 = await prisma.performedBy.create({
     data: {
-      name: "Lab Tech A",
-      phone: "5555555555",
+      name: 'Lab Technician Mike',
+      phone: '2233445566',
     },
   });
 
-  const performedBy2 = await prisma.performedBy.create({
-    data: {
-      name: "Lab Tech B",
-      phone: "5556666666",
-    },
+  // Seed Memos
+  await prisma.memo.createMany({
+    data: [
+      {
+        patientId: patient1.id,
+        testId: test1.id,
+        referredById: referredBy1.id,
+        performedById: performedBy1.id,
+        paymentMethod: 'PAID',
+        paidAmount: 120.0,
+        dueAmount: 0.0,
+        totalAmount: 120.0,
+      },
+      {
+        patientId: patient2.id,
+        testId: test2.id,
+        performedById: performedBy1.id,
+        paymentMethod: 'DUE',
+        paidAmount: 100.0,
+        dueAmount: 80.0,
+        totalAmount: 180.0,
+      },
+    ],
   });
 
-  // Seed Memo
-  await prisma.memo.create({
-    data: {
-      patientId: patient1.id,
-      testId: test1.id,
-      referredById: referredBy1.id,
-      performedById: performedBy1.id,
-      amount: 500.0,
-    },
+  // Seed Assets
+  await prisma.asset.createMany({
+    data: [
+      {
+        name: 'Ultrasound Machine',
+        description: 'High-quality ultrasound machine for diagnostics.',
+        value: 25000.0,
+      },
+      {
+        name: 'X-Ray Machine',
+        description: 'Digital X-Ray machine for detailed imaging.',
+        value: 30000.0,
+      },
+    ],
   });
 
-  await prisma.memo.create({
-    data: {
-      patientId: patient2.id,
-      testId: test2.id,
-      referredById: referredBy2.id,
-      performedById: performedBy2.id,
-      amount: 1000.0,
-    },
-  });
-
-  // Seed Expense
-  await prisma.expense.create({
-    data: {
-      description: "Bought office chairs",
-      amount: 3000.0,
-      expenseTypeId: expenseType1.id,
-      date: new Date(),
-    },
-  });
-
-  await prisma.expense.create({
-    data: {
-      description: "Air conditioner repair",
-      amount: 5000.0,
-      expenseTypeId: expenseType2.id,
-      date: new Date(),
-    },
-  });
-
-  // Seed Asset
-  await prisma.asset.create({
-    data: {
-      name: "MRI Machine",
-      description: "High-resolution MRI scanner",
-      value: 1000000.0,
-    },
-  });
-
-  await prisma.asset.create({
-    data: {
-      name: "Ultrasound Machine",
-      description: "Portable ultrasound scanner",
-      value: 500000.0,
-    },
-  });
-
-  console.log("Seeding completed!");
+  console.log('Database seeded successfully!');
 }
 
 main()
