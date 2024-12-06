@@ -11,6 +11,7 @@ export const RoleEnum = {
 export let role = "admin";
 // export let role = "accounts";
 // export let role = "receptionist";
+// export let role = "inventory";
 
 // PatientData 
 export const patientData = [
@@ -306,6 +307,77 @@ export const expensesData = [
     },
 ];
 
+// All Expenses Type Data
+export const expensesType = [
+    {
+        expenseTypeId: 1,
+        expenseTypeTitle: "Office Rent",
+    },
+    {
+        expenseTypeId: 2,
+        expenseTypeTitle: "Office Rent",
+    },
+    {
+        expenseTypeId: 3,
+        expenseTypeTitle: "Office Rent",
+    },
+    {
+        expenseTypeId: 4,
+        expenseTypeTitle: "Office Rent",
+    },
+];
+
+// All Assets Data 
+export const assetsData = [
+    {
+        assetsId: 1,
+        assetsTitle: "Purchase 5 Tables",
+        purchaseAmount: 80,
+        purchaseQty: 5,
+        totalPurchase: 400,
+        purchaseBy: "Aman Hosain",
+    },
+    {
+        assetsId: 2,
+        assetsTitle: "Purchase 10 Chairs",
+        purchaseAmount: 50,
+        purchaseQty: 10,
+        totalPurchase: 500,
+        purchaseBy: "Rohit Sharma",
+    },
+    {
+        assetsId: 3,
+        assetsTitle: "Purchase 2 Desks",
+        purchaseAmount: 150,
+        purchaseQty: 2,
+        totalPurchase: 300,
+        purchaseBy: "Emily Clark",
+    },
+    {
+        assetsId: 4,
+        assetsTitle: "Purchase 1 Projector",
+        purchaseAmount: 1200,
+        purchaseQty: 1,
+        totalPurchase: 1200,
+        purchaseBy: "John Doe",
+    },
+    {
+        assetsId: 5,
+        assetsTitle: "Purchase 4 Laptops",
+        purchaseAmount: 800,
+        purchaseQty: 4,
+        totalPurchase: 3200,
+        purchaseBy: "Sophia Loren",
+    },
+    {
+        assetsId: 6,
+        assetsTitle: "Purchase 3 Whiteboards",
+        purchaseAmount: 100,
+        purchaseQty: 3,
+        totalPurchase: 300,
+        purchaseBy: "David Warner",
+    }
+];
 
 
 

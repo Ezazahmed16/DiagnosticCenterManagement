@@ -1,14 +1,43 @@
-'use client'
+'use client';
 import { useState } from "react";
 import { AiOutlineDelete } from "react-icons/ai";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
+import MemoForm from "./forms/MemoForm";
+import PatientForm from "./forms/PatientForm";
+import ExpenseForm from "./forms/ExpenseForm";
+import ExpenseTypeForm from "./forms/ExpenseTypeForm ";
+import AssetsForm from "./forms/AssetsForm";
+import AddRoleForm from "./forms/AddRole";
+
+const forms: {
+    [key: string]: (type: "create" | "update", data?: any) => JSX.Element;
+} = {
+    patientData: (type, data) => <PatientForm type={type} data={data} />,
+    memoData: (type, data) => <MemoForm type={type} data={data} />,
+    ExpenseData: (type, data) => <ExpenseForm type={type} data={data} />,
+    ExpenseType: (type, data) => <ExpenseTypeForm type={type} data={data} />,
+    AssetsData: (type, data) => <AssetsForm type={type} data={data} />,
+    UserData: (type, data) => <AddRoleForm type={type} data={data} />,
+};
+
 
 type FormModalProps = {
-    table: "account" | "receptionist" | "patientData" | "memoData" | "testData" | "patient" | "ExpenseData" | "UserData" | "ReferalData";
-    type: "create" | "update" | "delete" | "";
+    table:
+        | "account"
+        | "receptionist"
+        | "patientData"
+        | "memoData"
+        | "testData"
+        | "patient"
+        | "ExpenseData"
+        | "UserData"
+        | "ExpenseType"
+        | "AssetsData"
+        | "ReferalData";
+    type: "create" | "update" | "delete";
     data?: any;
-    id?: number;
+    id?: string;
 };
 
 const FormModal = ({ table, type, data, id }: FormModalProps) => {
@@ -31,11 +60,9 @@ const FormModal = ({ table, type, data, id }: FormModalProps) => {
                     Delete
                 </button>
             </form>
-        ) : (
-            <div className="p-4">
-                <span className="font-medium">Create or Update Form</span>
-            </div>
-        );
+        ) : type === "create" || type === "update" ? (
+            forms[table](type, data)
+        ) : "Form Not Found!"
     };
 
     return (
@@ -54,7 +81,9 @@ const FormModal = ({ table, type, data, id }: FormModalProps) => {
             </button>
             {open && (
                 <div className="w-full h-full fixed left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
-                    <div className="bg-white text-black p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%]">
+                    <div
+                        className="bg-white text-black p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%] max-h-[90%] overflow-y-auto"
+                    >
                         <button
                             className="absolute top-4 right-4 cursor-pointer text-gray-700"
                             onClick={() => setOpen(false)}

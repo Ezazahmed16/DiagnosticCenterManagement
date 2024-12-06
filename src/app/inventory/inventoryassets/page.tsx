@@ -2,39 +2,44 @@ import FormModal from "@/components/FormModal";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
-import { expensesData, role } from "@/lib/data";
+import { assetsData, role } from "@/lib/data";
 import Link from "next/link";
 import { CiSearch } from "react-icons/ci";
 import { FaRegEye } from "react-icons/fa";
 
-type ExpenseData = {
-  expenseId: number;
-  expenseTitle: string;
-  expenseAmount: number;
-  expenseCategory: string;
-  expenseDate: string;
+type AssetsData = {
+  assetsId: number;
+  assetsTitle: string;
+  purchaseAmount: number;
+  purchaseQty: number;
+  totalPurchase: number;
+  purchaseBy: string;
 };
 
 const columns = [
   {
-    header: "Expense ID",
-    accessor: "expenseId",
+    header: "Asset ID",
+    accessor: "assetsId",
   },
   {
     header: "Title",
-    accessor: "expenseTitle",
+    accessor: "assetsTitle",
   },
   {
     header: "Amount",
-    accessor: "expenseAmount",
+    accessor: "purchaseAmount",
   },
   {
-    header: "Category",
-    accessor: "expenseCategory",
+    header: "Quantity",
+    accessor: "purchaseQty",
   },
   {
-    header: "Date",
-    accessor: "expenseDate",
+    header: "Total Purchase",
+    accessor: "totalPurchase",
+  },
+  {
+    header: "Purchased By",
+    accessor: "purchaseBy",
   },
   {
     header: "Actions",
@@ -42,29 +47,30 @@ const columns = [
   },
 ];
 
-const AllExpensesPage = () => {
-  const renderRow = (item: ExpenseData) => (
-    <tr key={item.expenseId} className="border-b text-sm hover:bg-lamaPurpleLight">
-      <td>{item.expenseId}</td>
-      <td>{item.expenseTitle}</td>
-      <td>{item.expenseAmount}</td>
-      <td>{item.expenseCategory}</td>
-      <td>{item.expenseDate}</td>
+const AllInventoryList = () => {
+  const renderRow = (item: AssetsData) => (
+    <tr key={item.assetsId} className="border-b text-sm hover:bg-lamaPurpleLight">
+      <td>{item.assetsId}</td>
+      <td>{item.assetsTitle}</td>
+      <td>{item.purchaseAmount}</td>
+      <td>{item.purchaseQty}</td>
+      <td>{item.totalPurchase}</td>
+      <td>{item.purchaseBy}</td>
       <td>
         <div className="flex items-center justify-start gap-1">
-          <Link href={`/expenses/${item.expenseId}`}>
+          <Link href={`/assets/${item.assetsId}`}>
             <button className="w-7 h-7 flex items-center justify-center rounded-full">
               <FaRegEye size={18} />
             </button>
           </Link>
           {role === "admin" && (
             <button className="w-7 h-7 flex items-center justify-center rounded-full">
-              <FormModal table="ExpenseData" type="update" data={item} />
+              <FormModal table="AssetsData" type="update" data={item} />
             </button>
           )}
           {role === "admin" && (
             <button className="w-8 h-8 flex items-center justify-center rounded-full">
-              <FormModal table="ExpenseData" type="delete" id={item.expenseId} />
+              <FormModal table="AssetsData" type="delete" id={item.assetsId} />
             </button>
           )}
         </div>
@@ -77,7 +83,7 @@ const AllExpensesPage = () => {
       <div className="min-h-screen">
         {/* Top */}
         <div className="flex justify-between items-center p-4 gap-5">
-          <h1 className="text-lg font-semibold">All Expenses</h1>
+          <h1 className="text-lg font-semibold">All Assets List</h1>
           <div className="flex justify-center items-center gap-2">
             <div className="relative">
               <button className="absolute left-2 top-1/2 -translate-y-1/2">
@@ -93,14 +99,14 @@ const AllExpensesPage = () => {
               href="#"
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
-              <FormModal table="ExpenseData" type="create" />
+              <FormModal table="AssetsData" type="create" />
               Add
             </Link>
           </div>
         </div>
 
         {/* Table */}
-        <Table columns={columns} renderRow={renderRow} data={expensesData} />
+        <Table columns={columns} renderRow={renderRow} data={assetsData} />
 
         {/* Pagination */}
         <Pagination />
@@ -109,4 +115,4 @@ const AllExpensesPage = () => {
   );
 };
 
-export default AllExpensesPage;
+export default AllInventoryList;

@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String   @unique
+  address     String?
+  bloodType   String?
+  gender      Gender
+  dateOfBirth DateTime
+  memos       Memo[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Memo {
+  id            String        @id @default(uuid())
+  testId        String
+  test          Test          @relation(fields: [testId], references: [id])
+  referredById  String?
+  referredBy    ReferredBy?   @relation(fields: [referredById], references: [id])
+  performedById String
+  performedBy   PerformedBy   @relation(fields: [performedById], references: [id])
+  paymentMethod PaymentMethod @default(DUE)
+  dueAmount     Float         @default(0)
+  paidAmount    Float         @default(0)
+  totalAmount   Float         @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  Patient       Patient?      @relation(fields: [patientId], references: [id])
+  patientId     String?
+}
+
+model Test {
+  id             String   @id @default(uuid())
+  name           String   @unique
+  description    String?
+  additionalCost Float    @default(0)
+  testCost       Float    @default(0)
+  price          Float
+  memos          Memo[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Expense {
+  id            String      @id @default(uuid())
+  description   String
+  amount        Float
+  date          DateTime    @default(now())
+  expenseTypeId String
+  expenseType   ExpenseType @relation(fields: [expenseTypeId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model ExpenseType {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  expenses    Expense[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Asset {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  value       Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ReferredBy {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String?  @unique
+  memos     Memo[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PerformedBy {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String?  @unique
+  memos     Memo[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum PaymentMethod {
+  PAID
+  DUE
+}
