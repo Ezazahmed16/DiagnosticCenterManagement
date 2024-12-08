@@ -4,7 +4,7 @@ import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import { role } from "@/lib/data";
 import prisma from "@/lib/prisma";
-import { Patient, Memo } from "@prisma/client";
+import { Patient, Memo, Prisma } from "@prisma/client";
 import Link from "next/link";
 import { CiSearch } from "react-icons/ci";
 import { FaRegEye } from "react-icons/fa";
@@ -89,23 +89,35 @@ const renderRow = (item: Patient & { memo: Memo[] }) => {
 };
 
 const AllPatientsPage = async (
-  { searchParams, }: { searchParams: { [key: string]: string | undefined } }
+  { searchParams }: { searchParams: { [key: string]: string | undefined } }
 ) => {
-  const { page, ...queryParams } = searchParams;
+  console.log("searchParams:", searchParams);
+
+  const { page, search } = searchParams;
   const p = page ? parseInt(page) : 1;
+
+  // Build the query for Prisma
+  const query: Prisma.PatientWhereInput = {};
+  if (search) {
+    query.phone = { contains: search, mode: "insensitive" };
+  }
+
+  // Fetch data using Prisma
   const [patients, count] = await prisma.$transaction([
     prisma.patient.findMany({
+      where: query,
       take: ITEM_PER_PAGE,
-      skip: ITEM_PER_PAGE * (p - 1)
+      skip: ITEM_PER_PAGE * (p - 1),
     }),
-    prisma.patient.count()
-  ])
+    prisma.patient.count({ where: query }),
+  ]);
+
   return (
     <DefaultLayout userRole={role}>
       <div className="min-h-screen">
         {/* Top Section */}
         <div className="flex justify-between items-center p-4 gap-5">
-          <h1 className="text-lg font-semibold">All Patient</h1>
+          <h1 className="text-lg font-semibold">All Patients</h1>
           <div className="flex justify-center items-center gap-2">
             <TableSearch />
             {/* Add Button */}
@@ -119,7 +131,12 @@ const AllPatientsPage = async (
         </div>
 
         {/* Table */}
-        <Table columns={columns} renderRow={renderRow} data={patients} />
+        {patients.length === 0 ? (
+          <div className="text-xl text-center py-5 text-gray-500">Patient not found</div>
+        ) : (
+          <Table columns={columns} renderRow={renderRow} data={patients} />
+        )}
+
 
         {/* Pagination */}
         <Pagination page={p} count={count} />
@@ -129,3 +146,5 @@ const AllPatientsPage = async (
 };
 
 export default AllPatientsPage;
+
+
