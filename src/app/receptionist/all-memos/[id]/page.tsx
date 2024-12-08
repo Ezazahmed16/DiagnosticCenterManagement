@@ -1,21 +1,14 @@
-import FormModal from "@/components/FormModal"
-import DefaultLayout from "@/components/Layouts/DefaultLayout"
-import Table from "@/components/Table"
-import { role, testData } from "@/lib/data"
-import Link from "next/link"
-import { CgCalendarDue } from "react-icons/cg"
-import { FaPrint, FaUser } from "react-icons/fa"
-import { FaMapLocationDot, FaMoneyBillTransfer } from "react-icons/fa6"
-import { IoIosCall } from "react-icons/io"
-import { MdPaid } from "react-icons/md"
-import { SiGmail } from "react-icons/si"
-
-
-type testData = {
-    id: number;
-    testName: string;
-    totalCost: string
-};
+import FormModal from "@/components/FormModal";
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import Table from "@/components/Table";
+import { role } from "@/lib/data";
+import Link from "next/link";
+import { CgCalendarDue } from "react-icons/cg";
+import { FaPrint, FaUser } from "react-icons/fa";
+import { FaMapLocationDot, FaMoneyBillTransfer } from "react-icons/fa6";
+import { IoIosCall } from "react-icons/io";
+import { MdPaid } from "react-icons/md";
+import prisma from "@/lib/prisma"; // Assuming prisma is used for data fetching
 
 const columns = [
     {
@@ -23,23 +16,61 @@ const columns = [
         accessor: "testName",
     },
     {
-        header: "Total Ammount",
+        header: "Total Amount",
         accessor: "totalCost",
     },
 ];
 
-const SinglePatientPage = () => {
-    const renderRow = (item: testData) => {
+const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
+    const memoId = params.id;
+
+    // Fetch the memo data, including patient information (joined query for patient)
+    const memo = await prisma.memo.findUnique({
+        where: { id: memoId },
+        include: {
+            Patient: true,
+        },
+    });
+console.log(memo)
+    if (!memo) {
         return (
-            <tr
-                key={item.id}
-                className="border-b text-sm hover:bg-lamaPurpleLight"
-            >
-                <td>{item.testName}</td>
-                <td>{item.totalCost}</td>
-            </tr>
+            <DefaultLayout userRole={role}>
+                <div className="text-center p-4">
+                    <h1>Memo not found</h1>
+                </div>
+            </DefaultLayout>
         );
-    };
+    }
+
+    // Ensure the amounts are numbers for calculation
+    const totalAmount = Number(memo.totalAmount);
+    const dueAmount = memo.paymentMethod === "DUE" ? Number(memo.dueAmount) : 0;
+    const paidAmount = memo.paymentMethod === "PAID" ? Number(memo.paidAmount) : 0;
+
+    // Fetch the test data associated with this memo
+    const tests = await prisma.test.findMany({
+        where: {
+            memos: {
+                some: {
+                    id: memo.id,
+                },
+            },
+        },
+        select: {
+            id: true,
+            name: true,
+            price: true,
+        },
+    });
+
+    // Render table row for each test
+    const renderRow = (item: { id: string; name: string; price: number }) => (
+        <tr key={item.id} className="border-b text-sm hover:bg-lamaPurpleLight">
+            <td>{item.name}</td>
+            <td>{item.price}</td>
+        </tr>
+    );
+
     return (
         <DefaultLayout userRole={role}>
             <div className="flex flex-col gap-4">
@@ -64,58 +95,56 @@ const SinglePatientPage = () => {
                         </Link>
                     </div>
                 </div>
-                {/* (User Info Card) */}
+
+                {/* Patient Info Card */}
                 <div className="card flex flex-1 p-4 rounded-xl">
                     <div className="w-1/3">
                         <FaUser className="h-20 w-20" />
-                        <h1 className="text-xl font-semibold mt-2">Ezaz Ahmed</h1>
-                        <p>Age: 37</p>
-                        <p>Gender: Male</p>
+                        <h1 className="text-xl font-semibold mt-2">{memo.Patient?.name}</h1>
+                        <p>Age: {memo.Patient?.dateOfBirth ? new Date().getFullYear() - new Date(memo.Patient?.dateOfBirth).getFullYear() : "N/A"}</p>
+                        <p>Gender: {memo.Patient?.gender}</p>
                     </div>
                     <div className="w-2/3 grid grid-cols-2 gap-4 text-white">
                         <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3">
                             <IoIosCall className="h-8 w-8" />
-                            <p>+8801726065822</p>
-                        </div>
-                        <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3">
-                            <SiGmail className="h-8 w-8" />
-                            <p>dev.ezazahmed@gmail.com</p>
+                            <p>{memo.Patient?.phone}</p>
                         </div>
                         <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3">
                             <FaMapLocationDot className="h-8 w-8" />
-                            <p>1B, Test, Dhaka, Bangladesh</p>
+                            <p>{memo.Patient?.address}</p>
                         </div>
                     </div>
                 </div>
-                {/* Middle (Payment History) */}
+
+                {/* Payment History */}
                 <div className="card">
                     <h1 className="text-xl font-semibold">Payment History</h1>
                     <div className="flex flex-1 p-4 rounded-xl gap-4 text-white items-center">
                         <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3 w-full">
                             <FaMoneyBillTransfer className="h-8 w-8" />
-                            <p>Total Ammount: 5,000</p>
+                            <p>Total Amount: {totalAmount}</p>
                         </div>
                         <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3 w-full">
                             <CgCalendarDue className="h-8 w-8" />
-                            <p>Due Ammount: 1,000</p>
+                            <p>Due Amount: {dueAmount}</p>
                         </div>
                         <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3 w-full">
                             <MdPaid className="h-8 w-8" />
-                            <p>Paid: 4,000</p>
+                            <p>Paid: {paidAmount}</p>
                         </div>
-
                     </div>
                 </div>
+
                 {/* Test History */}
                 <div className="card flex flex-col gap-4">
                     <h1 className="text-xl font-semibold">Test History</h1>
 
                     {/* Table */}
-                    <Table columns={columns} renderRow={renderRow} data={testData} />
+                    <Table columns={columns} renderRow={renderRow} data={tests} />
                 </div>
             </div>
         </DefaultLayout>
-    )
-}
+    );
+};
 
-export default SinglePatientPage
+export default SingleMemoPage;

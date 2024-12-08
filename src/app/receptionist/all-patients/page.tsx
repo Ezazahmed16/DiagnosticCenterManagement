@@ -6,7 +6,6 @@ import { role } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { Patient, Memo, Prisma } from "@prisma/client";
 import Link from "next/link";
-import { CiSearch } from "react-icons/ci";
 import { FaRegEye } from "react-icons/fa";
 import { format } from "date-fns";
 import { ITEM_PER_PAGE } from "@/lib/settings";
@@ -91,7 +90,6 @@ const renderRow = (item: Patient & { memo: Memo[] }) => {
 const AllPatientsPage = async (
   { searchParams }: { searchParams: { [key: string]: string | undefined } }
 ) => {
-  console.log("searchParams:", searchParams);
 
   const { page, search } = searchParams;
   const p = page ? parseInt(page) : 1;
