@@ -6,10 +6,9 @@ import TableSearch from "@/components/TableSearch";
 import { role } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
-import { Memo, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { format } from "date-fns";
 import Link from "next/link";
-import { CiSearch } from "react-icons/ci";
 import { FaPrint, FaRegEye } from "react-icons/fa";
 
 type MemoWithPatient = Prisma.MemoGetPayload<{

@@ -31,7 +31,7 @@ const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
             Patient: true,
         },
     });
-console.log(memo)
+
     if (!memo) {
         return (
             <DefaultLayout userRole={role}>
@@ -41,11 +41,6 @@ console.log(memo)
             </DefaultLayout>
         );
     }
-
-    // Ensure the amounts are numbers for calculation
-    const totalAmount = Number(memo.totalAmount);
-    const dueAmount = memo.paymentMethod === "DUE" ? Number(memo.dueAmount) : 0;
-    const paidAmount = memo.paymentMethod === "PAID" ? Number(memo.paidAmount) : 0;
 
     // Fetch the test data associated with this memo
     const tests = await prisma.test.findMany({
@@ -70,7 +65,6 @@ console.log(memo)
             <td>{item.price}</td>
         </tr>
     );
-
     return (
         <DefaultLayout userRole={role}>
             <div className="flex flex-col gap-4">
@@ -122,15 +116,15 @@ console.log(memo)
                     <div className="flex flex-1 p-4 rounded-xl gap-4 text-white items-center">
                         <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3 w-full">
                             <FaMoneyBillTransfer className="h-8 w-8" />
-                            <p>Total Amount: {totalAmount}</p>
+                            <p>Total Amount: {memo.totalAmount}</p>
                         </div>
                         <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3 w-full">
                             <CgCalendarDue className="h-8 w-8" />
-                            <p>Due Amount: {dueAmount}</p>
+                            <p>Due Amount: {memo.dueAmount}</p>
                         </div>
                         <div className="flex flex-col p-4 bg-gray-700 justify-center items-start gap-3 w-full">
                             <MdPaid className="h-8 w-8" />
-                            <p>Paid: {paidAmount}</p>
+                            <p>Paid: {memo.paidAmount}</p>
                         </div>
                     </div>
                 </div>

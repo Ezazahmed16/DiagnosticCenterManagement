@@ -57,6 +57,7 @@ model Test {
 
 model Expense {
   id            String      @id @default(uuid())
+  title         String
   description   String
   amount        Float
   date          DateTime    @default(now())
@@ -79,7 +80,10 @@ model Asset {
   id          String   @id @default(uuid())
   name        String
   description String?
-  value       Float
+  amount      Float    
+  qty         Int      
+  value       Float    
+  purchasedBy String   
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
