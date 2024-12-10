@@ -44,15 +44,17 @@ model Memo {
 }
 
 model Test {
-  id             String   @id @default(uuid())
-  name           String   @unique
+  id             String        @id @default(uuid())
+  name           String        @unique
   description    String?
-  additionalCost Float    @default(0)
-  testCost       Float    @default(0)
+  testCost       Float         @default(0)
+  additionalCost Float         @default(0)
   price          Float
+  roomNo         String?
   memos          Memo[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  PerformedBy    PerformedBy[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 model Expense {
@@ -80,22 +82,37 @@ model Asset {
   id          String   @id @default(uuid())
   name        String
   description String?
-  amount      Float    
-  qty         Int      
-  value       Float    
-  purchasedBy String   
+  amount      Float
+  qty         Int
+  value       Float
+  purchasedBy String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-model ReferredBy {
-  id        String   @id @default(uuid())
-  name      String
-  phone     String?  @unique
-  memos     Memo[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+model ReferralPayment {
+  id            String      @id @default(uuid())
+  referredById  String     
+  referredBy    ReferredBy  @relation(fields: [referredById], references: [id])
+  amount        Float       
+  date          DateTime    @default(now()) 
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
+
+model ReferredBy {
+  id                String             @id @default(uuid())
+  name              String
+  phone             String?            @unique
+  commissionPercent Float
+  totalAmmount      Float
+  memos             Memo[]
+  payments          ReferralPayment[] // Relation to ReferralPayment
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
 
 model PerformedBy {
   id        String   @id @default(uuid())
@@ -104,6 +121,8 @@ model PerformedBy {
   memos     Memo[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Test      Test?    @relation(fields: [testId], references: [id])
+  testId    String?
 }
 
 enum Gender {
