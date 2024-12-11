@@ -1,3 +1,5 @@
+import { auth } from "@clerk/nextjs/server";
+
 // Enum Data
 export const RoleEnum = {
     SUPER_ADMIN: "super admin",
@@ -7,6 +9,8 @@ export const RoleEnum = {
     LAB_TECHNICIAN: "lab technician",
     NURSE: "nurse"
 };
+
+
 
 export let role = "admin";
 // export let role = "accounts";
