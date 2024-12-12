@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -5,15 +7,17 @@ import Image from "next/image";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
+
 import { MdInventory, MdOutlineDashboard } from "react-icons/md";
 import { FaUserTag } from "react-icons/fa";
 import { MdAccountBalanceWallet } from "react-icons/md";
 import { CiSettings } from "react-icons/ci";
-import { useUser } from "@clerk/nextjs";
+import { role } from "@/lib/data";
 
 interface SidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: (arg: boolean) => void;
+  userRole: string;
 }
 
 const menuGroups = [
@@ -23,7 +27,7 @@ const menuGroups = [
       {
         icon: <MdOutlineDashboard />,
         label: "Dashboard",
-        route: "/admin",
+        route: "/",
         visible: ["admin", "accounts", "receptionist", "inventory"],
       },
       {
@@ -71,16 +75,9 @@ const menuGroups = [
   },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
+const Sidebar = ({ sidebarOpen, setSidebarOpen, userRole = role }: SidebarProps) => {
   const pathname = usePathname();
   const [pageName, setPageName] = useLocalStorage("selectedMenu", "dashboard");
-  const { isSignedIn, user, isLoaded } = useUser();
-
-  if (!isLoaded) {
-    return <div>Loading...</div>; 
-  }
-
-  const role = user?.publicMetadata.role  as string;
 
   return (
     <ClickOutside onClick={() => setSidebarOpen(false)}>
@@ -120,18 +117,20 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
             </svg>
           </button>
         </div>
+        {/* Sidebar Header */}
 
-        {/* Sidebar Menu */}
         <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+          {/* Sidebar Menu */}
           <nav className="mt-5 px-4 py-4 lg:mt-9 lg:px-6">
             {menuGroups.map((group, groupIndex) => (
               <div key={groupIndex}>
                 <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
                   {group.name}
                 </h3>
+
                 <ul className="mb-6 flex flex-col gap-1.5">
                   {group.menuItems
-                    .filter((menuItem) => role && menuItem.visible.includes(role))
+                    .filter((menuItem) => menuItem.visible.includes(userRole))
                     .map((menuItem, menuIndex) => (
                       <SidebarItem
                         key={menuIndex}
@@ -144,6 +143,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen }) => {
               </div>
             ))}
           </nav>
+          {/* Sidebar Menu */}
         </div>
       </aside>
     </ClickOutside>

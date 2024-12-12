@@ -8,7 +8,9 @@ import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Prisma, Test } from "@prisma/client";
 import Link from "next/link";
 import { FaRegEye } from "react-icons/fa";
+import { auth } from "@clerk/nextjs/server";  // Import auth to get the user's role
 
+// Table Columns definition
 const columns = [
   { header: "Test ID", accessor: "id" },
   { header: "Test Name", accessor: "name" },
@@ -20,7 +22,8 @@ const columns = [
   { header: "Actions", accessor: "actions" },
 ];
 
-const renderRow = (item: Test & { memos: { performedBy?: { name: string } }[] }) => (
+// Row rendering function that depends on the user's role
+const renderRow = (item: Test & { memos: { performedBy?: { name: string } }[] }, role: string) => (
   <tr key={item.id} className="border-b text-sm hover:bg-lamaPurpleLight">
     <td>{item.id}</td>
     <td>{item.name}</td>
@@ -42,22 +45,26 @@ const renderRow = (item: Test & { memos: { performedBy?: { name: string } }[] })
             <FaRegEye size={18} />
           </button>
         </Link>
-        <button className="w-7 h-7 flex items-center justify-center rounded-full">
-          <FormModal table="testData" type="update" />
-        </button>
-        <button className="w-8 h-8 flex items-center justify-center rounded-full">
-          <FormModal table="testData" type="delete" id={item.id} />
-        </button>
+        {role === "admin" && (
+          <button className="w-7 h-7 flex items-center justify-center rounded-full">
+            <FormModal table="testData" type="update" />
+          </button>
+        )}
+        {role === "admin" && (
+          <button className="w-8 h-8 flex items-center justify-center rounded-full">
+            <FormModal table="testData" type="delete" id={item.id} />
+          </button>
+        )}
       </div>
     </td>
   </tr>
 );
 
-const AllTestsPage = async ({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | undefined };
-}) => {
+const AllTestsPage = async ({ searchParams }: { searchParams: { [key: string]: string | undefined } }) => {
+  // Fetch user role from Clerk authentication
+  const { sessionClaims } = await auth();
+  const userRole = (sessionClaims?.metadata as { role?: string })?.role || "";  // Default to empty string if role is not found
+
   const { page, search } = searchParams;
   const p = page ? parseInt(page) : 1;
 
@@ -84,7 +91,7 @@ const AllTestsPage = async ({
   ]);
 
   return (
-    <DefaultLayout userRole="admin">
+    <DefaultLayout userRole={userRole}> {/* Pass userRole here */}
       <div className="min-h-screen">
         {/* Top Section */}
         <div className="flex justify-between items-center p-4 gap-5">
@@ -102,7 +109,7 @@ const AllTestsPage = async ({
         </div>
 
         {/* Table */}
-        <Table columns={columns} renderRow={renderRow} data={memo} />
+        <Table columns={columns} renderRow={(item) => renderRow(item, userRole)} data={memo} />
 
         {/* Pagination */}
         <Pagination page={p} count={count} />

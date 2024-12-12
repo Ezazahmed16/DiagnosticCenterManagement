@@ -29,7 +29,7 @@ export default async function SinglePatientPage({ params }: { params: { id: stri
 
     if (!patient) {
         return (
-            <DefaultLayout userRole="receptionist">
+            <DefaultLayout>
                 <div className="text-center p-4">
                     <h1>Patient not found</h1>
                 </div>
@@ -86,7 +86,7 @@ export default async function SinglePatientPage({ params }: { params: { id: stri
     );
 
     return (
-        <DefaultLayout userRole={role}>
+        <DefaultLayout>
             <div className="min-h-screen">
                 {/* Patient Info */}
                 <div className="card flex flex-col gap-4 p-4 rounded-lg">

@@ -3,14 +3,15 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Prisma, ReferredBy } from "@prisma/client";
 import Link from "next/link";
 import { CiSearch } from "react-icons/ci";
 import { FaRegEye } from "react-icons/fa";
+import { auth } from "@clerk/nextjs/server";  // Import Clerk's auth for user role
 
+// Table columns definition
 const columns = [
   {
     header: "Referral ID",
@@ -42,7 +43,8 @@ const columns = [
   },
 ];
 
-const renderRow = (item: ReferredBy & { amountPaid: number; totalDue: number }) => {
+// Row rendering function that depends on the user's role
+const renderRow = (item: ReferredBy & { amountPaid: number; totalDue: number }, role: string) => {
   return (
     <tr key={item.id} className="border-b text-sm hover:bg-lamaPurpleLight">
       <td>{item.id}</td>
@@ -61,6 +63,7 @@ const renderRow = (item: ReferredBy & { amountPaid: number; totalDue: number }) 
           <button className="w-7 h-7 flex items-center justify-center rounded-full">
             <FormModal table="memoData" type="update" data="" />
           </button>
+          {/* Admin only delete button */}
           {role === "admin" && (
             <button className="w-8 h-8 flex items-center justify-center rounded-full">
               <FormModal table="memoData" type="delete" id={item.id} />
@@ -77,6 +80,10 @@ const AllReferralsPage = async ({
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
+  // Fetch user role from Clerk authentication
+  const { sessionClaims } = await auth();
+  const userRole = (sessionClaims?.metadata as { role?: string })?.role || ""; // Default to empty string if no role
+
   const { page, search } = searchParams;
   const p = page ? parseInt(page) : 1;
 
@@ -95,7 +102,7 @@ const AllReferralsPage = async ({
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
       include: {
-        payments: true, // Include ReferralPayment to calculate amountPaid
+        payments: true,
       },
     }),
     prisma.referredBy.count({ where: query }),
@@ -113,9 +120,9 @@ const AllReferralsPage = async ({
   });
 
   return (
-    <DefaultLayout userRole={role}>
+    <DefaultLayout userRole={userRole}> {/* Pass the dynamic role here */}
       <div className="min-h-screen">
-        {/* Top */}
+        {/* Top Section */}
         <div className="flex justify-between items-center p-4 gap-5">
           <h1 className="text-lg font-semibold">All Referrals</h1>
           <div className="flex justify-center items-center gap-2">
@@ -131,7 +138,7 @@ const AllReferralsPage = async ({
         </div>
 
         {/* Table */}
-        <Table columns={columns} renderRow={renderRow} data={dataWithPayments} />
+        <Table columns={columns} renderRow={(item) => renderRow(item, userRole)} data={dataWithPayments} />
 
         {/* Pagination */}
         <Pagination page={p} count={count} />

@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs/server";
 
 // Enum Data
 export const RoleEnum = {

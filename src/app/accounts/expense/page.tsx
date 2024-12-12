@@ -3,14 +3,14 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
+import { auth } from "@clerk/nextjs/server";
 import { Expense, Prisma } from "@prisma/client";
 import { format } from "date-fns";
 import Link from "next/link";
-import { CiSearch } from "react-icons/ci";
 
+// Table Columns definition
 const columns = [
   {
     header: "Expense ID",
@@ -42,7 +42,8 @@ const columns = [
   },
 ];
 
-const renderRow = (item: Expense & { expenseType?: { name: string } }) => (
+// Row rendering function that depends on the user's role
+const renderRow = (item: Expense & { expenseType?: { name: string } }, role: string) => (
   <tr key={item.id} className="border-b text-sm hover:bg-lamaPurpleLight">
     <td>{item.id}</td>
     <td>{item.title}</td>
@@ -68,6 +69,10 @@ const renderRow = (item: Expense & { expenseType?: { name: string } }) => (
 );
 
 const AllExpensesPage = async ({ searchParams }: { searchParams: { [key: string]: string | undefined } }) => {
+  // Fetch user role from Clerk authentication
+  const { sessionClaims } = await auth();
+  const userRole = (sessionClaims?.metadata as { role?: string })?.role || "";  // default to empty string if role is not found
+
   const { page, search } = searchParams;
   const p = page ? parseInt(page) : 1;
 
@@ -94,13 +99,10 @@ const AllExpensesPage = async ({ searchParams }: { searchParams: { [key: string]
     prisma.expense.count({ where: query }),
   ]);
 
-
-
-
   return (
-    <DefaultLayout userRole={role}>
+    <DefaultLayout userRole={userRole}> {/* Pass userRole here */}
       <div className="min-h-screen">
-        {/* Top */}
+        {/* Top Section */}
         <div className="flex justify-between items-center p-4 gap-5">
           <h1 className="text-lg font-semibold">All Expenses</h1>
           <div className="flex justify-center items-center gap-2">
@@ -115,10 +117,10 @@ const AllExpensesPage = async ({ searchParams }: { searchParams: { [key: string]
           </div>
         </div>
 
-        {/* Table */}
-        <Table columns={columns} renderRow={renderRow} data={expenses} />
+        {/* Table Section */}
+        <Table columns={columns} renderRow={(item) => renderRow(item, userRole)} data={expenses} />
 
-        {/* Pagination */}
+        {/* Pagination Section */}
         <Pagination page={p} count={count} />
       </div>
     </DefaultLayout>

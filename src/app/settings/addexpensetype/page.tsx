@@ -3,12 +3,13 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import Link from "next/link";
-import { role } from "@/lib/data";
-import { ExpenseType, Prisma } from "@prisma/client";
+import { Prisma, ExpenseType } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import TableSearch from "@/components/TableSearch";
+import { auth } from "@clerk/nextjs/server";  // Import auth to get the user's role
 
+// Table columns definition
 const columns = [
   {
     header: "Expense ID",
@@ -28,7 +29,8 @@ const columns = [
   },
 ];
 
-const renderRow = (item: ExpenseType) => {
+// Row rendering function that depends on the user's role
+const renderRow = (item: ExpenseType, role: string) => {
   return (
     <tr key={item.id} className="border-b text-sm hover:bg-lamaPurpleLight">
       <td>{item.id}</td>
@@ -58,6 +60,10 @@ const AllExpenseTypePage = async ({
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
+  // Fetch user role from Clerk authentication
+  const { sessionClaims } = await auth();
+  const userRole = (sessionClaims?.metadata as { role?: string })?.role || ""; // Default to empty string if role is not found
+
   const { page, search } = searchParams;
   const p = page ? parseInt(page) : 1;
 
@@ -78,7 +84,7 @@ const AllExpenseTypePage = async ({
   ]);
 
   return (
-    <DefaultLayout userRole={role}>
+    <DefaultLayout userRole={userRole}> {/* Pass userRole here */}
       <div className="min-h-screen">
         {/* Header */}
         <div className="flex justify-between items-center p-4 gap-5">
@@ -99,7 +105,7 @@ const AllExpenseTypePage = async ({
         </div>
 
         {/* Table */}
-        <Table columns={columns} renderRow={renderRow} data={expenseType} />
+        <Table columns={columns} renderRow={(item) => renderRow(item, userRole)} data={expenseType} />
 
         {/* Pagination */}
         <Pagination page={p} count={count} />

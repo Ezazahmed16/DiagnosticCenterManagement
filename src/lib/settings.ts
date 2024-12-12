@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 
-export const ITEM_PER_PAGE = 10;
+export const ITEM_PER_PAGE = 15;
 
 type RouteAccessMap = {
     [key: string]: string[];
@@ -12,7 +12,7 @@ type RouteAccessMap = {
   
     // Receptionist access
     "/receptionist(.*)": ["receptionist", "admin"],
-    "/receptionist/all-patients": ["receptionist", "admin"],
+    "/receptionist/all-patients(.*)": ["receptionist", "admin"],
     "/receptionist/all-memos": ["receptionist", "admin"],
   
     // Accounts access
@@ -31,8 +31,5 @@ type RouteAccessMap = {
  
   };
 
-  export async function getUserRole() {
-    const { sessionClaims } = await auth();
-    return (sessionClaims?.metadata as { role?: string })?.role || "";
-  }
+
   
