@@ -7,7 +7,7 @@ import { Prisma, ExpenseType } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import TableSearch from "@/components/TableSearch";
-import { auth } from "@clerk/nextjs/server";  // Import auth to get the user's role
+import { auth } from "@clerk/nextjs/server"; 
 
 // Table columns definition
 const columns = [

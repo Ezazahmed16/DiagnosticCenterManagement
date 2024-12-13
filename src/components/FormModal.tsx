@@ -5,38 +5,36 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 import dynamic from "next/dynamic";
-import { deletePatient } from "@/lib/actions";
+import { deletePatient, deleteTest } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
+// Lazy load form components
 const MemoForm = dynamic(() => import("./forms/MemoForm"), { loading: () => <h1>Loading...</h1> });
 const PatientForm = dynamic(() => import("./forms/PatientForm"), { loading: () => <h1>Loading...</h1> });
 const ExpenseForm = dynamic(() => import("./forms/ExpenseForm"), { loading: () => <h1>Loading...</h1> });
 const ExpenseTypeForm = dynamic(() => import("./forms/ExpenseTypeForm "), { loading: () => <h1>Loading...</h1> });
 const AssetsForm = dynamic(() => import("./forms/AssetsForm"), { loading: () => <h1>Loading...</h1> });
 const AddRoleForm = dynamic(() => import("./forms/AddRole"), { loading: () => <h1>Loading...</h1> });
+const AddTestForm = dynamic(() => import("./forms/AddTestForm"), { loading: () => <h1>Loading...</h1> });
 
-const deleteActionMap: { [key: string]: (data: FormData) => Promise<{ success: boolean; error: boolean }> } = {
+// Define delete action mapping for each table
+const deleteActionMap: { [key: string]: (formData: FormData) => Promise<{ success: boolean; error: boolean }> } = {
     patient: deletePatient,
-    // memoData: deleteMemo, 
-    // ExpenseData: deleteExpense,
-    // Add other delete actions for other tables here
+    test: deleteTest
 };
 
-
+// Define form components based on table
 const forms: {
     [key: string]: (
         type: "create" | "update",
         data: any,
-        setOpen: Dispatch<SetStateAction<boolean>>
+        setOpen: Dispatch<SetStateAction<boolean>>,
+        relatedData?: any
     ) => JSX.Element;
 } = {
     patientData: (type, data, setOpen) => <PatientForm type={type} data={data} setOpen={setOpen} />,
-    memoData: (type, data, setOpen) => <MemoForm type={type} data={data} setOpen={setOpen} />,
-    ExpenseData: (type, data, setOpen) => <ExpenseForm type={type} data={data} setOpen={setOpen} />,
-    ExpenseType: (type, data, setOpen) => <ExpenseTypeForm type={type} data={data} setOpen={setOpen} />,
-    AssetsData: (type, data, setOpen) => <AssetsForm type={type} data={data} setOpen={setOpen} />,
-    UserData: (type, data, setOpen) => <AddRoleForm type={type} data={data} setOpen={setOpen} />,
+    testData: (type, data, setOpen, relatedData) => <AddTestForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
 };
 
 type FormModalProps = {
@@ -55,20 +53,27 @@ type FormModalProps = {
     type: "create" | "update" | "delete";
     data?: any;
     id?: string;
+    relatedData?: any;
 };
-const FormModal = ({ table, type, data, id }: FormModalProps) => {
+
+const FormModal = ({ table, type, data, id, relatedData }: FormModalProps & { relatedData?: any }) => {
     const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
     const [open, setOpen] = useState(false);
     const router = useRouter();
 
-    const handleDelete = async (formData: FormData) => {
+    // Handle delete action
+    const handleDelete = async (id: string) => {
         const deleteAction = deleteActionMap[table];
         if (!deleteAction) {
             toast.error("Delete action not supported for this table.");
             return;
         }
 
-        const result = await deleteAction(formData);
+        // Create FormData and append the id for deletion
+        const formData = new FormData();
+        formData.append("id", id);
+
+        const result = await deleteAction(formData); // Pass FormData to delete function
         if (result.success) {
             toast("Item deleted successfully.");
             setOpen(false);
@@ -78,15 +83,14 @@ const FormModal = ({ table, type, data, id }: FormModalProps) => {
         }
     };
 
+    // Form component to render based on type (create, update, delete)
     const Form = () => {
         if (type === "delete" && id) {
             return (
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
-                        const formData = new FormData(e.currentTarget);
-                        formData.append("id", id);
-                        handleDelete(formData);
+                        handleDelete(id); // Directly pass the id to delete function
                     }}
                     className="p-4 flex flex-col gap-4"
                 >
@@ -108,7 +112,7 @@ const FormModal = ({ table, type, data, id }: FormModalProps) => {
             if (!renderForm) {
                 return <span>Form Not Found!</span>;
             }
-            return renderForm(type, data, setOpen);
+            return renderForm(type, data, setOpen, relatedData);
         }
 
         return <span>Form Not Found!</span>;

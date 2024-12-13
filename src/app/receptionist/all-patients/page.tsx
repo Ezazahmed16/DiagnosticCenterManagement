@@ -51,6 +51,7 @@ const renderRow = (item: Patient & { memo: Memo[] }, role: string) => (
 
 const AllPatientsPage = async ({ searchParams }: { searchParams: { [key: string]: string | undefined } }) => {
   // Fetch auth session and user role
+  // Fetch auth session and user role
   const { sessionClaims } = await auth();
   const userRole = (sessionClaims?.metadata as { role?: string })?.role || "";
   const { page, search } = searchParams;

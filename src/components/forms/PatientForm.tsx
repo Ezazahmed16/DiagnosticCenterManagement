@@ -42,7 +42,7 @@ const PatientForm = ({
     console.log("Form Submitted with Data:", formData);
     try {
       if (type === "create") {
-        await createPatient(formData); // Call the create function
+        await createPatient(formData); 
         toast("Patient record successfully created.");
       } else {
         if (formData.id) {

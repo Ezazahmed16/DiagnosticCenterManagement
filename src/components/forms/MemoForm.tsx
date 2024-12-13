@@ -2,41 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { useState } from "react";
 import InputFields from "../InputFields";
 import { MdCancelPresentation } from "react-icons/md";
+import { memoSchema, MemoSchema } from "@/lib/FormValidationSchemas";
 
-const schema = z.object({
-  patientName: z
-    .string()
-    .min(3, { message: "Patient name must be at least 3 characters long!" })
-    .max(20, { message: "Patient name must be at most 20 characters long!" }),
-  email: z.string().email({ message: "Invalid email address!" }),
-  phone: z
-    .string()
-    .regex(/^\d+$/, { message: "Phone number must contain only digits!" })
-    .min(10, { message: "Phone number must be at least 10 digits long!" }),
-  age: z
-    .preprocess(
-      (val) => (val !== null && val !== "" ? Number(val) : undefined),
-      z
-        .number()
-        .min(1, { message: "Age must be at least 1!" })
-        .max(120, { message: "Age must be at most 120!" })
-    ),
-  gender: z.enum(["male", "female", "other"], { message: "Gender is required!" }),
-  address: z.string().min(5, { message: "Address is required!" }),
-  paidAmount: z
-    .preprocess((val) => (val !== null && val !== "" ? Number(val) : undefined), z.number())
-    .optional(),
-  dueAmount: z.number().optional(),
-  memoTest: z.array(z.string()).optional(),
-  referredBy: z.string().optional(),
-
-});
-
-type Inputs = z.infer<typeof schema>;
 
 const testOptions = [
   { id: 1, name: "Blood Test", cost: 50 },
@@ -50,15 +20,15 @@ const MemoForm = ({
   data,
 }: {
   type: "create" | "update";
-  data?: Partial<Inputs>;
+  data?: Partial<MemoSchema>;
 }) => {
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<Inputs>({
-    resolver: zodResolver(schema),
+  } = useForm<MemoSchema>({
+    resolver: zodResolver(memoSchema),
     defaultValues: data,
   });
 
