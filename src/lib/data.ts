@@ -1,3 +1,4 @@
+import prisma from "./prisma";
 
 // Enum Data
 export const RoleEnum = {
@@ -381,6 +382,7 @@ export const assetsData = [
         purchaseBy: "David Warner",
     }
 ];
+
 
 
 

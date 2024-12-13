@@ -1,48 +1,71 @@
-"use client";
 import dynamic from "next/dynamic";
 import React from "react";
-import ChartOne from "../Charts/ChartOne";
-import ChartTwo from "../Charts/ChartTwo";
-
 import CardDataStats from "../CardDataStats";
 import { FaMoneyCheck, FaUserTie } from "react-icons/fa";
 import { GiExpense } from "react-icons/gi";
 import { PiMathOperationsFill } from "react-icons/pi";
-import PopularTestChart from "../Charts/PopularTestChart";
-
+import prisma from "@/lib/prisma";
+import ChartOne from "../Charts/ChartOne";
+import ChartTwo from "../Charts/ChartTwo";
 
 const ChartThree = dynamic(() => import("@/components/Charts/ChartThree"), {
   ssr: false,
 });
 
-const Dashboard: React.FC = () => {
-  const seriesData = [44, 33, 22, 11, 30]; 
+const Dashboard: React.FC = async () => {
+  const userCount = await prisma.patient?.count();
+
+  // Fetch total income
+  const totalIncome = await prisma.memo.aggregate({
+    _sum: {
+      totalAmount: true,
+    },
+  });
+
+  // Fetch total expense
+  const totalExpense = await prisma.expense.aggregate({
+    _sum: {
+      amount: true,
+    },
+  });
+
+  // Ensure null values are handled
+  const totalIncomeAmount = totalIncome._sum?.totalAmount ?? 0; // Default to 0 if null
+  const totalExpenseAmount = totalExpense._sum?.amount ?? 0; // Default to 0 if null
+
+  // Calculate profit
+  const profit = totalIncomeAmount - totalExpenseAmount;
 
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        <CardDataStats title="Total Patient" total="1,872" rate="">
+        <CardDataStats title="Total Patient" total={String(userCount)} rate="">
           <FaUserTie />
         </CardDataStats>
-        <CardDataStats title="Total Income" total="45,102" rate="">
+        <CardDataStats title="Total Income" total={String(totalIncomeAmount)} rate="">
           <PiMathOperationsFill />
         </CardDataStats>
-        <CardDataStats title="Total Expense" total="2.450" rate="" >
+        <CardDataStats
+          title="Total Expense"
+          total={String(totalExpenseAmount)}
+          rate=""
+        >
           <GiExpense />
         </CardDataStats>
-        <CardDataStats title="Total Profit" total="3.456" rate="" >
+        <CardDataStats title="Total Profit" total={String(profit)} rate="">
           <FaMoneyCheck />
         </CardDataStats>
       </div>
-
       <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
         <ChartOne />
         <ChartTwo />
-        <ChartThree />
-        <PopularTestChart series={seriesData} />
+        {/* <ChartThree /> */}
+        {/* <PopularTestChart series={seriesData} /> */}
       </div>
     </>
   );
 };
 
 export default Dashboard;
+
+

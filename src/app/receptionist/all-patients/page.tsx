@@ -41,7 +41,7 @@ const renderRow = (item: Patient & { memo: Memo[] }, role: string) => (
         </button>
         {role === "admin" && (
           <button className="w-8 h-8 flex items-center justify-center rounded-full">
-            <FormModal table="patientData" type="delete" id={item.id} />
+            <FormModal table="patient" type="delete" id={item.id} />
           </button>
         )}
       </div>
@@ -52,8 +52,7 @@ const renderRow = (item: Patient & { memo: Memo[] }, role: string) => (
 const AllPatientsPage = async ({ searchParams }: { searchParams: { [key: string]: string | undefined } }) => {
   // Fetch auth session and user role
   const { sessionClaims } = await auth();
-  const userRole = (sessionClaims?.metadata as { role?: string })?.role || "user"; // Default to 'user' if undefined
-
+  const userRole = (sessionClaims?.metadata as { role?: string })?.role || "";
   const { page, search } = searchParams;
   const p = page ? parseInt(page) : 1;
 
@@ -64,6 +63,7 @@ const AllPatientsPage = async ({ searchParams }: { searchParams: { [key: string]
 
   const [patients, count] = await prisma.$transaction([
     prisma.patient.findMany({
+      orderBy: { createdAt: 'desc' },
       where: query,
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
