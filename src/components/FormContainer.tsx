@@ -18,8 +18,8 @@ export type FormModalProps = {
     data?: any;
     id?: string;
     relatedData?: {
-        performers?: { id: string; name: string }[]; // Optional performers
-    }; // Extend with any other required properties
+        performers?: { id: string; name: string }[]; 
+    }; 
 };
 
 

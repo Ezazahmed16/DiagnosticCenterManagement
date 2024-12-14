@@ -18,11 +18,11 @@ const AssetsForm = dynamic(() => import("./forms/AssetsForm"), { loading: () => 
 const AddRoleForm = dynamic(() => import("./forms/AddRole"), { loading: () => <h1>Loading...</h1> });
 const AddTestForm = dynamic(() => import("./forms/AddTestForm"), { loading: () => <h1>Loading...</h1> });
 
-// Define delete action mapping for each table
 const deleteActionMap: { [key: string]: (formData: FormData) => Promise<{ success: boolean; error: boolean }> } = {
-    patient: deletePatient,
-    test: deleteTest
+    patientData: deletePatient, // Updated key to match "patientData"
+    testData: deleteTest,      // Updated key to match "testData"
 };
+
 
 // Define form components based on table
 const forms: {
@@ -63,6 +63,12 @@ const FormModal = ({ table, type, data, id, relatedData }: FormModalProps & { re
 
     // Handle delete action
     const handleDelete = async (id: string) => {
+        if (!id) {
+            toast.error("Invalid ID for deletion.");
+            return;
+        }
+        console.log(id);
+        console.log(id)
         const deleteAction = deleteActionMap[table];
         if (!deleteAction) {
             toast.error("Delete action not supported for this table.");
@@ -73,7 +79,7 @@ const FormModal = ({ table, type, data, id, relatedData }: FormModalProps & { re
         const formData = new FormData();
         formData.append("id", id);
 
-        const result = await deleteAction(formData); // Pass FormData to delete function
+        const result = await deleteAction(formData);
         if (result.success) {
             toast("Item deleted successfully.");
             setOpen(false);
@@ -90,7 +96,7 @@ const FormModal = ({ table, type, data, id, relatedData }: FormModalProps & { re
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
-                        handleDelete(id); // Directly pass the id to delete function
+                        handleDelete(id);
                     }}
                     className="p-4 flex flex-col gap-4"
                 >

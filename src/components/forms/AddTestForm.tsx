@@ -112,6 +112,23 @@ const AddTestForm = ({
           register={register("roomNo")}
           error={errors.roomNo}
         />
+        {/* <InputFields
+          label="id"
+          name="id"
+          register={register("id")}
+          error={errors.id}
+          hidden
+        /> */}
+        {data && (
+          <InputFields
+            label="Id"
+            name="id"
+            defaultValue={data?.id}
+            register={register("id")}
+            error={errors?.id}
+            hidden
+          />
+        )}
 
         <div className="w-full md:w-3/4">
           <label htmlFor="performer" className="text-xs text-gray-500 block m-1">

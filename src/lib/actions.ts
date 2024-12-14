@@ -1,9 +1,6 @@
 "use server";
-
-import { revalidatePath } from "next/cache";
 import { PatientSchema, TestSchema } from "./FormValidationSchemas";
 import prisma from "./prisma";
-import { connect } from 'http2';
 
 // Patient Create 
 export const createPatient = async (data: PatientSchema): Promise<{ success: boolean; error: boolean }> => {
@@ -121,19 +118,35 @@ export const updateTest = async (data: TestSchema): Promise<{ success: boolean; 
 };
 
 // Delete a Test
+// export const deleteTest = async (formData: FormData): Promise<{ success: boolean; error: boolean }> => {
+//     try {
+//         const id = formData.get("id") as string;
+//         console.log(id)
+//         if (!id) {
+//             throw new Error("Test ID is required for deletion.");
+//         }
+//         // Delete the test in the database
+//         await prisma.test.delete({
+//             where: { id },
+//         });
+//         // Revalidate the cache (adjust path as necessary)
+//         // revalidatePath("/tests");
+//         return { success: true, error: false };
+//     } catch (err) {
+//         console.error("Error deleting test:", err);
+//         return { success: false, error: true };
+//     }
+// };
+
 export const deleteTest = async (formData: FormData): Promise<{ success: boolean; error: boolean }> => {
     try {
         const id = formData.get("id") as string;
-        console.log(id)
-        if (!id) {
-            throw new Error("Test ID is required for deletion.");
-        }
-        // Delete the test in the database
+
+        // Delete the test from the database
         await prisma.test.delete({
             where: { id },
         });
-        // Revalidate the cache (adjust path as necessary)
-        // revalidatePath("/tests");
+
         return { success: true, error: false };
     } catch (err) {
         console.error("Error deleting test:", err);

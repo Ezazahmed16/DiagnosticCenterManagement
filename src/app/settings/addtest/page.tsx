@@ -65,7 +65,7 @@ const renderRow = (item: TestWithPerformer, role: string) => (
               }}
             />
             {role === "admin" && (
-              <FormModal table="testData" type="delete" id={item?.id} />
+              <FormContainer table="testData" type="delete" id={item.id} />
             )}
           </>
         )}
@@ -105,6 +105,7 @@ const AllTestsPage = async ({
     }),
     prisma.test.count({ where: query }),
   ]);
+
 
   return (
     <DefaultLayout userRole={userRole}>
