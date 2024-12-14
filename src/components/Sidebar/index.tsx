@@ -69,6 +69,7 @@ const menuGroups = [
           { label: "Add Test", route: "/settings/addtest" },
           { label: "Add Expense Type", route: "/settings/addexpensetype" },
           { label: "Add Referral", route: "/settings/addreferral" },
+          { label: "Add Test Performer", route: "/settings/addperformer" },
         ],
       },
     ],

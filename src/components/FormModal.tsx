@@ -5,9 +5,10 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 import dynamic from "next/dynamic";
-import { deletePatient, deleteTest } from "@/lib/actions";
+import { deletePatient, deletePerformedBy, deleteTest } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import PerformerForm from "./forms/PerformerForm";
 
 // Lazy load form components
 const MemoForm = dynamic(() => import("./forms/MemoForm"), { loading: () => <h1>Loading...</h1> });
@@ -19,8 +20,9 @@ const AddRoleForm = dynamic(() => import("./forms/AddRole"), { loading: () => <h
 const AddTestForm = dynamic(() => import("./forms/AddTestForm"), { loading: () => <h1>Loading...</h1> });
 
 const deleteActionMap: { [key: string]: (formData: FormData) => Promise<{ success: boolean; error: boolean }> } = {
-    patientData: deletePatient, // Updated key to match "patientData"
-    testData: deleteTest,      // Updated key to match "testData"
+    patientData: deletePatient,
+    testData: deleteTest,
+    PerformerData: deletePerformedBy,
 };
 
 
@@ -34,6 +36,7 @@ const forms: {
     ) => JSX.Element;
 } = {
     patientData: (type, data, setOpen) => <PatientForm type={type} data={data} setOpen={setOpen} />,
+    PerformerData: (type, data, setOpen) => <PerformerForm type={type} data={data} setOpen={setOpen} />,
     testData: (type, data, setOpen, relatedData) => <AddTestForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
 };
 
@@ -48,6 +51,7 @@ type FormModalProps = {
     | "ExpenseData"
     | "UserData"
     | "ExpenseType"
+    | "PerformerData"
     | "AssetsData"
     | "ReferalData";
     type: "create" | "update" | "delete";
@@ -67,8 +71,7 @@ const FormModal = ({ table, type, data, id, relatedData }: FormModalProps & { re
             toast.error("Invalid ID for deletion.");
             return;
         }
-        console.log(id);
-        console.log(id)
+
         const deleteAction = deleteActionMap[table];
         if (!deleteAction) {
             toast.error("Delete action not supported for this table.");

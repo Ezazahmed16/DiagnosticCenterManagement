@@ -65,3 +65,19 @@ export const testSchema = z.object({
   
   export type TestSchema = z.infer<typeof testSchema>;
 
+
+export const performedBySchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z
+    .string()
+    .min(3, { message: "Name must be at least 3 characters long!" })
+    .max(50, { message: "Name cannot exceed 50 characters!" }),
+  phone: z
+    .string()
+    .min(10, { message: "Phone number must be at least 10 digits long!" })
+    .optional(),
+  testId: z.string().uuid().optional(),
+});
+
+export type PerformedBySchema = z.infer<typeof performedBySchema>;
+
