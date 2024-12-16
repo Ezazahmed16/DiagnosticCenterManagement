@@ -5,7 +5,7 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 import dynamic from "next/dynamic";
-import { deletePatient, deletePerformedBy, deleteTest } from "@/lib/actions";
+import { deleteMemo, deletePatient, deletePerformedBy, deleteTest } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import PerformerForm from "./forms/PerformerForm";
@@ -23,6 +23,7 @@ const deleteActionMap: { [key: string]: (formData: FormData) => Promise<{ succes
     patientData: deletePatient,
     testData: deleteTest,
     PerformerData: deletePerformedBy,
+    memoData: deleteMemo
 };
 
 
@@ -38,6 +39,7 @@ const forms: {
     patientData: (type, data, setOpen) => <PatientForm type={type} data={data} setOpen={setOpen} />,
     PerformerData: (type, data, setOpen) => <PerformerForm type={type} data={data} setOpen={setOpen} />,
     testData: (type, data, setOpen, relatedData) => <AddTestForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+    memoData: (type, data, setOpen, relatedData) => <MemoForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
 };
 
 type FormModalProps = {
@@ -126,6 +128,8 @@ const FormModal = ({ table, type, data, id, relatedData }: FormModalProps & { re
 
         return <span>Form Not Found!</span>;
     };
+
+    const { performers } = relatedData || {}; 
 
     return (
         <>

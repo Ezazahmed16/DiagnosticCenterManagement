@@ -18,8 +18,9 @@ export type FormModalProps = {
     data?: any;
     id?: string;
     relatedData?: {
-        performers?: { id: string; name: string }[]; 
-    }; 
+        performers?: { id: string; name: string }[];
+        tests?: { id: string; name: string; price: number }[];
+    };
 };
 
 
@@ -31,11 +32,14 @@ const FormContainer = async ({ table, type, data, id }: FormModalProps) => {
             case "testData":
                 const performedBy = await prisma.performedBy.findMany({
                     select: { id: true, name: true },
-                });
+                })
                 relatedData = { performers: performedBy };
                 break;
-
-            default:
+            case "memoData":
+                const tests = await prisma.test.findMany({
+                    select: { id: true, name: true, price: true },
+                })
+                relatedData = { tests: tests };
                 break;
         }
     }

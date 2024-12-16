@@ -10,18 +10,22 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { FaPrint, FaRegEye } from "react-icons/fa";
 import { auth } from "@clerk/nextjs/server";
+import FormContainer from "@/components/FormContainer";
 
 type MemoWithPatient = Prisma.MemoGetPayload<{
-  include: { Patient: { select: { name: true; phone: true; address: true } } };
+  include: {
+    Patient: { select: { name: true; phone: true; address: true } };
+    tests: { select: { name: true; price: true; roomNo: true } }; 
+  };
 }>;
 
 const columns = [
-  { header: "Memo ID", accessor: "memoId" },
+  { header: "Memo ID", accessor: "id" },  
   { header: "Name", accessor: "Patient.name" },
   { header: "Contact", accessor: "Patient.phone" },
   { header: "Total Amount", accessor: "totalAmount" },
-  { header: "Status", accessor: "status" },
-  { header: "Date", accessor: "issueDate" },
+  { header: "Status", accessor: "paymentMethod" }, 
+  { header: "Date", accessor: "createdAt" },  // Use `createdAt` for date
   { header: "Actions", accessor: "actions" },
 ];
 
@@ -47,27 +51,7 @@ const renderRow = (item: MemoWithPatient, role: string) => (
           </button>
         </Link>
         <button className="w-7 h-7 flex items-center justify-center rounded-full">
-          <FormModal
-            table="memoData"
-            type="update"
-            data={{
-              id: 1,
-              memoId: "5251",
-              patientName: "Ezaz Ahmed",
-              age: 27,
-              phone: "01726065822",
-              gender: "male",
-              email: "ezazrahul794@gmail.com",
-              address: "123 Main St, Dhaka, Bangladesh",
-              memoTest: ["Blood Test", "MRI"],
-              totalAmount: 1500,
-              pay: 1000,
-              dueAmount: 300,
-              status: "Due",
-              issueDate: "2024-11-01",
-              paymentDueDate: "2024-11-10",
-            }}
-          />
+          <FormModal table="memoData" type="update" data={item} />
         </button>
         <button className="w-7 h-7 flex items-center justify-center rounded-full">
           <FaPrint size={18} />
@@ -84,7 +68,7 @@ const renderRow = (item: MemoWithPatient, role: string) => (
 
 const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: string | undefined } }) => {
   const { sessionClaims } = await auth();
-  const userRole = (sessionClaims?.metadata as { role?: string })?.role || ""; 
+  const userRole = (sessionClaims?.metadata as { role?: string })?.role || "";
 
   const { page, search } = searchParams;
   const p = page ? parseInt(page) : 1;
@@ -99,13 +83,17 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
 
   const [memo, count] = await prisma.$transaction([
     prisma.memo.findMany({
-      include: { Patient: { select: { name: true, phone: true, address: true } } },
+      include: {
+        Patient: { select: { name: true, phone: true, address: true } },
+        tests: { select: { name: true, price: true, roomNo: true } },
+      },
       where: query,
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
     }),
     prisma.memo.count({ where: query }),
   ]);
+  
 
   return (
     <DefaultLayout userRole={userRole}>
@@ -117,7 +105,7 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
             <button
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
-              <FormModal table="memoData" type="create" />
+              <FormContainer table="memoData" type="create" />
               Add
             </button>
           </div>
@@ -134,3 +122,4 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
 };
 
 export default AllMemosPage;
+

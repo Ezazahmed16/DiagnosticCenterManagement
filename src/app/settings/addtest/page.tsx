@@ -16,9 +16,9 @@ type Performer = {
   name: string;
 };
 
-type TestWithPerformer = Test & {
-  PerformedBy: Performer[];
-};
+// type TestWithPerformer = Test & {
+//   PerformedBy: Performer[];
+// };
 
 const columns = [
   { header: "Test ID", accessor: "id" },
@@ -31,8 +31,8 @@ const columns = [
   { header: "Actions", accessor: "actions" },
 ];
 
-const renderRow = (item: TestWithPerformer, role: string) => (
-  <tr key={item.id} className="border-b text-sm hover:bg-gray-100">
+const renderRow = (item: any, role: string) => (
+  <tr key={item.id} className="border-b text-sm">
     <td>{item.id}</td>
     <td>{item.name}</td>
     <td>{item.roomNo}</td>
@@ -40,16 +40,16 @@ const renderRow = (item: TestWithPerformer, role: string) => (
     <td>{item.additionalCost}</td>
     <td>{item.price}</td>
     <td>
-      {item.PerformedBy.length > 0
-        ? item.PerformedBy.map((p) => p.name).join(", ")
+      {item.PerformedBy && item.PerformedBy.name
+        ? item.PerformedBy.name
         : "N/A"}
     </td>
+
+
     <td>
       <div className="flex items-center justify-start gap-2">
         <Link href={`/receptionist/all-patients/${item.id}`}>
-          <button className="w-7 h-7 flex items-center justify-center rounded-full">
-            <FaRegEye size={18} />
-          </button>
+
         </Link>
         {role === "admin" && (
           <>
@@ -57,12 +57,6 @@ const renderRow = (item: TestWithPerformer, role: string) => (
               table="testData"
               type="update"
               data={item}
-              relatedData={{
-                performers: item.PerformedBy.map((p) => ({
-                  id: p.id,
-                  name: p.name,
-                })),
-              }}
             />
             {role === "admin" && (
               <FormContainer table="testData" type="delete" id={item.id} />
@@ -82,30 +76,36 @@ const AllTestsPage = async ({
   const { sessionClaims } = await auth();
   const userRole = (sessionClaims?.metadata as { role?: string })?.role || "";
 
-  const { page, search } = searchParams;
+  const { page, search, performedById } = searchParams; // Added `performedById` here
   const p = page ? parseInt(page, 10) : 1;
 
-  const query: Prisma.TestWhereInput = search
-    ? { name: { contains: search, mode: "insensitive" as Prisma.QueryMode } }
-    : {};
+  const query: Prisma.TestWhereInput = {
+    ...(search
+      ? { name: { contains: search, mode: "insensitive" as Prisma.QueryMode } }
+      : {}),
+    ...(performedById
+      ? {
+        PerformedBy: {
+          some: { id: performedById },
+        },
+      }
+      : {}),
+  };
 
   const [tests, count] = await prisma.$transaction([
     prisma.test.findMany({
-      where: query,
+      where: query, // Use the query object
       include: {
-        PerformedBy: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        PerformedBy: true, // Include the related `PerformedBy` data
       },
       skip: (p - 1) * ITEM_PER_PAGE,
       take: ITEM_PER_PAGE,
     }),
-    prisma.test.count({ where: query }),
+    prisma.test.count({
+      where: query,
+    }),
   ]);
-
+  console.log("Fetched tests data:", tests);
 
   return (
     <DefaultLayout userRole={userRole}>
@@ -123,7 +123,7 @@ const AllTestsPage = async ({
         <Table
           columns={columns}
           renderRow={(item) => renderRow(item, userRole)}
-          data={tests}
+          data={tests} // Pass the fetched tests data here
         />
 
         <Pagination page={p} count={count} />
@@ -133,3 +133,6 @@ const AllTestsPage = async ({
 };
 
 export default AllTestsPage;
+
+
+

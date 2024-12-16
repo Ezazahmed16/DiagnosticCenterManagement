@@ -13,22 +13,23 @@ import prisma from "@/lib/prisma"; // Assuming prisma is used for data fetching
 const columns = [
     {
         header: "Test Name",
-        accessor: "testName",
+        accessor: "name",
     },
     {
         header: "Total Amount",
-        accessor: "totalCost",
+        accessor: "price",
     },
 ];
 
 const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
     const memoId = params.id;
 
-    // Fetch the memo data, including patient information (joined query for patient)
+    // Fetch the memo data, including patient information and related tests
     const memo = await prisma.memo.findUnique({
         where: { id: memoId },
         include: {
             Patient: true,
+            tests: true, // This will fetch the related tests for this memo
         },
     });
 
@@ -42,22 +43,6 @@ const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
         );
     }
 
-    // Fetch the test data associated with this memo
-    const tests = await prisma.test.findMany({
-        where: {
-            memos: {
-                some: {
-                    id: memo.id,
-                },
-            },
-        },
-        select: {
-            id: true,
-            name: true,
-            price: true,
-        },
-    });
-
     // Render table row for each test
     const renderRow = (item: { id: string; name: string; price: number }) => (
         <tr key={item.id} className="border-b text-sm hover:bg-lamaPurpleLight">
@@ -65,6 +50,7 @@ const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
             <td>{item.price}</td>
         </tr>
     );
+
     return (
         <DefaultLayout userRole={role}>
             <div className="flex flex-col gap-4">
@@ -130,11 +116,11 @@ const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
                 </div>
 
                 {/* Test History */}
-                <div className="card flex flex-col gap-4">
+                <div className="card flex flex-col gap-4 min-h-screen">
                     <h1 className="text-xl font-semibold">Test History</h1>
 
                     {/* Table */}
-                    <Table columns={columns} renderRow={renderRow} data={tests} />
+                    <Table columns={columns} renderRow={renderRow} data={memo.tests} />
                 </div>
             </div>
         </DefaultLayout>

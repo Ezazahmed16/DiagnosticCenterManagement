@@ -30,7 +30,7 @@ const AddTestForm = ({
     defaultValues: {
       ...data,
       PerformedBy: data?.PerformedBy || "",
-    }
+    },
   });
 
   const router = useRouter();
@@ -44,9 +44,11 @@ const AddTestForm = ({
     setValue("price", calculatedPrice);
   }, [testCost, additionalCost, setValue]);
 
-  const { performers } = relatedData || {};
+  // Ensure performers is always an array
+  const performers = Array.isArray(relatedData?.performers) ? relatedData.performers : [];
+
   const onSubmit = async (formData: TestSchema) => {
-    console.log(formData)
+    console.log(formData);
     try {
       if (type === "create") {
         await createTest(formData);
@@ -112,13 +114,6 @@ const AddTestForm = ({
           register={register("roomNo")}
           error={errors.roomNo}
         />
-        {/* <InputFields
-          label="id"
-          name="id"
-          register={register("id")}
-          error={errors.id}
-          hidden
-        /> */}
         {data && (
           <InputFields
             label="Id"
@@ -143,7 +138,7 @@ const AddTestForm = ({
             <option value="" disabled>
               Select a Performer
             </option>
-            {performers?.map((performer: { id: string; name: string }) => (
+            {performers.map((performer: { id: string; name: string }) => (
               <option key={performer.id} value={performer.id}>
                 {performer.name}
               </option>
@@ -151,7 +146,6 @@ const AddTestForm = ({
           </select>
           {errors.PerformedBy && <p className="text-xs text-red-400 mt-1">{errors.PerformedBy.message}</p>}
         </div>
-
       </div>
 
       <button type="submit" className="bg-blue-400 text-white p-2 rounded-md">
