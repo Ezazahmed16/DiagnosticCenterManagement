@@ -4,10 +4,11 @@ import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
+import { ExpenseSchema } from "@/lib/FormValidationSchemas";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { auth } from "@clerk/nextjs/server";
-import { Expense, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { format } from "date-fns";
 import Link from "next/link";
 
@@ -29,10 +30,7 @@ const columns = [
     header: "Amount",
     accessor: "amount",
   },
-  {
-    header: "Category",
-    accessor: "expenseType",
-  },
+
   {
     header: "Date",
     accessor: "createdAt",
@@ -44,14 +42,14 @@ const columns = [
 ];
 
 // Row rendering function that depends on the user's role
-const renderRow = (item: Expense & { expenseType?: { name: string } }, role: string) => (
+const renderRow = (item: ExpenseSchema & { expenseType?: { name: string } }, role: string) => (
   <tr key={item.id} className="border-b text-sm hover:bg-lamaPurpleLight">
     <td>{item.id}</td>
     <td>{item.title}</td>
     <td>{item.description}</td>
     <td>{item.amount}</td>
     <td>{item.expenseType?.name}</td>
-    <td>{format(new Date(item.createdAt), "MMMM dd, yyyy")}</td>
+    {/* <td>{format(new Date(item.createdAt), "MMMM dd, yyyy")}</td> */}
     <td>
       <div className="flex items-center justify-start gap-1">
         {role === "admin" && (
