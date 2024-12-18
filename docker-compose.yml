@@ -1,7 +1,9 @@
+version: '3.8'
+
 services:
-  postgress:
+  postgres:
     image: postgres:15
-    container_name: postgres
+    container_name: postgres_db
     environment:
       POSTGRES_USER: alok
       POSTGRES_PASSWORD: alok24
@@ -17,12 +19,7 @@ services:
     ports:
       - '3000:3000'
     environment:
-<<<<<<< HEAD
-      - DATABASE_URL: postgresql://alok:alok24@178.16.139.84:5432/alokhealthcare
-
-=======
-      - DATABASE_URL: postgresql://alok:alok24@postgres:5432/alokhealthcare
->>>>>>> 4e87e94cfd06627f97fe2cc1a4b827face79bf3a
+      - DATABASE_URL=postgresql://alok:alok24@postgres:5432/alokhealthcare
     depends_on:
       - postgres
 
