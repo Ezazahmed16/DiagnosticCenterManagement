@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15
@@ -12,6 +10,11 @@ services:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "alok", "-d", "alokhealthcare"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   app:
     build: .
@@ -20,13 +23,14 @@ services:
       - '3000:3000'
     environment:
       - DATABASE_URL=postgresql://alok:alok24@postgres:5432/alokhealthcare
+      - NODE_ENV=production
     depends_on:
-      - postgres
-    entrypoint: [ 
-      "sh", 
-      "-c", 
-      "until nc -z postgres 5432; do echo waiting for postgres...; sleep 2; done; npx prisma migrate deploy && npm start" 
-    ]
-
+      postgres:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "
+      npx prisma migrate deploy &&
+      npm start
+      "
 volumes:
   postgres_data:
