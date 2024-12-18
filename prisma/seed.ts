@@ -56,21 +56,21 @@ async function main() {
         title: "Electricity Bill",
         description: "Monthly electricity bill for December.",
         amount: 300.0,
-        expenseTypeId: expenseType1.id, // Corrected
+        expenseTypeId: expenseType1.id,
         date: new Date("2023-12-01"),
       },
       {
         title: "Water Bill",
         description: "Monthly water bill for December.",
         amount: 100.0,
-        expenseTypeId: expenseType1.id, // Corrected
+        expenseTypeId: expenseType1.id,
         date: new Date("2023-12-01"),
       },
       {
         title: "AC Maintenance",
         description: "Annual maintenance for air conditioning units.",
         amount: 500.0,
-        expenseTypeId: expenseType2.id, // Corrected
+        expenseTypeId: expenseType2.id,
         date: new Date("2023-12-05"),
       },
     ],
@@ -87,7 +87,7 @@ async function main() {
       name: "Dr. Alex Johnson",
       phone: "1122334455",
       commissionPercent: 10,
-      totalAmmount: 0, // Fixed typo here
+      totalAmmount: 0,
     },
   });
 
@@ -145,39 +145,66 @@ async function main() {
     },
   });
 
-  // Seed Memos with relations to Patient, Test, ReferredBy, and PerformedBy
-  const memo1 = await prisma.memo.create({
-    data: {
-      patientId: patient1.id,
+  // Seed Memos
+  const memo1 = await prisma.memo.upsert({
+    where: { id: patient1.id },  
+    update: {
+      name: "Memo for John Doe",
+      gender: "MALE",
+      phone: patient1.phone,  // You can keep phone if necessary
       referredById: referredBy1.id,
       performedById: performedBy1.id,
       paymentMethod: "PAID",
       paidAmount: 120.0,
       dueAmount: 0.0,
       totalAmount: 120.0,
-      tests: {
-        connect: [
-          { id: test1.id },
-          { id: test2.id }
-        ],
-      },
+    },
+    create: {
+      name: "Memo for John Doe",
+      gender: "MALE",
+      phone: patient1.phone,
+      referredById: referredBy1.id,
+      performedById: performedBy1.id,
+      paymentMethod: "PAID",
+      paidAmount: 120.0,
+      dueAmount: 0.0,
+      totalAmount: 120.0,
     },
   });
-
-  const memo2 = await prisma.memo.create({
-    data: {
-      patientId: patient2.id,
+  
+  const memo2 = await prisma.memo.upsert({
+    where: { id: patient2.id },
+    update: {
+      name: "Memo for Jane Smith",
+      gender: "FEMALE",
+      phone: patient2.phone,  // You can keep phone if necessary
       referredById: referredBy1.id,
       performedById: performedBy1.id,
       paymentMethod: "DUE",
       paidAmount: 100.0,
       dueAmount: 80.0,
       totalAmount: 180.0,
-      tests: {
-        connect: [{ id: test2.id }],
-      },
+    },
+    create: {
+      name: "Memo for Jane Smith",
+      gender: "FEMALE",
+      phone: patient2.phone,
+      referredById: referredBy1.id,
+      performedById: performedBy1.id,
+      paymentMethod: "DUE",
+      paidAmount: 100.0,
+      dueAmount: 80.0,
+      totalAmount: 180.0,
     },
   });
+  
+  await prisma.memoToTest.create({
+    data: {
+      memoId: memo2.id,
+      testId: test2.id,
+    },
+  });
+  
 
   // Update totalAmount for ReferredBy (commission calculation)
   const referredMemos = await prisma.memo.findMany({
@@ -193,15 +220,14 @@ async function main() {
     data: { totalAmmount: Math.round(totalCommission) },
   });
 
+  console.log("Memos and Tests seeded successfully!");
+
   // Seed Assets
-  // Seed Assets using unique 'id' in the 'where' clause
-  const asset1 = await prisma.asset.upsert({
-    where: { id: "some-unique-id-for-ultrasound-machine" },
-    update: {
-      qty: { increment: 1 },
-      value: { increment: 20000.0 },
-    },
+  await prisma.asset.upsert({
+    where: { id: "asset-ultrasound" },
+    update: { qty: { increment: 1 }, value: { increment: 20000.0 } },
     create: {
+      id: "asset-ultrasound",
       name: "Ultrasound Machine",
       description: "High-resolution ultrasound imaging device.",
       amount: 1,
@@ -211,13 +237,11 @@ async function main() {
     },
   });
 
-  const asset2 = await prisma.asset.upsert({
-    where: { id: "some-unique-id-for-mri-scanner" },
-    update: {
-      qty: { increment: 1 },
-      value: { increment: 75000.0 },
-    },
+  await prisma.asset.upsert({
+    where: { id: "asset-mri" },
+    update: { qty: { increment: 1 }, value: { increment: 75000.0 } },
     create: {
+      id: "asset-mri",
       name: "MRI Scanner",
       description: "Advanced magnetic resonance imaging system.",
       amount: 1,

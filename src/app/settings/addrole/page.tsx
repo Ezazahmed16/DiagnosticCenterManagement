@@ -60,12 +60,12 @@ const AllRolesPage = () => {
           </Link>
           <Link href={`/users/${item.userId}/edit`}>
             <button className="w-7 h-7 flex items-center justify-center rounded-full">
-              <FormModal table="UserData" type="update" />
+              {/* <FormModal table="UserData" type="update" /> */}
             </button>
           </Link>
           {role === "admin" && (
             <button className="w-8 h-8 flex items-center justify-center rounded-full">
-              <FormModal table="UserData" type="delete" id={item.userId} />
+              {/* <FormModal table="UserData" type="delete" id={item.userId} /> */}
             </button>
           )}
         </div>
@@ -94,7 +94,7 @@ const AllRolesPage = () => {
               href="#"
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
-              <FormModal table="UserData" type="create"/>
+              {/* <FormModal table="UserData" type="create"/> */}
               Add Role
             </Link>
           </div>
@@ -104,7 +104,7 @@ const AllRolesPage = () => {
         <Table columns={columns} renderRow={renderRow} data={userData} />
 
         {/* Pagination */}
-        <Pagination />
+        {/* <Pagination /> */}
       </div>
     </DefaultLayout>
   );

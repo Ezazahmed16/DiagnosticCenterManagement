@@ -1,14 +1,14 @@
 'use client';
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { AiOutlineDelete } from "react-icons/ai";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 import dynamic from "next/dynamic";
-import { deleteMemo, deletePatient, deletePerformedBy, deleteTest } from "@/lib/actions";
+import { deleteExpense, deletePatient, deletePerformedBy, deleteTest } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import PerformerForm from "./forms/PerformerForm";
+import PerformersForm from "./forms/PerformerForm";
 
 // Lazy load form components
 const MemoForm = dynamic(() => import("./forms/MemoForm"), { loading: () => <h1>Loading...</h1> });
@@ -19,13 +19,15 @@ const AssetsForm = dynamic(() => import("./forms/AssetsForm"), { loading: () => 
 const AddRoleForm = dynamic(() => import("./forms/AddRole"), { loading: () => <h1>Loading...</h1> });
 const AddTestForm = dynamic(() => import("./forms/AddTestForm"), { loading: () => <h1>Loading...</h1> });
 
-const deleteActionMap: { [key: string]: (formData: FormData) => Promise<{ success: boolean; error: boolean }> } = {
+const deleteActionMap: {
+    [key: string]: (formData: FormData) => Promise<{ success: boolean; error: boolean }>
+} = {
     patientData: deletePatient,
     testData: deleteTest,
     PerformerData: deletePerformedBy,
-    memoData: deleteMemo
+    // memoData: deleteMemo
+    // ExpenseData: deleteExpense
 };
-
 
 // Define form components based on table
 const forms: {
@@ -37,9 +39,10 @@ const forms: {
     ) => JSX.Element;
 } = {
     patientData: (type, data, setOpen) => <PatientForm type={type} data={data} setOpen={setOpen} />,
-    PerformerData: (type, data, setOpen) => <PerformerForm type={type} data={data} setOpen={setOpen} />,
+    PerformerData: (type, data, setOpen) => <PerformersForm type={type} data={data} setOpen={setOpen} />,
     testData: (type, data, setOpen, relatedData) => <AddTestForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
     memoData: (type, data, setOpen, relatedData) => <MemoForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+    ExpenseData: (type, data, setOpen, relatedData) => <ExpenseForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
 };
 
 type FormModalProps = {
@@ -51,7 +54,7 @@ type FormModalProps = {
     | "testData"
     | "patient"
     | "ExpenseData"
-    | "UserData"
+    | "User Data"
     | "ExpenseType"
     | "PerformerData"
     | "AssetsData"
@@ -62,7 +65,7 @@ type FormModalProps = {
     relatedData?: any;
 };
 
-const FormModal = ({ table, type, data, id, relatedData }: FormModalProps & { relatedData?: any }) => {
+const FormModal = ({ table, type, data, id, relatedData }: FormModalProps) => {
     const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
     const [open, setOpen] = useState(false);
     const router = useRouter();
@@ -94,7 +97,7 @@ const FormModal = ({ table, type, data, id, relatedData }: FormModalProps & { re
         }
     };
 
-    // Form component to render based on type (create, update, delete)
+    // Form component to render based on type ( create, update, delete)
     const Form = () => {
         if (type === "delete" && id) {
             return (
@@ -128,8 +131,6 @@ const FormModal = ({ table, type, data, id, relatedData }: FormModalProps & { re
 
         return <span>Form Not Found!</span>;
     };
-
-    const { performers } = relatedData || {}; 
 
     return (
         <>

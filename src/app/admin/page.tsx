@@ -5,7 +5,7 @@ import React from 'react'
 
 const page = () => {
     return (
-        <DefaultLayout>
+        <DefaultLayout userRole=''>
             <Dashboard />
         </DefaultLayout>
     )

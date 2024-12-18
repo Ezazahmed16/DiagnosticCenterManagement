@@ -14,26 +14,27 @@ import FormContainer from "@/components/FormContainer";
 
 type MemoWithPatient = Prisma.MemoGetPayload<{
   include: {
-    Patient: { select: { name: true; phone: true; address: true } };
-    tests: { select: { name: true; price: true; roomNo: true } }; 
+    Patient: { select: { id: true, name: true; phone: true; address: true } };
+    tests: { select: { id: true, name: true; price: true; roomNo: true } };
+    referredBy: { select: { id: true; name: true } };
   };
 }>;
 
 const columns = [
-  { header: "Memo ID", accessor: "id" },  
+  { header: "Memo ID", accessor: "id" },
   { header: "Name", accessor: "Patient.name" },
   { header: "Contact", accessor: "Patient.phone" },
   { header: "Total Amount", accessor: "totalAmount" },
-  { header: "Status", accessor: "paymentMethod" }, 
-  { header: "Date", accessor: "createdAt" },  // Use `createdAt` for date
+  { header: "Status", accessor: "paymentMethod" },
+  { header: "Date", accessor: "createdAt" },
   { header: "Actions", accessor: "actions" },
 ];
 
 const renderRow = (item: MemoWithPatient, role: string) => (
   <tr key={item.id} className="border-b text-sm my-2">
     <td>{item.id}</td>
-    <td>{item.Patient?.name}</td>
-    <td>{item.Patient?.phone}</td>
+    <td>{item?.name}</td>
+    <td>{item.phone}</td>
     <td>{item.totalAmount}</td>
     <td>
       {item.paymentMethod === "DUE" ? (
@@ -51,14 +52,14 @@ const renderRow = (item: MemoWithPatient, role: string) => (
           </button>
         </Link>
         <button className="w-7 h-7 flex items-center justify-center rounded-full">
-          <FormModal table="memoData" type="update" data={item} />
+          <FormContainer table="memoData" type="update" data={item} />
         </button>
         <button className="w-7 h-7 flex items-center justify-center rounded-full">
           <FaPrint size={18} />
         </button>
         {role === "admin" && (
           <button className="w-8 h-8 flex items-center justify-center rounded-full">
-            <FormModal table="memoData" type="delete" id={item.id} />
+            <FormContainer table="memoData" type="delete" id={item.id} />
           </button>
         )}
       </div>
@@ -83,9 +84,13 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
 
   const [memo, count] = await prisma.$transaction([
     prisma.memo.findMany({
+      orderBy: {
+        createdAt: "desc"
+      },
       include: {
-        Patient: { select: { name: true, phone: true, address: true } },
-        tests: { select: { name: true, price: true, roomNo: true } },
+        Patient: { select: { id: true, name: true, phone: true, address: true } },
+        tests: { select: { id: true } },
+        referredBy: { select: { name: true, id: true } },
       },
       where: query,
       take: ITEM_PER_PAGE,
@@ -93,7 +98,8 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
     }),
     prisma.memo.count({ where: query }),
   ]);
-  
+
+  console.log(memo)
 
   return (
     <DefaultLayout userRole={userRole}>
@@ -105,7 +111,7 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
             <button
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
-              <FormContainer table="memoData" type="create" />
+              <FormContainer table="memoData" type="create" data='' />
               Add
             </button>
           </div>
@@ -122,4 +128,3 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
 };
 
 export default AllMemosPage;
-

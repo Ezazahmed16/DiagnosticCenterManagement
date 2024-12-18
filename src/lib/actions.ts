@@ -1,5 +1,6 @@
 "use server";
-import { MemoSchema, PatientSchema, PerformedBySchema, TestSchema } from "./FormValidationSchemas";
+import { PaymentMethod } from "@prisma/client";
+import { ExpenseSchema, memoSchema, MemoSchema, PatientSchema, PerformedBySchema, TestSchema } from "./FormValidationSchemas";
 import prisma from "./prisma";
 
 // Patient Create 
@@ -62,134 +63,115 @@ export const deletePatient = async (data: FormData): Promise<{ success: boolean;
 };
 
 
-// Create a Memo
 
+// Create a Memo
 export const createMemo = async (data: MemoSchema): Promise<{ success: boolean; error: boolean }> => {
     try {
-        let patientId: string;
+        // Validate the incoming data using the memoSchema
+        const validatedData = memoSchema.parse(data);
 
-        // Check if the patient exists based on the provided phone or other identifying field
+        // Step 1: Check if a patient already exists with the provided phone number
+        let patientId = null;
+
         const existingPatient = await prisma.patient.findUnique({
-            where: {
-                phone: data.phone, // Assuming phone number is unique
-            },
+            where: { phone: validatedData.phone },
         });
 
         if (existingPatient) {
-            // If patient exists, use the existing patient's ID
+            // If the patient exists, use their id
             patientId = existingPatient.id;
         } else {
-            // If patient doesn't exist, create the patient
+            // If the patient does not exist, create a new patient and use the newly created patientId
             const newPatient = await prisma.patient.create({
                 data: {
-                    name: data.name,
-                    phone: data.phone,
-                    gender: data.gender,
-                    dateOfBirth: data.dateOfBirth,
-                    address: data.address,
-                    bloodType: data.bloodType,
+                    name: validatedData.name,
+                    phone: validatedData.phone,
+                    gender: validatedData.gender,
+                    dateOfBirth: validatedData.dateOfBirth,
+                    address: validatedData.address,
                 },
             });
-            patientId = newPatient.id; // Save the newly created patient's ID
+            patientId = newPatient.id; // Assign the new patient's ID
         }
 
-        // Now, create the memo associated with the patient
-        await prisma.memo.create({
+        // Step 2: Create the memo with the validated data
+        const memo = await prisma.memo.create({
             data: {
-                patientId,  // Associate the created or existing patient's ID
-                referredById: data.referredBy,  // Assuming referredBy is a string
-                performedById: data.performedBy,
-                paymentMethod: data.paymentMethod || 'DUE',
-                dueAmount: data.dueAmount || 0,
-                paidAmount: data.paidAmount || 0,
-                totalAmount: data.totalAmount || 0,
-                tests: {
-                    connect: data.memoTest?.map((id) => ({ id })),
-                },
+                name: validatedData.name,
+                phone: validatedData.phone,
+                gender: validatedData.gender,
+                dateOfBirth: validatedData.dateOfBirth,
+                address: validatedData.address,
+                paymentMethod: validatedData.paymentMethod as PaymentMethod ?? "DUE",
+                paidAmount: validatedData.paidAmount ?? 0,
+                dueAmount: validatedData.dueAmount ?? 0,
+                totalAmount: validatedData.totalAmount ?? 0,
+                discount: validatedData.discount ?? 0,
+                referredById: validatedData.referredBy, // Connect referredBy if provided
+
+                performedById: validatedData.performedBy ?? null,
+
+                // Assign the patientId to the memo
+                patientId: patientId,
+
+                // Handle tests: ensure proper format for memoTest
+                tests: validatedData.memoTest
+                    ? {
+                        connect: validatedData.memoTest.map((test) => ({
+                            id: test.id,
+                        })),
+                    }
+                    : undefined,
             },
         });
 
-        // Return success status
+        console.log("Memo Created:", memo); // Check the created memo
         return { success: true, error: false };
-    } catch (err) {
-        console.error("Error creating memo:", err);
-        return { success: false, error: true };
-    }
-};
-// Update a Memo
+    } catch (error: unknown) {
+        console.error("Error creating memo:", error);
 
-export const UpdateMemo = async (data: MemoSchema): Promise<{ success: boolean; error: boolean }> => {
-    try {
-        let patientId: string;
-
-        // Check if the patient exists based on the provided phone or other identifying field
-        const existingPatient = await prisma.patient.findUnique({
-            where: {
-                phone: data.phone, // Assuming phone number is unique
-            },
-        });
-
-        if (existingPatient) {
-            // If patient exists, use the existing patient's ID
-            patientId = existingPatient.id;
-        } else {
-            // If patient doesn't exist, create the patient
-            const newPatient = await prisma.patient.create({
-                data: {
-                    name: data.name,
-                    phone: data.phone,
-                    gender: data.gender,
-                    dateOfBirth: data.dateOfBirth,
-                    address: data.address,
-                    bloodType: data.bloodType,
-                },
-            });
-            patientId = newPatient.id; // Save the newly created patient's ID
+        // Handle the error based on its type
+        if (error instanceof Error) {
+            console.error("Error message:", error.message);
         }
 
-        // Now, create the memo associated with the patient
-        await prisma.memo.create({
-            data: {
-                patientId,  // Associate the created or existing patient's ID
-                referredById: data.referredBy,  // Assuming referredBy is a string
-                performedById: data.performedBy,
-                paymentMethod: data.paymentMethod || 'DUE',
-                dueAmount: data.dueAmount || 0,
-                paidAmount: data.paidAmount || 0,
-                totalAmount: data.totalAmount || 0,
-                tests: {
-                    connect: data.memoTest?.map((id) => ({ id })),
-                },
-            },
-        });
-
-        // Return success status
-        return { success: true, error: false };
-    } catch (err) {
-        console.error("Error creating memo:", err);
         return { success: false, error: true };
     }
 };
-// Delete a Memo
 
-// Example of a delete function that expects FormData
-export const deleteMemo = async (formData: FormData): Promise<{ success: boolean; error: boolean }> => {
-    const id = formData.get("id");
-    if (!id) {
-        return { success: false, error: true };
-    }
-
+export const updateMemo = async (data: MemoSchema) => {
     try {
-        // Call Prisma to delete the record
-        await prisma.memo.delete({
-            where: { id: String(id) },  // Ensure the id is cast to string if needed
-        });
-        return { success: true, error: false };
-    } catch (err) {
-        console.error(err);
-        return { success: false, error: true };
+      const updatedMemo = await prisma.memo.update({
+        where: { id: data.id },
+        data: {
+          name: data.name,
+          phone: data.phone,
+          gender: data.gender,
+          dateOfBirth: data.dateOfBirth,
+          address: data.address,
+          paidAmount: data.paidAmount,
+          dueAmount: data.dueAmount,
+          totalAmount: data.totalAmount,
+          paymentMethod: data.paymentMethod as PaymentMethod ?? "DUE",          discount: data.discount,
+          referredById: data.referredBy, 
+          performedById: data.performedBy ?? null,
+          tests: data.memoTest
+            ? {
+                connect: data.memoTest.map((test) => ({
+                  id: test.id,
+                })),
+              }
+            : undefined,
+        },
+      });
+  
+      return updatedMemo; // Return updated memo if needed
+    } catch (error) {
+      console.error("Error updating memo:", error);
+      throw new Error("Failed to update memo");
     }
-};
+  };
+
 
 
 
@@ -338,6 +320,66 @@ export const deletePerformedBy = async (
         return { success: true, error: false };
     } catch (err) {
         console.error("Error deleting performer:", err);
+        return { success: false, error: true };
+    }
+};
+
+// Expense Create
+export const createExpense = async (data: ExpenseSchema): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        // await prisma.expense.create({
+        //     data: {
+        //         title: data.title,
+        //         description: data.description || "", 
+        //         amount: data.amount,
+        //         expenseTypeId: data.expenseTypeId,
+        //     },
+        // });
+        return { success: true, error: false };
+    } catch (err) {
+        console.error("Error creating expense:", err);
+        return { success: false, error: true };
+    }
+};
+
+// Expense Update
+export const updateExpense = async (data: ExpenseSchema): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        if (!data.id) {
+            throw new Error("Expense ID is required for update.");
+        }
+
+        // Perform the update operation
+        await prisma.expense.update({
+            where: { id: data.id },
+            data: {
+                title: data.title,
+                description: data.description || "", // Default to an empty string if null
+                amount: data.amount,
+                expenseTypeId: data.expenseTypeId,
+            },
+        });
+        return { success: true, error: false };
+    } catch (err) {
+        console.error("Error updating expense:", err);
+        return { success: false, error: true };
+    }
+};
+
+// Expense Delete
+export const deleteExpense = async (id: string): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        if (!id) {
+            throw new Error("Expense ID is required for deletion.");
+        }
+
+        // Delete the expense from the database
+        await prisma.expense.delete({
+            where: { id },
+        });
+        return { success: true, error: false };
+    } catch (err) {
+        console.error("Error deleting expense:", err);
         return { success: false, error: true };
     }
 };

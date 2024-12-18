@@ -5,20 +5,9 @@ import TableSearch from "@/components/TableSearch";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import Link from "next/link";
-import { FaRegEye } from "react-icons/fa";
 import { auth } from "@clerk/nextjs/server";
-import { Prisma, Test } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import FormContainer from "@/components/FormContainer";
-import FormModal from "@/components/FormModal";
-
-type Performer = {
-  id: string;
-  name: string;
-};
-
-// type TestWithPerformer = Test & {
-//   PerformedBy: Performer[];
-// };
 
 const columns = [
   { header: "Test ID", accessor: "id" },
@@ -40,27 +29,14 @@ const renderRow = (item: any, role: string) => (
     <td>{item.additionalCost}</td>
     <td>{item.price}</td>
     <td>
-      {item.PerformedBy && item.PerformedBy.name
-        ? item.PerformedBy.name
-        : "N/A"}
+      {item.PerformedBy?.name ? item.PerformedBy.name : "N/A"}
     </td>
-
-
     <td>
       <div className="flex items-center justify-start gap-2">
-        <Link href={`/receptionist/all-patients/${item.id}`}>
-
-        </Link>
         {role === "admin" && (
           <>
-            <FormContainer
-              table="testData"
-              type="update"
-              data={item}
-            />
-            {role === "admin" && (
-              <FormContainer table="testData" type="delete" id={item.id} />
-            )}
+            <FormContainer table="testData" type="update" data={item} />
+            <FormContainer table="testData" type="delete" id={item.id} />
           </>
         )}
       </div>
@@ -76,27 +52,41 @@ const AllTestsPage = async ({
   const { sessionClaims } = await auth();
   const userRole = (sessionClaims?.metadata as { role?: string })?.role || "";
 
-  const { page, search, performedById } = searchParams; // Added `performedById` here
+  const { page, search } = searchParams;
   const p = page ? parseInt(page, 10) : 1;
 
   const query: Prisma.TestWhereInput = {
     ...(search
-      ? { name: { contains: search, mode: "insensitive" as Prisma.QueryMode } }
-      : {}),
-    ...(performedById
-      ? {
-        PerformedBy: {
-          some: { id: performedById },
-        },
-      }
+      ? { name: { contains: search, mode: "insensitive" } }
       : {}),
   };
 
+  // const [tests, count] = await prisma.$transaction([
+  //   prisma.test.findMany({
+  //     where: query,
+  //     include: {
+  //       PerformedBy: true, // Include the performer relation
+  //       memos: { // This maps the `MemoToTest` join table
+  //         include: {
+  //           Memo: true, // Fetch the actual `Memo` records
+  //         },
+  //       },
+  //     },
+  //     skip: (p - 1) * ITEM_PER_PAGE,
+  //     take: ITEM_PER_PAGE,
+  //   }),
+  //   prisma.test.count({
+  //     where: query,
+  //   }),
+  // ]);
   const [tests, count] = await prisma.$transaction([
     prisma.test.findMany({
-      where: query, // Use the query object
+      where: query,
       include: {
-        PerformedBy: true, // Include the related `PerformedBy` data
+        PerformedBy: true,
+      },
+      orderBy: {
+        id: "desc"
       },
       skip: (p - 1) * ITEM_PER_PAGE,
       take: ITEM_PER_PAGE,
@@ -105,6 +95,7 @@ const AllTestsPage = async ({
       where: query,
     }),
   ]);
+  
   console.log("Fetched tests data:", tests);
 
   return (
@@ -133,6 +124,3 @@ const AllTestsPage = async ({
 };
 
 export default AllTestsPage;
-
-
-

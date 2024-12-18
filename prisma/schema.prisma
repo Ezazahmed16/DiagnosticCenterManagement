@@ -8,38 +8,49 @@ datasource db {
 }
 
 model Patient {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
-  phone       String   @unique
+  phone       String    @unique
   address     String?
   bloodType   String?
   gender      Gender
-  dateOfBirth DateTime
+  dateOfBirth DateTime?
   memos       Memo[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Memo {
-  id        String   @id @default(uuid())
-  patientId String?
-  Patient   Patient? @relation(fields: [patientId], references: [id])
+  id String @id @default(uuid())
 
-  tests Test[] // Many-to-many relation to Test
+  patientId   String?
+  Patient     Patient?  @relation(fields: [patientId], references: [id])
+  name        String
+  phone       String  
+  dateOfBirth DateTime?
+  gender      Gender
+  address     String?
+
+  tests        Test[]    @relation("MemoTest")
+
+  paymentMethod PaymentMethod @default(DUE)
+  totalAmount   Float         @default(0)
+  paidAmount    Float         @default(0)
+  dueAmount     Float         @default(0)
+  discount      Float         @default(0)
 
   referredById String?
   referredBy   ReferredBy? @relation(fields: [referredById], references: [id])
 
-  performedById String
-  performedBy   PerformedBy @relation(fields: [performedById], references: [id])
+  performedById String?
+  performedBy   PerformedBy? @relation(fields: [performedById], references: [id])
 
-  paymentMethod PaymentMethod @default(DUE)
-  dueAmount     Float         @default(0)
-  paidAmount    Float         @default(0)
-  totalAmount   Float         @default(0)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  // MemoToTest MemoToTest[]
+  // Test       Test[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  MemoToTest MemoToTest[] @relation("MemoTests")
 }
 
 model Test {
@@ -53,18 +64,37 @@ model Test {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  Memo   Memo?   @relation(fields: [memoId], references: [id])
-  memoId String?
+  memos  Memo[] @relation("MemoTest")
+
 
   PerformedBy   PerformedBy? @relation(fields: [performedById], references: [id])
   performedById String?
+  // Memo          Memo?        @relation(fields: [memoId], references: [id])
+  // memoId        String?
+
+  MemoToTest MemoToTest[]
 }
+
+model MemoToTest {
+  id     String @id @default(uuid())
+  memoId String
+  testId String
+
+  // Memo Memo @relation(fields: [memoId], references: [id], onDelete: Cascade)
+  Test Test @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Memo Memo[] @relation("MemoTests")
+}
+
 
 model PerformedBy {
   id        String   @id @default(uuid())
   name      String
   phone     String?  @unique
-  memos     Memo[] 
+  memos     Memo[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

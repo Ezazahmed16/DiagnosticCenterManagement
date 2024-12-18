@@ -3,7 +3,7 @@ import React from 'react'
 
 const page = () => {
   return (
-    <DefaultLayout>
+    <DefaultLayout userRole=''>
       <h1>Page is Under Development</h1>
     </DefaultLayout>
   )

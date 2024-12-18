@@ -48,7 +48,6 @@ const AddTestForm = ({
   const performers = Array.isArray(relatedData?.performers) ? relatedData.performers : [];
 
   const onSubmit = async (formData: TestSchema) => {
-    console.log(formData);
     try {
       if (type === "create") {
         await createTest(formData);
@@ -73,7 +72,7 @@ const AddTestForm = ({
         {type === "create" ? "Create a new Test" : "Update Test"}
       </h1>
 
-      <div className="flex justify-between flex-wrap gap-4">
+      <div className="grid grid-cols-3 justify-between flex-wrap gap-4">
         <InputFields
           label="Test Name"
           name="name"

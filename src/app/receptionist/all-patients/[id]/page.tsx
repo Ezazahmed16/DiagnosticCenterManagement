@@ -29,7 +29,7 @@ export default async function SinglePatientPage({ params }: { params: { id: stri
 
     if (!patient) {
         return (
-            <DefaultLayout>
+            <DefaultLayout userRole="">
                 <div className="text-center p-4">
                     <h1>Patient not found</h1>
                 </div>
@@ -86,7 +86,7 @@ export default async function SinglePatientPage({ params }: { params: { id: stri
     );
 
     return (
-        <DefaultLayout>
+        <DefaultLayout userRole="">
             <div className="min-h-screen">
                 {/* Patient Info */}
                 <div className="card flex flex-col gap-4 p-4 rounded-lg">
@@ -94,7 +94,7 @@ export default async function SinglePatientPage({ params }: { params: { id: stri
                         <FaUser size={80} />
                         <div>
                             <h1 className="text-2xl font-semibold">{patient.name}</h1>
-                            <p><span className="font-bold">Date of Birth:</span> {format(new Date(patient.dateOfBirth), "MMMM dd, yyyy")}</p>
+                            {/* <p><span className="font-bold">Date of Birth:</span> {format(new Date(patient?.dateOfBirth), "MMMM dd, yyyy")}</p> */}
                             <p><span className="font-bold">Gender:</span> {patient.gender}</p>
                         </div>
                     </div>

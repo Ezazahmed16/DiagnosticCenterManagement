@@ -1,3 +1,4 @@
+import FormContainer from "@/components/FormContainer";
 import FormModal from "@/components/FormModal";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Pagination from "@/components/Pagination";
@@ -56,10 +57,12 @@ const renderRow = (item: Expense & { expenseType?: { name: string } }, role: str
         {role === "admin" && (
           <>
             <button className="w-7 h-7 flex items-center justify-center rounded-full">
-              <FormModal table="ExpenseData" type="update" data={item} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full">
-              <FormModal table="ExpenseData" type="delete" id={item.id} />
+              {role === "admin" && (
+                <>
+                  <FormContainer table="ExpenseData" type="update" data={item} />
+                  <FormContainer table="ExpenseData" type="delete" id={item.id} />
+                </>
+              )}
             </button>
           </>
         )}
@@ -71,8 +74,7 @@ const renderRow = (item: Expense & { expenseType?: { name: string } }, role: str
 const AllExpensesPage = async ({ searchParams }: { searchParams: { [key: string]: string | undefined } }) => {
   // Fetch user role from Clerk authentication
   const { sessionClaims } = await auth();
-  const userRole = (sessionClaims?.metadata as { role?: string })?.role || "";  // default to empty string if role is not found
-
+  const userRole = (sessionClaims?.metadata as { role?: string })?.role || "";  
   const { page, search } = searchParams;
   const p = page ? parseInt(page) : 1;
 
@@ -89,7 +91,7 @@ const AllExpensesPage = async ({ searchParams }: { searchParams: { [key: string]
     prisma.expense.findMany({
       include: {
         expenseType: {
-          select: { name: true },
+          select: { id: true, name: true },
         },
       },
       where: query,
@@ -111,7 +113,9 @@ const AllExpensesPage = async ({ searchParams }: { searchParams: { [key: string]
               href="#"
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
-              <FormModal table="ExpenseData" type="create" />
+              <FormContainer table="ExpenseData" type="create" data='' />
+              {/* <FormModal table="patientData" type="create" data="" /> */}
+
               Add
             </Link>
           </div>
