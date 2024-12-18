@@ -18,12 +18,11 @@ services:
     container_name: nextjs_app
     ports:
       - '3000:3000'
-
     environment:
       - DATABASE_URL=postgresql://alok:alok24@postgres:5432/alokhealthcare
-
     depends_on:
       - postgres
+    entrypoint: [ "sh", "-c", "until nc -z postgres 5432; do echo waiting for postgres...; sleep 2; done; npm run dev" ]
 
 volumes:
   postgres_data:
