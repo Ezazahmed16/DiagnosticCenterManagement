@@ -210,6 +210,7 @@ async function main() {
   const referredMemos = await prisma.memo.findMany({
     where: { referredById: referredBy1.id },
   });
+  
 
   // const totalCommission = referredMemos.reduce((sum, memo) => {
   //   return sum + memo.totalAmount * (referredBy1.commissionPercent / 100);
