@@ -30,7 +30,8 @@ services:
     entrypoint: >
       sh -c "
       npx prisma migrate deploy &&
+      npx prisma generate &&
       npm start
       "
 volumes:
-  postgres_data:
+  postgres_data:  
