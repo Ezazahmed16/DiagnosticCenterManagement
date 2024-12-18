@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Memo, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -216,7 +216,7 @@ async function main() {
   //   return sum + memo.totalAmount * (referredBy1.commissionPercent / 100);
   // }, 0);
 
-  const totalCommission = referredMemos.reduce((sum: number, memo) => {
+  const totalCommission = referredMemos.reduce((sum: number, memo: Memo) => {
     return sum + memo.totalAmount * (referredBy1.commissionPercent / 100);
   }, 0);
   
