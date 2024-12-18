@@ -1,3 +1,5 @@
+import prisma from "./prisma";
+
 // Enum Data
 export const RoleEnum = {
     SUPER_ADMIN: "super admin",
@@ -7,6 +9,8 @@ export const RoleEnum = {
     LAB_TECHNICIAN: "lab technician",
     NURSE: "nurse"
 };
+
+
 
 export let role = "admin";
 // export let role = "accounts";
@@ -378,6 +382,7 @@ export const assetsData = [
         purchaseBy: "David Warner",
     }
 ];
+
 
 
 

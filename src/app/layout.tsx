@@ -5,6 +5,9 @@ import "@/css/satoshi.css";
 import "@/css/style.css";
 import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
+import { ClerkProvider } from "@clerk/nextjs";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function RootLayout({
   children,
@@ -21,12 +24,15 @@ export default function RootLayout({
   }, []);
 
   return (
-    <html lang="en">
-      <body suppressHydrationWarning={true}>
-        <div className="dark:bg-boxdark-2 dark:text-bodydark">
-          {loading ? <Loader /> : children}
-        </div>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body suppressHydrationWarning={true}>
+          <div className="dark:bg-boxdark-2 dark:text-bodydark">
+          <ToastContainer position="bottom-right" theme="dark" />
+            {loading ? <Loader /> : children}
+          </div>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

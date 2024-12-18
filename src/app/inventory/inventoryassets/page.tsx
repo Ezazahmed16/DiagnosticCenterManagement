@@ -2,44 +2,48 @@ import FormModal from "@/components/FormModal";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
-import { assetsData, role } from "@/lib/data";
+import { Asset, Prisma } from "@prisma/client";
+import prisma from "@/lib/prisma";
+import { ITEM_PER_PAGE } from "@/lib/settings";
+import { format } from "date-fns";
 import Link from "next/link";
-import { CiSearch } from "react-icons/ci";
 import { FaRegEye } from "react-icons/fa";
+import TableSearch from "@/components/TableSearch";
+import { auth } from "@clerk/nextjs/server";
 
-type AssetsData = {
-  assetsId: number;
-  assetsTitle: string;
-  purchaseAmount: number;
-  purchaseQty: number;
-  totalPurchase: number;
-  purchaseBy: string;
-};
-
+// Table Columns definition
 const columns = [
   {
-    header: "Asset ID",
-    accessor: "assetsId",
+    header: "ID",
+    accessor: "id",
   },
   {
     header: "Title",
-    accessor: "assetsTitle",
+    accessor: "name",
+  },
+  {
+    header: "Description",
+    accessor: "description",
   },
   {
     header: "Amount",
-    accessor: "purchaseAmount",
+    accessor: "amount",
   },
   {
     header: "Quantity",
-    accessor: "purchaseQty",
+    accessor: "qty",
   },
   {
-    header: "Total Purchase",
-    accessor: "totalPurchase",
+    header: "Total",
+    accessor: "value",
   },
   {
     header: "Purchased By",
     accessor: "purchaseBy",
+  },
+  {
+    header: "Date",
+    accessor: "createdAt",
   },
   {
     header: "Actions",
@@ -47,53 +51,74 @@ const columns = [
   },
 ];
 
-const AllInventoryList = () => {
-  const renderRow = (item: AssetsData) => (
-    <tr key={item.assetsId} className="border-b text-sm hover:bg-lamaPurpleLight">
-      <td>{item.assetsId}</td>
-      <td>{item.assetsTitle}</td>
-      <td>{item.purchaseAmount}</td>
-      <td>{item.purchaseQty}</td>
-      <td>{item.totalPurchase}</td>
-      <td>{item.purchaseBy}</td>
-      <td>
-        <div className="flex items-center justify-start gap-1">
-          <Link href={`/assets/${item.assetsId}`}>
-            <button className="w-7 h-7 flex items-center justify-center rounded-full">
-              <FaRegEye size={18} />
-            </button>
-          </Link>
-          {role === "admin" && (
-            <button className="w-7 h-7 flex items-center justify-center rounded-full">
-              <FormModal table="AssetsData" type="update" data={item} />
-            </button>
-          )}
-          {role === "admin" && (
-            <button className="w-8 h-8 flex items-center justify-center rounded-full">
-              <FormModal table="AssetsData" type="delete" id={item.assetsId} />
-            </button>
-          )}
-        </div>
-      </td>
-    </tr>
-  );
+// Row rendering function that depends on the user's role
+const renderRow = (item: Asset, role: string) => (
+  <tr key={item.id} className="border-b text-sm">
+    <td>{item.id}</td>
+    <td>{item.name}</td>
+    <td>{item.description}</td>
+    <td>{item.amount}</td>
+    <td>{item.qty}</td>
+    <td>{item.value}</td>
+    <td>{item.purchasedBy}</td>
+    <td>{format(new Date(item.createdAt), "MMMM dd, yyyy")}</td>
+    <td>
+      <div className="flex items-center justify-start gap-1">
+        <Link href={`/assets/${item.id}`}>
+          <button className="w-7 h-7 flex items-center justify-center rounded-full">
+            <FaRegEye size={18} />
+          </button>
+        </Link>
+        {role === "admin" && (
+          <button className="w-7 h-7 flex items-center justify-center rounded-full">
+            <FormModal table="AssetsData" type="update" data={item} />
+          </button>
+        )}
+        {role === "admin" && (
+          <button className="w-8 h-8 flex items-center justify-center rounded-full">
+            <FormModal table="AssetsData" type="delete" id={item.id} />
+          </button>
+        )}
+      </div>
+    </td>
+  </tr>
+);
+
+const AllInventoryList = async ({ searchParams }: { searchParams: { [key: string]: string | undefined } }) => {
+  // Fetch user role from Clerk authentication
+  const { sessionClaims } = await auth();
+  const userRole = (sessionClaims?.metadata as { role?: string })?.role || "";  // default to empty string if role is not found
+
+  const { page = "1", search = "" } = searchParams;
+  const p = parseInt(page);
+
+  // Build the query for Prisma
+  const query: Prisma.AssetWhereInput = {};
+  if (search) {
+    query.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  // Fetch data from Prisma
+  const [assets, count] = await prisma.$transaction([
+    prisma.asset.findMany({
+      where: query,
+      take: ITEM_PER_PAGE,
+      skip: ITEM_PER_PAGE * (p - 1),
+    }),
+    prisma.asset.count({ where: query }),
+  ]);
 
   return (
-    <DefaultLayout userRole={role}>
+    <DefaultLayout userRole={userRole}> {/* Pass userRole here */}
       <div className="min-h-screen">
-        {/* Top */}
+        {/* Top Section */}
         <div className="flex justify-between items-center p-4 gap-5">
           <h1 className="text-lg font-semibold">All Assets List</h1>
           <div className="flex justify-center items-center gap-2">
             <div className="relative">
-              <button className="absolute left-2 top-1/2 -translate-y-1/2">
-                <CiSearch className="h-6 w-6" />
-              </button>
-              <input
-                type="text"
-                placeholder="Type to search..."
-                className="w-full bg-transparent pl-9 pr-4 font-medium focus:outline-none lg:w-60 border-2 py-2 rounded-3xl"
-              />
+              <TableSearch />
             </div>
             <Link
               href="#"
@@ -105,11 +130,11 @@ const AllInventoryList = () => {
           </div>
         </div>
 
-        {/* Table */}
-        <Table columns={columns} renderRow={renderRow} data={assetsData} />
+        {/* Table Section */}
+        <Table columns={columns} renderRow={(item) => renderRow(item, userRole)} data={assets} />
 
-        {/* Pagination */}
-        <Pagination />
+        {/* Pagination Section */}
+        <Pagination page={p} count={count} />
       </div>
     </DefaultLayout>
   );
