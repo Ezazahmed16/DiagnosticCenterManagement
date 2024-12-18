@@ -19,7 +19,7 @@ services:
     ports:
       - '3000:3000'
     environment:
-      - DATABASE_URL: postgresql://alok:alok24@localhost:5432/alokhealthcare
+      - DATABASE_URL: postgresql://alok:alok24@postgres:5432/alokhealthcare
     depends_on:
       - postgres
 
