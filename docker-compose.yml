@@ -12,14 +12,14 @@ services:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    
+
   app:
     build: .
     container_name: nextjs_app
     ports:
       - '3000:3000'
     environment:
-      - DATABASE_URL: postgresql://alok:alok24@localhost:5432/alokhealthcare
+      - DATABASE_URL: postgresql://alok:alok24@postgres:5432/alokhealthcare
     depends_on:
       - postgres
 
