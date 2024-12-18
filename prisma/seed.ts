@@ -211,9 +211,14 @@ async function main() {
     where: { referredById: referredBy1.id },
   });
 
-  const totalCommission = referredMemos.reduce((sum, memo) => {
+  // const totalCommission = referredMemos.reduce((sum, memo) => {
+  //   return sum + memo.totalAmount * (referredBy1.commissionPercent / 100);
+  // }, 0);
+
+  const totalCommission = referredMemos.reduce((sum: number, memo) => {
     return sum + memo.totalAmount * (referredBy1.commissionPercent / 100);
   }, 0);
+  
 
   await prisma.referredBy.update({
     where: { id: referredBy1.id },
