@@ -22,7 +22,11 @@ services:
       - DATABASE_URL=postgresql://alok:alok24@postgres:5432/alokhealthcare
     depends_on:
       - postgres
-    entrypoint: [ "sh", "-c", "until nc -z postgres 5432; do echo waiting for postgres...; sleep 2; done; npm run dev" ]
+    entrypoint: [ 
+      "sh", 
+      "-c", 
+      "until nc -z postgres 5432; do echo waiting for postgres...; sleep 2; done; npx prisma migrate deploy && npm start" 
+    ]
 
 volumes:
   postgres_data:
