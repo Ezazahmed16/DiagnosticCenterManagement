@@ -1,4 +1,3 @@
-'use client';
 import React, { useRef } from "react";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Table from "@/components/Table";

@@ -138,40 +138,60 @@ export const createMemo = async (data: MemoSchema): Promise<{ success: boolean; 
         return { success: false, error: true };
     }
 };
-
+// Update a memo
 export const updateMemo = async (data: MemoSchema) => {
     try {
-      const updatedMemo = await prisma.memo.update({
-        where: { id: data.id },
-        data: {
-          name: data.name,
-          phone: data.phone,
-          gender: data.gender,
-          dateOfBirth: data.dateOfBirth,
-          address: data.address,
-          paidAmount: data.paidAmount,
-          dueAmount: data.dueAmount,
-          totalAmount: data.totalAmount,
-          paymentMethod: data.paymentMethod as PaymentMethod ?? "DUE",          discount: data.discount,
-          referredById: data.referredBy, 
-          performedById: data.performedBy ?? null,
-          tests: data.memoTest
-            ? {
-                connect: data.memoTest.map((test) => ({
-                  id: test.id,
-                })),
-              }
-            : undefined,
-        },
-      });
-  
-      return updatedMemo; // Return updated memo if needed
+        const updatedMemo = await prisma.memo.update({
+            where: { id: data.id },
+            data: {
+                name: data.name,
+                phone: data.phone,
+                gender: data.gender,
+                dateOfBirth: data.dateOfBirth,
+                address: data.address,
+                paidAmount: data.paidAmount,
+                dueAmount: data.dueAmount,
+                totalAmount: data.totalAmount,
+                paymentMethod: data.paymentMethod as PaymentMethod ?? "DUE", discount: data.discount,
+                referredById: data.referredBy,
+                performedById: data.performedBy ?? null,
+                tests: data.memoTest
+                    ? {
+                        connect: data.memoTest.map((test) => ({
+                            id: test.id,
+                        })),
+                    }
+                    : undefined,
+            },
+        });
+        return updatedMemo; // Return updated memo if needed
     } catch (error) {
-      console.error("Error updating memo:", error);
-      throw new Error("Failed to update memo");
+        console.error("Error updating memo:", error);
+        throw new Error("Failed to update memo");
     }
-  };
+};
+// Delete a Memo
 
+export const deleteMemo = async (formData: FormData): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        const id = formData.get("id") as string;
+
+        if (!id) {
+            throw new Error("Memo ID is required for deletion.");
+        }
+
+        // Delete the memo from the database
+        await prisma.memo.delete({
+            where: { id },
+        });
+
+        console.log("Memo deleted:", id);
+        return { success: true, error: false };
+    } catch (err) {
+        console.error("Error deleting memo:", err);
+        return { success: false, error: true };
+    }
+};
 
 
 

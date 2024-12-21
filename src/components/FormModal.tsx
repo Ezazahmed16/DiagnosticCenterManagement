@@ -5,7 +5,7 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 import dynamic from "next/dynamic";
-import { deleteExpense, deletePatient, deletePerformedBy, deleteTest } from "@/lib/actions";
+import { deleteExpense, deleteMemo, deletePatient, deletePerformedBy, deleteTest } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import PerformersForm from "./forms/PerformerForm";
@@ -25,7 +25,7 @@ const deleteActionMap: {
     patientData: deletePatient,
     testData: deleteTest,
     PerformerData: deletePerformedBy,
-    // memoData: deleteMemo
+    memoData: deleteMemo
     // ExpenseData: deleteExpense
 };
 

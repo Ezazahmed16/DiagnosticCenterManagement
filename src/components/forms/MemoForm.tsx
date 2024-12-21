@@ -21,7 +21,10 @@ interface Referral {
   id: string;
   name: string;
 }
-
+interface ReferredBy {
+  id: string;
+  name: string;
+}
 
 interface MemoFormProps {
   type: "create" | "update";
@@ -30,7 +33,7 @@ interface MemoFormProps {
   relatedData?: {
     tests?: Test[];
     selectedTest?: Test[];
-    referral?: Referral[];
+    referral?: ReferredBy[];
   };
 }
 
@@ -46,7 +49,6 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
     resolver: zodResolver(memoSchema),
     defaultValues: {
       ...data,
-      // If `data` has paidAmount and discount, set them, else default to 0
       paidAmount: data?.paidAmount || 0,
       discount: data?.discount || 0,
     },
@@ -58,7 +60,6 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
   const selectedTestsInitial = type === "update" && data?.memoTest
     ? patientTests.filter((test) => data.memoTest?.includes(test))
     : [];
-
 
   const [selectedTests, setSelectedTests] = useState<Test[]>(selectedTestsInitial);
   const [selectedReferral, setSelectedReferral] = useState<Referral | null>(null);
@@ -77,31 +78,24 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
     }
   };
 
-
   const handleRemoveTest = (testId: string) => {
     setSelectedTests((prev) => prev.filter((test) => test.id !== testId));
   };
 
-  // Calculate total cost of selected tests
   const totalCost = data?.totalAmount || selectedTests.reduce((sum, test) => sum + test.price, 0);
 
   const paidAmount = Number(watch("paidAmount") || 0);
   const discountPercentage = Number(watch("discount") || 0);
 
-  // Calculate discount amount and due amount
   const discountAmount = (totalCost * discountPercentage) / 100;
   const finalAmount = totalCost - discountAmount;
   const dueAmount = Math.max(0, finalAmount - paidAmount);
   const returnableAmount = Math.max(0, paidAmount - finalAmount);
-  const paymentStatus = dueAmount > 0 ? "Due" : "Paid";
-
-
-
+  const paymentMethod = dueAmount > 0 ? "Due" : "Paid";
 
   const onSubmit: SubmitHandler<MemoSchema> = async (formData) => {
     console.log("Submitted Form Data:", formData);
 
-    // Prepare memoTest for Prisma separately
     const prismaFormattedTests = selectedTests.map((test) => ({
       id: test.id,
       name: test.name,
@@ -109,7 +103,6 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
       roomNo: test.roomNo,
     }));
 
-    // Prisma Input
     const prismaInput = {
       ...formData,
       memoTest: prismaFormattedTests,
@@ -125,7 +118,6 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
         await createMemo(prismaInput);
         toast.success("Memo successfully created.");
       } else if (type === "update" && formData.id) {
-        
         await updateMemo(prismaInput);
         toast.success("Memo successfully updated.");
       } else {
@@ -141,12 +133,10 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
 
   const availableTests = Array.isArray(relatedData?.tests) ? relatedData.tests : [];
 
-
   return (
     <form className="flex flex-col gap-2" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-xl font-semibold">{type === "create" ? "Create Memo" : "Update Memo"}</h1>
 
-      {/* Patient Information Section */}
       <span className="text-xl text-gray-400 font-medium">Patient Information</span>
       <div className="flex flex-wrap gap-2 justify-between items-center">
         <div className="grid grid-cols-3 gap-4 justify-around items-center w-full">
@@ -186,26 +176,16 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
             </select>
             {errors.gender && <p className="text-xs text-red-400 mt-1">{errors.gender.message}</p>}
           </div>
-          {/* Date of Birth Selector */}
-          {
-            type === "create" && (
-              <div className="flex flex-col gap-2 w-full md:w-1/4">
-                <label htmlFor="dateOfBirth" className="text-xs text-gray-500">
-                  Date of Birth
-                </label>
-                <input
-                  type="date"
-                  id="dateOfBirth"
-                  {...register("dateOfBirth")}
-                  className={`ring-[1.5px] p-2 rounded-md text-sm w-full ${errors.dateOfBirth ? "ring-red-500" : "ring-gray-300"
-                    }`}
-                />
-                {errors.dateOfBirth && (
-                  <p className="text-xs text-red-400 mt-1">{errors.dateOfBirth.message}</p>
-                )}
-              </div>
-            )
-          }
+          <div className="flex flex-col gap-2 w-full md:w-1/4">
+            <label htmlFor="dateOfBirth" className="text-xs text-gray-500">Date of Birth</label>
+            <input
+              type="date"
+              id="dateOfBirth"
+              {...register("dateOfBirth")}
+              className={`ring-[1.5px] p-2 rounded-md text-sm w-full ${errors.dateOfBirth ? "ring-red-500" : "ring-gray-300"}`}
+            />
+            {errors.dateOfBirth && <p className="text-xs text-red-400 mt-1">{errors.dateOfBirth.message}</p>}
+          </div>
 
           <InputFields
             label="Address"
@@ -213,36 +193,41 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
             register={register("address")}
             error={errors.address} />
 
-          {
-            type === 'create' && (
-              <div>
-                <label className="text-xs text-gray-500 block mb-1">Reference</label>
-                <select
-                  className={`p-2 border rounded-md ${errors.referredBy ? "border-red-400" : "border-gray-300"}`}
-                  {...register("referredBy")}
-                  onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                    const selectedReferral = referralMemo.find(ref => ref.id === e.target.value);
-                    if (selectedReferral) {
-                      setSelectedReferral(selectedReferral);
-                      setValue("referredBy", selectedReferral.name);
-                    }
-                  }}
-                >
-                  <option disabled value="">Select Reference</option>
-                  {referralMemo.length ? referralMemo.map((ref: Referral) => (
-                    <option key={ref.id} value={ref.id}>{ref.name}</option>
-                  )) : (
-                    <option disabled>No references available</option>
-                  )}
-                </select>
-                {errors.referredBy && <p className="text-xs text-red-400 mt-1">{errors.referredBy.message}</p>}
-              </div>
-            )
-          }
+
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">Reference</label>
+            <select
+              className={`p-2 border rounded-md ${errors.referredBy ? "border-red-400" : "border-gray-300"}`}
+              {...register("referredBy")}
+              value={selectedReferral?.id || ""}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                const referral = referralMemo.find((ref) => ref.id === e.target.value);
+                setSelectedReferral(referral || null);
+                setValue("referredBy", referral?.name || "");
+              }}
+            >
+              <option disabled value="">
+                Select Reference
+              </option>
+              {referralMemo.length ? (
+                referralMemo.map((ref) => (
+                  <option key={ref.id} value={ref.id}>
+                    {ref.name}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No references available</option>
+              )}
+            </select>
+            {errors.referredBy && (
+              <p className="text-xs text-red-400 mt-1">{errors.referredBy.message}</p>
+            )}
+          </div>
+
+
         </div>
       </div>
 
-      {/* Test Information Section */}
       {
         type === "create" && (
           <div className="">
@@ -282,7 +267,6 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
                   ) : (
                     <p>No tests selected</p>
                   )}
-
                 </div>
               </div>
             </div>
@@ -290,17 +274,14 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
         )
       }
 
-      {/* Payment Information Section */}
       <span className="text-xl text-gray-400 font-medium">Payment Information</span>
-      <div className="grid grid-cols-4 gap-2 w-full justify-center items-center">`
+      <div className="grid grid-cols-4 gap-2 w-full justify-center items-center">
         {type === "update" && (
           <InputFields
             label="Total Amount"
             name="totalAmount"
             type="number"
-            register={register("totalAmount", {
-              valueAsNumber: true,
-            })}
+            register={register("totalAmount", { valueAsNumber: true })}
             error={errors.totalAmount}
             disabled
           />
@@ -309,18 +290,14 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
           label="Paid Amount"
           name="paidAmount"
           type="number"
-          register={register("paidAmount", {
-            valueAsNumber: true,
-          })}
+          register={register("paidAmount", { valueAsNumber: true })}
           error={errors.paidAmount}
         />
         <InputFields
           label="Discount"
           name="discount"
           type="number"
-          register={register("discount", {
-            valueAsNumber: true,
-          })}
+          register={register("discount", { valueAsNumber: true })}
           error={errors.discount}
         />
         <div>
@@ -333,7 +310,7 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
         </div>
         <div>
           <label className="text-xs text-gray-500 block m-1">Payment Status</label>
-          <input type="text" value={paymentStatus} readOnly className="p-2 border rounded-md" />
+          <input type="text" value={paymentMethod} readOnly className="p-2 border rounded-md" />
         </div>
       </div>
 
@@ -345,4 +322,3 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
 };
 
 export default MemoForm;
-

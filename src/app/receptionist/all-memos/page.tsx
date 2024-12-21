@@ -30,7 +30,7 @@ const columns = [
   { header: "Actions", accessor: "actions" },
 ];
 
-const renderRow = (item: MemoWithPatient, role: string) => (
+const renderRow = (item: any, role: string) => (
   <tr key={item.id} className="border-b text-sm my-2">
     <td>{item.id}</td>
     <td>{item?.name}</td>
