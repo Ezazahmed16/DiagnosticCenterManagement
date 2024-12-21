@@ -51,6 +51,7 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
       ...data,
       paidAmount: data?.paidAmount || 0,
       discount: data?.discount || 0,
+      referredBy: data?.referredBy || "",
     },
   });
 
@@ -203,8 +204,7 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
               onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                 const referral = referralMemo.find((ref) => ref.id === e.target.value);
                 setSelectedReferral(referral || null);
-                setValue("referredBy", referral?.name || "");
-              }}
+                setValue("referredBy", referral?.name || "")              }}
             >
               <option disabled value="">
                 Select Reference

@@ -107,7 +107,7 @@ export const createMemo = async (data: MemoSchema): Promise<{ success: boolean; 
                 dueAmount: validatedData.dueAmount ?? 0,
                 totalAmount: validatedData.totalAmount ?? 0,
                 discount: validatedData.discount ?? 0,
-                referredById: validatedData.referredBy, // Connect referredBy if provided
+                referredById: validatedData.referredBy ?? '', // Connect referredBy if provided
 
                 performedById: validatedData.performedBy ?? null,
 

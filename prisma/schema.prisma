@@ -26,12 +26,12 @@ model Memo {
   patientId   String?
   Patient     Patient?  @relation(fields: [patientId], references: [id])
   name        String
-  phone       String  
+  phone       String
   dateOfBirth DateTime?
   gender      Gender
   address     String?
 
-  tests        Test[]    @relation("MemoTest")
+  tests Test[] @relation("MemoTest")
 
   paymentMethod PaymentMethod @default(DUE)
   totalAmount   Float         @default(0)
@@ -45,8 +45,8 @@ model Memo {
   performedById String?
   performedBy   PerformedBy? @relation(fields: [performedById], references: [id])
 
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   // MemoToTest MemoToTest[]
   // Test       Test[]
 
@@ -64,8 +64,7 @@ model Test {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  memos  Memo[] @relation("MemoTest")
-
+  memos Memo[] @relation("MemoTest")
 
   PerformedBy   PerformedBy? @relation(fields: [performedById], references: [id])
   performedById String?
@@ -88,7 +87,6 @@ model MemoToTest {
 
   Memo Memo[] @relation("MemoTests")
 }
-
 
 model PerformedBy {
   id        String   @id @default(uuid())
