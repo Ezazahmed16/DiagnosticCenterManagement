@@ -13,7 +13,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "alok", "-d", "alokhealthcare"]
+      test: [ "CMD", "pg_isready", "-U", "alok", "-d", "alokhealthcare" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -31,10 +31,10 @@ services:
         condition: service_healthy
     entrypoint: >
       sh -c "
-      npx prisma migrate deploy &&
-      npx prisma generate &&
-      npm start
-      "
+       ./wait-for-it.sh postgres:5432 -- 
+       npx prisma migrate deploy &&
+       npx prisma generate &&
+       npm start"
 
 volumes:
   postgres_data:
