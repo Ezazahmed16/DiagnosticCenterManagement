@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// Patient
 export const patientSchema = z.object({
     id: z.string().uuid().optional(),
     name: z.string().min(3, { message: "Patient name must be at least 3 characters long!" }),
@@ -21,7 +22,7 @@ export const patientSchema = z.object({
 export type PatientSchema = z.infer<typeof patientSchema>;
 
 
-
+// Memo
 export const memoSchema = z.object({
   id: z.string().uuid().optional(),  
   name: z.string().min(3, { message: "Patient name must be at least 3 characters long!" }),
@@ -58,7 +59,7 @@ export const memoSchema = z.object({
 
 export type MemoSchema = z.infer<typeof memoSchema>;
 
-
+// Test
 export const testSchema = z.object({
     id: z.string().uuid().optional(),
     name: z.string().min(3, { message: "Test name must be at least 3 characters long!" }),
@@ -87,7 +88,7 @@ export const testSchema = z.object({
 
 export type TestSchema = z.infer<typeof testSchema>;
 
-
+// PerformedBy
 export const performedBySchema = z.object({
     id: z.string().uuid().optional(),
     name: z
@@ -103,7 +104,7 @@ export const performedBySchema = z.object({
 
 export type PerformedBySchema = z.infer<typeof performedBySchema>;
 
-
+// Expense Type
 export const expenseSchema = z.object({
     id: z.string().uuid().optional(), // Optional for create, required for update
     title: z
@@ -129,6 +130,14 @@ export const expenseSchema = z.object({
 export type ExpenseSchema = z.infer<typeof expenseSchema>;
 
 
+// Referral
+export const referredBySchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z.string().min(1, { message: "Referral name is required and cannot be empty." }),
+  phone: z.string().optional(),
+  commissionPercent: z.number().min(0, { message: "Commission percent must be a non-negative number." }).optional(),
+});
 
+export type ReferredBySchema = z.infer<typeof referredBySchema>;
 
 

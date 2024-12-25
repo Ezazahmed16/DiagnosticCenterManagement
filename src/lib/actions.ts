@@ -2,6 +2,7 @@
 import { PaymentMethod } from "@prisma/client";
 import { ExpenseSchema, memoSchema, MemoSchema, PatientSchema, PerformedBySchema, TestSchema } from "./FormValidationSchemas";
 import prisma from "./prisma";
+import { referredBySchema, ReferredBySchema } from "./FormValidationSchemas";
 
 // Patient Create 
 export const createPatient = async (data: PatientSchema): Promise<{ success: boolean; error: boolean }> => {
@@ -85,7 +86,7 @@ export const createMemo = async (data: MemoSchema): Promise<{ success: boolean; 
             const newPatient = await prisma.patient.create({
                 data: {
                     name: validatedData.name,
-                    phone: validatedData.phone,
+                    phone: validatedData.phone ?? "",
                     gender: validatedData.gender,
                     dateOfBirth: validatedData.dateOfBirth,
                     address: validatedData.address,
@@ -107,7 +108,7 @@ export const createMemo = async (data: MemoSchema): Promise<{ success: boolean; 
                 dueAmount: validatedData.dueAmount ?? 0,
                 totalAmount: validatedData.totalAmount ?? 0,
                 discount: validatedData.discount ?? 0,
-                referredById: validatedData.referredBy ?? '', // Connect referredBy if provided
+                referredById: validatedData.referredBy || undefined,
 
                 performedById: validatedData.performedBy ?? null,
 
@@ -400,6 +401,78 @@ export const deleteExpense = async (id: string): Promise<{ success: boolean; err
         return { success: true, error: false };
     } catch (err) {
         console.error("Error deleting expense:", err);
+        return { success: false, error: true };
+    }
+};
+
+
+
+// Create a Referral
+export const createReferredBy = async (data: ReferredBySchema): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        // Validate the incoming data
+        const validatedData = referredBySchema.parse(data);
+
+        // Create the referral in the database
+        await prisma.referredBy.create({
+            data: {
+                name: validatedData.name,
+                phone: validatedData.phone ?? "",
+                commissionPercent: validatedData.commissionPercent ?? 0,
+            },
+        });
+
+        return { success: true, error: false };
+    } catch (err) {
+        console.error("Error creating referredBy:", err);
+        return { success: false, error: true };
+    }
+};
+
+// Update a Referral
+export const updateReferredBy = async (data: ReferredBySchema): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        if (!data.id) {
+            throw new Error("Referral ID is required for update.");
+        }
+
+        // Validate the incoming data
+        const validatedData = referredBySchema.parse(data);
+
+        // Perform the update operation
+        await prisma.referredBy.update({
+            where: { id: validatedData.id },
+            data: {
+                name: validatedData.name,
+                phone: validatedData.phone,
+                commissionPercent: validatedData.commissionPercent ?? 0,
+            },
+        });
+
+        return { success: true, error: false };
+    } catch (err) {
+        console.error("Error updating referredBy:", err);
+        return { success: false, error: true };
+    }
+};
+
+// Delete a Referral
+export const deleteReferredBy = async (formData: FormData): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        const id = formData.get("id") as string;
+
+        if (!id) {
+            throw new Error("Referral ID is required for deletion.");
+        }
+
+        // Delete the referral from the database
+        await prisma.referredBy.delete({
+            where: { id },
+        });
+
+        return { success: true, error: false };
+    } catch (err) {
+        console.error("Error deleting referredBy:", err);
         return { success: false, error: true };
     }
 };

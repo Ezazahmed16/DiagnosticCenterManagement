@@ -145,11 +145,11 @@ model ReferralPayment {
 model ReferredBy {
   id                String            @id @default(uuid())
   name              String
-  phone             String?           @unique
+  phone             String?            @unique
   commissionPercent Float
-  totalAmmount      Float
+  totalAmmount      Float?
   memos             Memo[]
-  payments          ReferralPayment[] // Relation to ReferralPayment
+  payments          ReferralPayment[]
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 }

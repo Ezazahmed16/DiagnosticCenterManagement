@@ -22,7 +22,7 @@ const columns = [
 ];
 
 const renderRow = (item: Performer, role: string) => (
-  <tr key={item.id} className="border-b text-sm hover:bg-gray-100">
+  <tr key={item.id} className="border-b text-sm">
     <td>{item.id}</td>
     <td>{item.name}</td>
     <td>{item.phone || "N/A"}</td>

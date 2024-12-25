@@ -5,19 +5,21 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 import dynamic from "next/dynamic";
-import { deleteExpense, deleteMemo, deletePatient, deletePerformedBy, deleteTest } from "@/lib/actions";
+import { deleteExpense, deleteMemo, deletePatient, deletePerformedBy, deleteReferredBy, deleteTest } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import PerformersForm from "./forms/PerformerForm";
 
 // Lazy load form components
 const MemoForm = dynamic(() => import("./forms/MemoForm"), { loading: () => <h1>Loading...</h1> });
-const PatientForm = dynamic(() => import("./forms/PatientForm"), { loading: () => <h1>Loading...</h1> });
+const PatientForm = dynamic(() => import("./forms/AddPatientForm"), { loading: () => <h1>Loading...</h1> });
 const ExpenseForm = dynamic(() => import("./forms/ExpenseForm"), { loading: () => <h1>Loading...</h1> });
-const ExpenseTypeForm = dynamic(() => import("./forms/ExpenseTypeForm "), { loading: () => <h1>Loading...</h1> });
-const AssetsForm = dynamic(() => import("./forms/AssetsForm"), { loading: () => <h1>Loading...</h1> });
-const AddRoleForm = dynamic(() => import("./forms/AddRole"), { loading: () => <h1>Loading...</h1> });
 const AddTestForm = dynamic(() => import("./forms/AddTestForm"), { loading: () => <h1>Loading...</h1> });
+const ReferalForm = dynamic(() => import("./forms/ReferalForm"), { loading: () => <h1>Loading...</h1> });
+// const ExpenseTypeForm = dynamic(() => import("./forms/ExpenseTypeForm "), { loading: () => <h1>Loading...</h1> });
+// const AssetsForm = dynamic(() => import("./forms/AssetsForm"), { loading: () => <h1>Loading...</h1> });
+// const AddRoleForm = dynamic(() => import("./forms/AddRole"), { loading: () => <h1>Loading...</h1> });
+
 
 const deleteActionMap: {
     [key: string]: (formData: FormData) => Promise<{ success: boolean; error: boolean }>
@@ -25,8 +27,8 @@ const deleteActionMap: {
     patientData: deletePatient,
     testData: deleteTest,
     PerformerData: deletePerformedBy,
-    memoData: deleteMemo
-    // ExpenseData: deleteExpense
+    memoData: deleteMemo,
+    ReferalData: deleteReferredBy
 };
 
 // Define form components based on table
@@ -43,6 +45,7 @@ const forms: {
     testData: (type, data, setOpen, relatedData) => <AddTestForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
     memoData: (type, data, setOpen, relatedData) => <MemoForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
     ExpenseData: (type, data, setOpen, relatedData) => <ExpenseForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+    ReferalData: (type, data, setOpen) => <ReferalForm type={type} data={data} setOpen={setOpen}  />,
 };
 
 type FormModalProps = {

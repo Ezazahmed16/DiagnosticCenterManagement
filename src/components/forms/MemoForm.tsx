@@ -64,14 +64,18 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
 
   const [selectedTests, setSelectedTests] = useState<Test[]>(selectedTestsInitial);
   const [selectedReferral, setSelectedReferral] = useState<Referral | null>(null);
-
   useEffect(() => {
-    if (data?.referredBy && !selectedReferral) {
+    // Set selectedReferral based on referredBy field in data
+    if (data?.referredBy) {
       const referral = referralMemo.find((ref) => ref.name === data.referredBy);
       setSelectedReferral(referral || null);
+      setValue("referredBy", referral?.name || ""); // Ensure form value is set correctly
+    } else if (type === "create") {
+      setSelectedReferral(null); // Clear referral for new memos
+      setValue("referredBy", "");
     }
-  }, [data, referralMemo, selectedReferral]);
-
+  }, [data?.referredBy, referralMemo, type, setValue]);
+  
   const handleAddTest = (testId: string) => {
     const selectedTest = patientTests.find((test) => test.id === testId);
     if (selectedTest && !selectedTests.some((test) => test.id === testId)) {
@@ -111,6 +115,10 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
       dueAmount: dueAmount,
       paymentMethod: data?.paymentMethod || (dueAmount > 0 ? "DUE" : "PAID") as "PAID" | "DUE",
     };
+
+    if (type === "update") {
+      delete prismaInput.referredBy;
+    }
 
     console.log("Updated Prisma Data:", prismaInput);
 
@@ -177,7 +185,7 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
             </select>
             {errors.gender && <p className="text-xs text-red-400 mt-1">{errors.gender.message}</p>}
           </div>
-          <div className="flex flex-col gap-2 w-full md:w-1/4">
+          <div className="flex flex-col gap-2 w-full">
             <label htmlFor="dateOfBirth" className="text-xs text-gray-500">Date of Birth</label>
             <input
               type="date"
@@ -204,7 +212,8 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
               onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                 const referral = referralMemo.find((ref) => ref.id === e.target.value);
                 setSelectedReferral(referral || null);
-                setValue("referredBy", referral?.name || "")              }}
+                setValue("referredBy", referral?.name || "")
+              }}
             >
               <option disabled value="">
                 Select Reference
@@ -223,7 +232,6 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
               <p className="text-xs text-red-400 mt-1">{errors.referredBy.message}</p>
             )}
           </div>
-
 
         </div>
       </div>

@@ -7,9 +7,9 @@ import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Prisma, ReferredBy } from "@prisma/client";
 import Link from "next/link";
-import { CiSearch } from "react-icons/ci";
 import { FaRegEye } from "react-icons/fa";
-import { auth } from "@clerk/nextjs/server";  // Import Clerk's auth for user role
+import { auth } from "@clerk/nextjs/server"; 
+import FormContainer from "@/components/FormContainer";
 
 // Table columns definition
 const columns = [
@@ -61,12 +61,12 @@ const renderRow = (item: ReferredBy & { amountPaid: number; totalDue: number }, 
             </button>
           </Link>
           <button className="w-7 h-7 flex items-center justify-center rounded-full">
-            <FormModal table="memoData" type="update" data="" />
+            <FormModal table="ReferalData" type="update" data={item} />
           </button>
           {/* Admin only delete button */}
           {role === "admin" && (
             <button className="w-8 h-8 flex items-center justify-center rounded-full">
-              <FormModal table="memoData" type="delete" id={item.id} />
+              <FormModal table="ReferalData" type="delete" id={item.id} />
             </button>
           )}
         </div>
@@ -111,7 +111,7 @@ const AllReferralsPage = async ({
   // Map data to include amountPaid and totalDue
   const dataWithPayments = referredBy.map((referral) => {
     const amountPaid = referral.payments.reduce((sum, payment) => sum + payment.amount, 0);
-    const totalDue = referral.totalAmmount - amountPaid;
+    const totalDue = (referral.totalAmmount ?? 0) - amountPaid;
     return {
       ...referral,
       amountPaid,
@@ -127,13 +127,12 @@ const AllReferralsPage = async ({
           <h1 className="text-lg font-semibold">All Referrals</h1>
           <div className="flex justify-center items-center gap-2">
             <TableSearch />
-            <Link
-              href="#"
+            <div
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
-              <FormModal table="ReferalData" type="create" />
+              <FormModal table="ReferalData" type="create"  data="" />
               Add
-            </Link>
+            </div>
           </div>
         </div>
 

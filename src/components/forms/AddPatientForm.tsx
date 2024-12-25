@@ -53,7 +53,7 @@ const PatientForm = ({
         }
       }
       setOpen(false);
-      router.refresh(); // Refresh the page or navigate
+      router.refresh(); 
     } catch (error) {
       toast.error("An error occurred! Please try again.");
       console.error(error);
@@ -82,7 +82,7 @@ const PatientForm = ({
         Patient Information
       </span>
 
-      <div className="flex justify-between flex-wrap gap-4">
+      <div className="grid grid-cols-3 justify-between flex-wrap gap-4">
         <InputFields
           label="Patient Name"
           name="name"
@@ -102,7 +102,7 @@ const PatientForm = ({
           error={errors.bloodType}
         />
         {/* Date of Birth Selector */}
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
+        <div className="flex flex-col gap-2 w-full">
           <label htmlFor="dateOfBirth" className="text-xs text-gray-500">
             Date of Birth
           </label>
@@ -121,7 +121,7 @@ const PatientForm = ({
 
 
         {/* Gender Select Input */}
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
+        <div className="flex flex-col gap-2 w-full">
           <label htmlFor="gender" className="text-xs text-gray-500">
             Gender
           </label>
