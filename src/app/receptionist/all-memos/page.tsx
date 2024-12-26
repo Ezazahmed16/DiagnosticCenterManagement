@@ -11,6 +11,8 @@ import Link from "next/link";
 import { FaPrint, FaRegEye } from "react-icons/fa";
 import { auth } from "@clerk/nextjs/server";
 import FormContainer from "@/components/FormContainer";
+import RenderPrintButton from "@/components/RenderPrintButton";
+
 
 type MemoWithPatient = Prisma.MemoGetPayload<{
   include: {
@@ -54,9 +56,9 @@ const renderRow = (item: any, role: string) => (
         <button className="w-7 h-7 flex items-center justify-center rounded-full">
           <FormContainer table="memoData" type="update" data={item} />
         </button>
-        <button className="w-7 h-7 flex items-center justify-center rounded-full">
-          <FaPrint size={18} />
-        </button>
+        <div className="">
+          <RenderPrintButton item={item} />
+        </div>
         {role === "admin" && (
           <button className="w-8 h-8 flex items-center justify-center rounded-full">
             <FormContainer table="memoData" type="delete" id={item.id} />
@@ -88,8 +90,8 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
         createdAt: "desc"
       },
       include: {
-        Patient: { select: { id: true, name: true, phone: true, address: true } },
-        tests: { select: { id: true } },
+        Patient: { select: { id: true, name: true, phone: true, address: true, gender: true, dateOfBirth: true } },
+        tests: { select: { id: true, name: true, price: true, roomNo: true } },
         referredBy: { select: { name: true, id: true } },
       },
       where: query,
@@ -98,9 +100,7 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
     }),
     prisma.memo.count({ where: query }),
   ]);
-
   console.log(memo)
-
   return (
     <DefaultLayout userRole={userRole}>
       <div className="min-h-screen">
@@ -128,3 +128,5 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
 };
 
 export default AllMemosPage;
+
+

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import Table from "@/components/Table";
 import { role } from "@/lib/data";
@@ -7,8 +7,7 @@ import { FaPrint, FaUser } from "react-icons/fa";
 import { FaMapLocationDot, FaMoneyBillTransfer } from "react-icons/fa6";
 import { IoIosCall } from "react-icons/io";
 import { MdPaid } from "react-icons/md";
-import prisma from "@/lib/prisma"; // Assuming prisma is used for data fetching
-import { toast } from "react-toastify";
+import prisma from "@/lib/prisma"; 
 
 const columns = [
     {
@@ -43,7 +42,6 @@ const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
         );
     }
 
-
     // Render table row for each test
     const renderRow = (item: { id: string; name: string; price: number }) => (
         <tr key={item.id} className="border-b text-sm hover:bg-lamaPurpleLight">
@@ -56,17 +54,6 @@ const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
     return (
         <DefaultLayout userRole={role}>
             <div className="flex flex-col gap-4">
-                {/* Top Section */}
-                <div className="flex justify-end items-center p-4 gap-5">
-                    <button
-                        className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
-                    >
-                        <FaPrint className="h-4 w-4" />
-                        Print
-                    </button>
-                </div>
-
-                {/* Printable Content */}
                 <div>
                     {/* Patient Info */}
                     <div className="card flex flex-1 p-4 rounded-xl">
