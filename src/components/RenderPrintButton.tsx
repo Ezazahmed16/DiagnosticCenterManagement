@@ -48,7 +48,7 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       doc.setFontSize(12);
       doc.setTextColor(80);
       doc.text(
-        "House # 52, Garib-E-Newaz Avenue, Sector # 13, Uttara, Dhaka-1230",
+        "House no. 71(1st floor), sadar hospital road, pirojpur sadar 8500.",
         105,
         imageY + imageHeight + 6,
         { align: "center" }
@@ -193,14 +193,13 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       const footerStartY = 280;
       const pageCount = doc.getNumberOfPages();
 
-      doc.setFontSize(10);
+      doc.setFontSize(14);
       doc.setTextColor(80);
       doc.setLineWidth(0.5);
-      doc.line(10, footerStartY - 5, 200, footerStartY - 5);
-      doc.text("For online report visit here: https://tiny.one/labreport", 105, footerStartY, {
-        align: "center",
-      });
-      doc.text("Page " + String(pageCount), 200, footerStartY, { align: "right" });
+      doc.line(12, footerStartY - 5, 200, footerStartY - 10);
+
+      doc.text("Your health is our commitment.", 105, footerStartY, { align: "center" });
+
     };
 
     // Add Sections to the PDF
