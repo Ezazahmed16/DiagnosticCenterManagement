@@ -54,22 +54,22 @@ const RenderPrintButton = ({ item }: { item: any }) => {
         { align: "center" }
       );
 
-  // Calculate the position for both Hotline and Email, centered together
-  const hotlineText = "Hotline: 09610009612";
-  const emailText = "Email: alokhealthcare@gmail.com";
+      // Calculate the position for both Hotline and Email, centered together
+      const hotlineText = "Hotline: +880 13 3285 1999";
+      const emailText = "Email: alokpirojpur@gmail.com";
 
-  const hotlineWidth = doc.getTextWidth(hotlineText); // Width of the Hotline text
-  const emailWidth = doc.getTextWidth(emailText); // Width of the Email text
-  const totalWidth = hotlineWidth + emailWidth + 20; // Add some space between the texts (adjustable)
+      const hotlineWidth = doc.getTextWidth(hotlineText); // Width of the Hotline text
+      const emailWidth = doc.getTextWidth(emailText); // Width of the Email text
+      const totalWidth = hotlineWidth + emailWidth + 20; // Add some space between the texts (adjustable)
 
-  const centerX = doc.internal.pageSize.width / 2;  // Page center
+      const centerX = doc.internal.pageSize.width / 2;  // Page center
 
-  // Calculate the starting X position so the combined width is centered
-  const startX = centerX - totalWidth / 2;
+      // Calculate the starting X position so the combined width is centered
+      const startX = centerX - totalWidth / 2;
 
-  // Add Hotline and Email texts next to each other, both centered
-  doc.text(hotlineText, startX, imageY + imageHeight + 12);
-  doc.text(emailText, startX + hotlineWidth + 20, imageY + imageHeight + 12); // Adding space between the texts
+      // Add Hotline and Email texts next to each other, both centered
+      doc.text(hotlineText, startX, imageY + imageHeight + 12);
+      doc.text(emailText, startX + hotlineWidth + 20, imageY + imageHeight + 12); // Adding space between the texts
 
 
       // Draw a border below the header
