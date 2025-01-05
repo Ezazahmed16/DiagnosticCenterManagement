@@ -129,6 +129,7 @@ async function main() {
       additionalCost: 20.0,
       price: 120.0,
       roomNo: "A1",
+      deliveryTime: '2 ', // Added this field
     },
   });
 
@@ -142,6 +143,7 @@ async function main() {
       additionalCost: 30.0,
       price: 180.0,
       roomNo: "B2",
+      deliveryTime: '1 ',
     },
   });
 
@@ -151,7 +153,7 @@ async function main() {
     update: {
       name: "Memo for John Doe",
       gender: "MALE",
-      phone: patient1.phone,  // You can keep phone if necessary
+      phone: patient1.phone,  
       referredById: referredBy1.id,
       performedById: performedBy1.id,
       paymentMethod: "PAID",
@@ -171,9 +173,9 @@ async function main() {
       totalAmount: 120.0,
     },
   });
-  
+
   const memo2 = await prisma.memo.upsert({
-    where: { id: patient2.id },
+    where: { id: patient2.id },  // Corrected relation to id
     update: {
       name: "Memo for Jane Smith",
       gender: "FEMALE",
@@ -197,29 +199,22 @@ async function main() {
       totalAmount: 180.0,
     },
   });
-  
+
   await prisma.memoToTest.create({
     data: {
       memoId: memo2.id,
       testId: test2.id,
     },
   });
-  
 
   // Update totalAmount for ReferredBy (commission calculation)
   const referredMemos = await prisma.memo.findMany({
     where: { referredById: referredBy1.id },
   });
-  
-
-  // const totalCommission = referredMemos.reduce((sum, memo) => {
-  //   return sum + memo.totalAmount * (referredBy1.commissionPercent / 100);
-  // }, 0);
 
   const totalCommission = referredMemos.reduce((sum: number, memo: any) => {
     return sum + memo.totalAmount * (referredBy1.commissionPercent / 100);
   }, 0);
-  
 
   await prisma.referredBy.update({
     where: { id: referredBy1.id },

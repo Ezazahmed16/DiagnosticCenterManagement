@@ -33,7 +33,7 @@ const menuGroups = [
       {
         icon: <FaUserTag />,
         label: "Receptionist",
-        route: "/receptionist",
+        route: "/receptionist/all-memos",
         visible: ["admin", "receptionist"],
         children: [
           { label: "All Patients", route: "/receptionist/all-patients" },
@@ -145,6 +145,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, userRole = role }: SidebarProps)
             ))}
           </nav>
           {/* Sidebar Menu */}
+        </div>
+
+        {/* Sidebar Footer */}
+        <div className="bottom-0 flex items-center justify-center w-full h-20 bg-gray-950">
+          <h1>Developed By</h1>
+          <Image
+            width={160}
+            height={80}
+            src={"/images/logo/skysoftpro.png"}
+            alt="Logo"
+            priority
+          />
         </div>
       </aside>
     </ClickOutside>

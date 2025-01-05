@@ -60,25 +60,6 @@ const AllTestsPage = async ({
       ? { name: { contains: search, mode: "insensitive" } }
       : {}),
   };
-
-  // const [tests, count] = await prisma.$transaction([
-  //   prisma.test.findMany({
-  //     where: query,
-  //     include: {
-  //       PerformedBy: true, // Include the performer relation
-  //       memos: { // This maps the `MemoToTest` join table
-  //         include: {
-  //           Memo: true, // Fetch the actual `Memo` records
-  //         },
-  //       },
-  //     },
-  //     skip: (p - 1) * ITEM_PER_PAGE,
-  //     take: ITEM_PER_PAGE,
-  //   }),
-  //   prisma.test.count({
-  //     where: query,
-  //   }),
-  // ]);
   const [tests, count] = await prisma.$transaction([
     prisma.test.findMany({
       where: query,
@@ -96,8 +77,6 @@ const AllTestsPage = async ({
     }),
   ]);
   
-  console.log("Fetched tests data:", tests);
-
   return (
     <DefaultLayout userRole={userRole}>
       <div className="min-h-screen">

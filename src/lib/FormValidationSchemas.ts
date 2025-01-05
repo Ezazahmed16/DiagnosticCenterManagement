@@ -68,6 +68,7 @@ export const testSchema = z.object({
     additionalCost: z.number().nonnegative({ message: "Additional cost must be non-negative!" }),
     price: z.number().positive({ message: "Price must be a positive number!" }),
     roomNo: z.string().max(10, { message: "Room number cannot exceed 10 characters!" }).optional(),
+    deliveryTime: z.string().optional(),
     PerformedBy: z.string().uuid().optional(),
     memos: z.array(
         z.object({

@@ -14,13 +14,14 @@ interface Test {
   id: string;
   name: string;
   price: number;
-  roomNo: string
+  roomNo: string;
 }
 
 interface Referral {
   id: string;
   name: string;
 }
+
 interface ReferredBy {
   id: string;
   name: string;
@@ -64,18 +65,19 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
 
   const [selectedTests, setSelectedTests] = useState<Test[]>(selectedTestsInitial);
   const [selectedReferral, setSelectedReferral] = useState<Referral | null>(null);
+
   useEffect(() => {
     // Set selectedReferral based on referredBy field in data
-    if (data?.referredBy) {
-      const referral = referralMemo.find((ref) => ref.name === data.referredBy);
+    if (data?.referredById) {  // Change `referredBy` to `referredById` as per the schema
+      const referral = referralMemo.find((ref) => ref.id === data.referredById);
       setSelectedReferral(referral || null);
-      setValue("referredBy", referral?.name || ""); // Ensure form value is set correctly
+      setValue("referredBy", referral?.id || "");  // Ensure we set the ID instead of the name
     } else if (type === "create") {
       setSelectedReferral(null); // Clear referral for new memos
-      setValue("referredBy", "");
+      setValue("referredBy", ""); // Ensure we set an empty string for new memo
     }
-  }, [data?.referredBy, referralMemo, type, setValue]);
-  
+  }, [data?.referredById, referralMemo, type, setValue]);
+
   const handleAddTest = (testId: string) => {
     const selectedTest = patientTests.find((test) => test.id === testId);
     if (selectedTest && !selectedTests.some((test) => test.id === testId)) {
@@ -88,15 +90,15 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
   };
 
   const totalCost = data?.totalAmount || selectedTests.reduce((sum, test) => sum + test.price, 0);
-
   const paidAmount = Number(watch("paidAmount") || 0);
   const discountPercentage = Number(watch("discount") || 0);
-
   const discountAmount = (totalCost * discountPercentage) / 100;
   const finalAmount = totalCost - discountAmount;
   const dueAmount = Math.max(0, finalAmount - paidAmount);
   const returnableAmount = Math.max(0, paidAmount - finalAmount);
-  const paymentMethod = dueAmount > 0 ? "Due" : "Paid";
+
+  // Determine paymentMethod based on the due amount
+  const paymentMethod: "PAID" | "DUE" | "PENDING" = dueAmount > 0 ? "DUE" : "PAID";
 
   const onSubmit: SubmitHandler<MemoSchema> = async (formData) => {
     console.log("Submitted Form Data:", formData);
@@ -113,12 +115,8 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
       memoTest: prismaFormattedTests,
       totalAmount: totalCost,
       dueAmount: dueAmount,
-      paymentMethod: data?.paymentMethod || (dueAmount > 0 ? "DUE" : "PAID") as "PAID" | "DUE",
+      paymentMethod: paymentMethod,
     };
-
-    if (type === "update") {
-      delete prismaInput.referredBy;
-    }
 
     console.log("Updated Prisma Data:", prismaInput);
 
@@ -170,7 +168,6 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
             register={register("phone")}
             error={errors.phone}
           />
-
           <div>
             <label htmlFor="gender" className="text-xs text-gray-500 block m-1">Gender</label>
             <select
@@ -202,85 +199,76 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
             register={register("address")}
             error={errors.address} />
 
-
-          <div>
-            <label className="text-xs text-gray-500 block mb-1">Reference</label>
-            <select
-              className={`p-2 border rounded-md ${errors.referredBy ? "border-red-400" : "border-gray-300"}`}
-              {...register("referredBy")}
-              value={selectedReferral?.id || ""}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                const referral = referralMemo.find((ref) => ref.id === e.target.value);
-                setSelectedReferral(referral || null);
-                setValue("referredBy", referral?.name || "")
-              }}
-            >
-              <option disabled value="">
-                Select Reference
-              </option>
-              {referralMemo.length ? (
-                referralMemo.map((ref) => (
-                  <option key={ref.id} value={ref.id}>
-                    {ref.name}
-                  </option>
-                ))
-              ) : (
-                <option disabled>No references available</option>
-              )}
-            </select>
-            {errors.referredBy && (
-              <p className="text-xs text-red-400 mt-1">{errors.referredBy.message}</p>
+          <select
+            className={`p-2 border rounded-md ${errors.referredBy ? "border-red-400" : "border-gray-300"}`}
+            {...register("referredBy")}
+            value={selectedReferral?.id || ""}  // Use `selectedReferral?.id` for the correct value
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+              const referral = referralMemo.find((ref) => ref.id === e.target.value);
+              setSelectedReferral(referral || null);
+              setValue("referredBy", referral?.id || "");  // Set the `id` on change
+            }}
+          >
+            <option disabled value="">
+              Select Reference
+            </option>
+            {referralMemo.length ? (
+              referralMemo.map((ref) => (
+                <option key={ref.id} value={ref.id}>
+                  {ref.name}
+                </option>
+              ))
+            ) : (
+              <option disabled>No references available</option>
             )}
-          </div>
-
+          </select>
+          {errors.referredBy && <p className="text-xs text-red-400 mt-1">{errors.referredBy.message}</p>}
         </div>
       </div>
 
-      {
-        type === "create" && (
-          <div className="">
-            <span className="text-xl text-gray-400 font-medium">Test Information</span>
+      {type === "create" && (
+        <div>
+          <span className="text-xl text-gray-400 font-medium">Test Information</span>
 
-            <div className="w-full grid grid-cols-2 gap-2 justify-between">
-              <div className="w-full">
-                <label className="text-xs text-gray-500 block mb-1">Select Test</label>
-                <select
-                  multiple
-                  className="p-2 border rounded-md"
-                  onChange={(e: ChangeEvent<HTMLSelectElement>) => handleAddTest(e.target.value)}
-                >
-                  <option value="" disabled>Select Test</option>
-                  {availableTests.length ? (
-                    availableTests.map((test: Test) => (
-                      <option key={test.id} value={test.id}>{test.name} - ${test.price}</option>
-                    ))
-                  ) : (
-                    <option disabled>No tests available</option>
-                  )}
-                </select>
-              </div>
+          <div className="w-full grid grid-cols-2 gap-2 justify-between">
+            <div className="w-full">
+              <label className="text-xs text-gray-500 block mb-1">Select Test</label>
+              <select
+                multiple
+                className="p-2 border rounded-md"
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => handleAddTest(e.target.value)}
+              >
+                <option value="" disabled>Select Test</option>
+                {availableTests.length ? (
+                  availableTests.map((test: Test) => (
+                    <option key={test.id} value={test.id}>{test.name} - ${test.price}</option>
+                  ))
+                ) : (
+                  <option disabled>No tests available</option>
+                )}
+              </select>
+            </div>
 
-              <div className="bg-gray-100 rounded-md w-full">
-                <label className="text-xs text-gray-500">Selected Tests</label>
-                <div className="px-1">
-                  {selectedTests.length ? (
-                    selectedTests.map((test: Test) => (
-                      <div className="flex justify-between items-center" key={test.id}>
-                        <span>{test.name} - ${test.price}</span>
-                        <button type="button" onClick={() => handleRemoveTest(test.id)}>
-                          <MdCancelPresentation />
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <p>No tests selected</p>
-                  )}
-                </div>
+            <div className="bg-gray-100 rounded-md w-full">
+              <label className="text-xs text-gray-500">Selected Tests</label>
+              <div className="px-1">
+                {selectedTests.length ? (
+                  selectedTests.map((test: Test) => (
+                    <div className="flex justify-between items-center" key={test.id}>
+                      <span>{test.name} - ${test.price}</span>
+                      <button type="button" onClick={() => handleRemoveTest(test.id)}>
+                        <MdCancelPresentation />
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p>No tests selected</p>
+                )}
               </div>
             </div>
           </div>
-        )
-      }
+        </div>
+      )}
 
       <span className="text-xl text-gray-400 font-medium">Payment Information</span>
       <div className="grid grid-cols-4 gap-2 w-full justify-center items-center">

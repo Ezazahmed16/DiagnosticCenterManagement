@@ -91,7 +91,7 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
       },
       include: {
         Patient: { select: { id: true, name: true, phone: true, address: true, gender: true, dateOfBirth: true } },
-        tests: { select: { id: true, name: true, price: true, roomNo: true } },
+        tests: { select: { id: true, name: true, price: true, roomNo: true, deliveryTime: true } },
         referredBy: { select: { name: true, id: true } },
       },
       where: query,
@@ -100,7 +100,6 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
     }),
     prisma.memo.count({ where: query }),
   ]);
-  console.log(memo)
   return (
     <DefaultLayout userRole={userRole}>
       <div className="min-h-screen">

@@ -154,7 +154,7 @@ export const updateMemo = async (data: MemoSchema) => {
                 dueAmount: data.dueAmount,
                 totalAmount: data.totalAmount,
                 paymentMethod: data.paymentMethod as PaymentMethod ?? "DUE", discount: data.discount,
-                referredById: data.referredBy,
+                referredById: data.referredBy || undefined,
                 performedById: data.performedBy ?? null,
                 tests: data.memoTest
                     ? {
@@ -210,7 +210,7 @@ export const createTest = async (data: TestSchema): Promise<{ success: boolean; 
                 additionalCost: data.additionalCost,
                 price: data.price,
                 roomNo: data.roomNo || null,
-                PerformedBy: data.PerformedBy ? { connect: { id: data.PerformedBy } } : undefined,
+                deliveryTime: data.deliveryTime || '',                 PerformedBy: data.PerformedBy ? { connect: { id: data.PerformedBy } } : undefined,
             },
         });
         // Revalidate the cache (adjust path as necessary)
@@ -229,6 +229,7 @@ export const updateTest = async (data: TestSchema): Promise<{ success: boolean; 
         if (!data.id) {
             throw new Error("Test ID is required for update.");
         }
+        console.log(data)
         // Perform the update operation
         await prisma.test.update({
             where: { id: data.id },
@@ -239,6 +240,7 @@ export const updateTest = async (data: TestSchema): Promise<{ success: boolean; 
                 additionalCost: data.additionalCost,
                 price: data.price,
                 roomNo: data.roomNo || null,
+                deliveryTime: data.deliveryTime || null, // Use null if deliveryTime is not provided
                 PerformedBy: data.PerformedBy ? { connect: { id: data.PerformedBy } } : undefined,
             },
         });

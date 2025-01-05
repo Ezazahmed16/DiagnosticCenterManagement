@@ -48,6 +48,7 @@ const AddTestForm = ({
   const performers = Array.isArray(relatedData?.performers) ? relatedData.performers : [];
 
   const onSubmit = async (formData: TestSchema) => {
+    console.log(formData);
     try {
       if (type === "create") {
         await createTest(formData);
@@ -112,6 +113,12 @@ const AddTestForm = ({
           name="roomNo"
           register={register("roomNo")}
           error={errors.roomNo}
+        />
+        <InputFields
+          label="Report Deliverable"
+          name="deliveryTime"
+          register={register("deliveryTime")}
+          error={errors.deliveryTime}
         />
         {data && (
           <InputFields

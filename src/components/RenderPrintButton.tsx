@@ -6,13 +6,13 @@ import { FaPrint } from "react-icons/fa";
 
 const RenderPrintButton = ({ item }: { item: any }) => {
   const generatePdf = async () => {
-    const doc = new jsPDF();
+    const doc = new jsPDF({ format: "a6" });
 
     // Function to convert an image file to Base64
     const loadLogoAsBase64 = async (path: string) => {
       return new Promise<string>((resolve, reject) => {
         const img = new Image();
-        img.src = path; // Dynamic path
+        img.src = path;
         img.onload = () => {
           const canvas = document.createElement("canvas");
           canvas.width = img.width;
@@ -29,60 +29,47 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       });
     };
 
-    // Load the logo dynamically
     const logoBase64 = await loadLogoAsBase64("/images/logo/logo.png");
 
-    // Header Section (with logo)
-    const header = () => {
-      doc.setFontSize(16);
-      doc.setTextColor(40);
-
-      // Add logo image
-      const imageWidth = 30;
-      const imageHeight = 15;
-      const imageX = 90;
-      const imageY = 5;
-      doc.addImage(logoBase64, "PNG", imageX, imageY, imageWidth, imageHeight);
-
-      // Add text below the logo
-      doc.setFontSize(12);
-      doc.setTextColor(80);
-      doc.text(
-        "House no. 71(1st floor), sadar hospital road, pirojpur sadar 8500.",
-        105,
-        imageY + imageHeight + 6,
-        { align: "center" }
-      );
-
-      // Calculate the position for both Hotline and Email, centered together
-      const hotlineText = "Hotline: +880 13 3285 1999";
-      const emailText = "Email: alokpirojpur@gmail.com";
-
-      const hotlineWidth = doc.getTextWidth(hotlineText); // Width of the Hotline text
-      const emailWidth = doc.getTextWidth(emailText); // Width of the Email text
-      const totalWidth = hotlineWidth + emailWidth + 20; // Add some space between the texts (adjustable)
-
-      const centerX = doc.internal.pageSize.width / 2;  // Page center
-
-      // Calculate the starting X position so the combined width is centered
-      const startX = centerX - totalWidth / 2;
-
-      // Add Hotline and Email texts next to each other, both centered
-      doc.text(hotlineText, startX, imageY + imageHeight + 12);
-      doc.text(emailText, startX + hotlineWidth + 20, imageY + imageHeight + 12); // Adding space between the texts
-
-
-      // Draw a border below the header
-      doc.setDrawColor(0);
-      doc.setLineWidth(0.5);
-      doc.line(10, imageY + imageHeight + 18, 200, imageY + imageHeight + 18);
+    // Calculate age as a number
+    const calculateAge = (dob: string | null): string => {
+      if (!dob) return "N/A";
+      const birthDate = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age -= 1;
+      }
+      return age.toString();
     };
 
-    // Border line after Header
-    const borderLineAfterHeader = () => {
-      doc.setDrawColor(0);
-      doc.setLineWidth(0.5);
-      doc.line(10, 40, 200, 40); // Below the header section
+    // Header Section
+    const header = () => {
+      const pageWidth = doc.internal.pageSize.width; // Get the page width
+      const imageWidth = 25;
+      const imageHeight = 15;
+      const leftX = 10; // Position for the logo
+      const spaceBetween = 5; // Space between the logo and the text
+
+      const rightX = leftX + imageWidth + spaceBetween; // Adjust text position by adding space after the logo
+      const imageY = 5;
+      const textY = imageY + imageHeight / 2 + 5; // Align text vertically with the logo
+
+      // Add logo image
+      doc.addImage(logoBase64, "PNG", leftX, imageY, imageWidth, imageHeight);
+
+      // Set font to bold
+      doc.setFont("helvetica", "bold");
+
+      // Set the logo color (replace r, g, b with the actual logo's RGB values)
+      doc.setTextColor(0, 123, 255);  // Example color (blue, replace with your logo color)
+
+      // Set font size
+      doc.setFontSize(18);
+
+      // Add the text "Alok Health Care" in the right column with some space after the logo
+      doc.text("Alok Health Care", rightX, textY);
     };
 
     // Patient Information Section
@@ -90,131 +77,130 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       const { Patient, referredBy, createdAt } = item;
       const createdDate = new Date(createdAt).toLocaleString();
       const patientGender = Patient?.gender || "N/A";
-      const patientAge = Patient?.dateOfBirth
-        ? new Date(Patient.dateOfBirth).toLocaleDateString("en-GB")
-        : "N/A";
+      const patientAge = Patient?.dateOfBirth ? calculateAge(Patient.dateOfBirth) : "N/A";
 
-      doc.setFontSize(12);
-      doc.setTextColor(40);
+      const boxX = 10;
+      const boxY = 25;
+      const boxWidth = 85;
+      const boxHeight = 22;
 
-      const patientInfoStartY = 45; // Position after the header
-
-      // First column: ID and Date
-      doc.text(`ID No: ${item.id}`, 10, patientInfoStartY);
-      doc.text(`Date: ${createdDate}`, 130, patientInfoStartY);
-
-      // Second column: Name, Gender, and Age
-      doc.text(`Name: ${Patient?.name || "N/A"}`, 10, patientInfoStartY + 7);
-      doc.text(`Sex: ${patientGender}`, 70, patientInfoStartY + 7);
-      doc.text(`Age: ${patientAge}`, 130, patientInfoStartY + 7);
-
-      // Third column: Contact and Referred By
-      doc.text(`Contact: ${Patient?.phone || "N/A"}`, 10, patientInfoStartY + 14);
-      doc.text(`Refd By: ${referredBy?.name || "N/A"}`, 70, patientInfoStartY + 14);
-
-      // Draw a border below the patient info section
-      doc.line(10, patientInfoStartY + 20, 200, patientInfoStartY + 20);
-    };
-
-    // Border line after Patient Info
-    const borderLineAfterPatientInfo = () => {
       doc.setDrawColor(0);
       doc.setLineWidth(0.5);
-      // doc.line(10, 85, 200, 85); // Below the patient info section
+      doc.rect(boxX, boxY, boxWidth, boxHeight);
+
+      doc.setFontSize(8);
+      doc.setTextColor(40);
+
+      doc.text(`ID No: ${item.id}`, boxX + 2, boxY + 5);
+      doc.text(`Name: ${Patient?.name || "N/A"}`, boxX + 2, boxY + 10);
+      doc.text(`Sex: ${patientGender}`, boxX + 2, boxY + 15);
+      doc.text(`Age: ${patientAge}`, boxX + 30, boxY + 15);
+      doc.text(`Contact: ${Patient?.phone || "N/A"}`, boxX + 50, boxY + 15);
+      doc.text(`Refd By: ${referredBy?.name || "N/A"}`, boxX + 2, boxY + 20);
+      doc.text(`Date: ${createdDate}`, boxX + 40, boxY + 20);
     };
 
     // Test Table Section
     const testTable = () => {
-      const tableStartY = 70; // Start after patient info section
+      const tableStartY = 50;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const tableWidth = 90;
+      const centerX = (pageWidth - tableWidth) / 2;
+
       const testsData = item.tests.map((test: any, index: number) => [
         index + 1,
         test.name,
         test.price,
         test.roomNo || "N/A",
-      ]);
+        test.deliveryTime ? `${test.deliveryTime} days` : "N/A",]);
 
       autoTable(doc, {
-        head: [["SL", "Test/Service", "Price", "Room No"]],
+        head: [["SL", "Test/Service", "Price", "Room No", "Delivery Time"]],
         body: testsData,
         startY: tableStartY,
-        styles: { fontSize: 10, cellPadding: 2 },
+        styles: { fontSize: 7, cellPadding: 1 },
         headStyles: { fillColor: [0, 82, 204], textColor: [255, 255, 255] },
+        tableWidth: "wrap",
+        margin: { left: centerX },
         columnStyles: {
           0: { cellWidth: 10 },
-          1: { cellWidth: 90 },
-          2: { cellWidth: 40, halign: "right" },
-          3: { cellWidth: 40, halign: "center" },
+          1: { cellWidth: 35 },
+          2: { cellWidth: 15, halign: "left" },
+          3: { cellWidth: 15, halign: "left" },
+          4: { cellWidth: 15, halign: "left" },
         },
       });
     };
 
-    // Summary Section
     const summary = () => {
-      const finalY = (doc as any).previousAutoTable.finalY + 10;
+      const finalY = (doc as any).previousAutoTable.finalY + 5;
       const { totalAmount, paidAmount, dueAmount, discount, paymentMethod } = item;
 
-      doc.setFontSize(12);
-      doc.setTextColor(40);
-      doc.text("Summary", 10, finalY);
-
-      doc.setFontSize(14);
-      doc.text(`Total Amount: ${totalAmount} BDT`, 150, finalY, { align: "right" });
-      doc.text(`Discount: ${discount || 0} BDT`, 150, finalY + 7, { align: "right" });
-      doc.text(`Paid Amount: ${paidAmount || 0} BDT`, 150, finalY + 14, { align: "right" });
-      doc.text(`Due Amount: ${dueAmount || 0} BDT`, 150, finalY + 21, { align: "right" });
+      const leftX = 10;
+      const rightX = 60;
+      const rowHeight = 5;
 
       const paymentStatus = paymentMethod === "PAID" ? "PAID" : "DUE";
       const statusColor = paymentMethod === "PAID" ? [0, 128, 0] : [255, 0, 0];
+      const boxWidth = 30;
+      const boxHeight = 10;
 
-      const boxX = 10;
-      const boxY = finalY + 28;
-      const boxWidth = 50;
-      const boxHeight = 12;
-
-      // Draw a thin black border for the status
-      doc.setLineWidth(0.5);
-      doc.setDrawColor(0, 0, 0);
-      doc.rect(boxX, boxY, boxWidth, boxHeight);
-
-      // Add text inside the box
-      doc.setFont("bold");
-      doc.setFontSize(14);
-      doc.setTextColor(0, 0, 0);
-      doc.text(paymentStatus, boxX + boxWidth / 2, boxY + 8, { align: "center" });
-
-      // Draw a bold border for the status
-      doc.setLineWidth(2);
+      // Draw the payment status box
       doc.setDrawColor(statusColor[0], statusColor[1], statusColor[2]);
-      doc.rect(boxX, boxY, boxWidth, boxHeight);
+      doc.setLineWidth(0.5);
+      doc.rect(leftX, finalY, boxWidth, boxHeight);
+
+      const textX = leftX + boxWidth / 2;
+      const textY = finalY + boxHeight / 2 + 3;
+      doc.setFontSize(10);
+      doc.setTextColor(0);
+      doc.text(paymentStatus, textX, textY, { align: "center" });
+
+      // Display the financial details
+      doc.setFontSize(8);
+      doc.text(`Total Amount: ${totalAmount} BDT`, rightX, finalY);
+      doc.text(`Discount: ${discount || 0} %`, rightX, finalY + rowHeight);
+      const payableAmount = totalAmount - (totalAmount * (discount || 0) / 100);
+      doc.text(`Payable Amount: ${payableAmount} BDT`, rightX, finalY + 2 * rowHeight);
+      doc.text(`Received: ${paidAmount || 0} BDT`, rightX, finalY + 3 * rowHeight);
+      doc.text(`Due Amount: ${dueAmount || 0} BDT`, rightX, finalY + 4 * rowHeight);
     };
 
     // Footer Section
     const footer = () => {
-      const footerStartY = 280;
-      const pageCount = doc.getNumberOfPages();
+      const footerStartY = 135;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const footerHeight = 15;
 
-      doc.setFontSize(14);
-      doc.setTextColor(80);
-      doc.setLineWidth(0.5);
-      doc.line(12, footerStartY - 5, 200, footerStartY - 10);
+      doc.setDrawColor(0);
+      doc.setFillColor(137, 179, 194);
+      doc.rect(0, footerStartY, pageWidth, footerHeight, "F");
 
-      doc.text("Your health is our commitment.", 105, footerStartY, { align: "center" });
+      doc.setFontSize(7);
+      doc.setTextColor(255, 255, 255);
 
+      const locationText = "Location: House No. 71(1st floor), Sadar Hospital Road, Pirojpur Sadar 8500.";
+      doc.text(locationText, pageWidth / 2, footerStartY + 5, { align: "center" });
+
+      const contactText = "Email: alokpirojpur@gmail.com | Phone: +8801332-851999";
+      doc.text(contactText, pageWidth / 2, footerStartY + 8, { align: "center" });
+
+      const websiteURL = "Website: www.alokhealthcare.com";
+      doc.text(websiteURL, pageWidth / 2, footerStartY + 11, { align: "center" });
     };
 
-    // Add Sections to the PDF
     header();
-    borderLineAfterHeader();
     patientInfo();
-    borderLineAfterPatientInfo();
     testTable();
     summary();
     footer();
 
-    // Open the PDF in a new browser tab
     const pdfBlob = doc.output("blob");
     const pdfURL = URL.createObjectURL(pdfBlob);
-    window.open(pdfURL, "_blank");
+
+    // Open the PDF and auto print it
+    const pdfWindow = window.open(pdfURL, "_blank");
+    pdfWindow?.print();
   };
 
   return (
