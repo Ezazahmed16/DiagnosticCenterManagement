@@ -148,16 +148,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, userRole = role }: SidebarProps)
         </div>
 
         {/* Sidebar Footer */}
-        <div className="bottom-0 flex items-center justify-center w-full h-20 bg-gray-950">
-          <h1>Developed By</h1>
+        <div className="mt-auto flex items-center justify-center h-20 bg-gray-950">
+          <h1 className="text-sm font-semibold">Developed By:</h1>
           <Image
             width={160}
             height={80}
             src={"/images/logo/skysoftpro.png"}
-            alt="Logo"
+            alt="SkysoftPro Logo"
             priority
           />
         </div>
+
+
       </aside>
     </ClickOutside>
   );
