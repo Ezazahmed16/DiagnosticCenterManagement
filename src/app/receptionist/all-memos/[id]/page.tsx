@@ -32,8 +32,6 @@ const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
         },
     });
 
-    console.log(memo)
-
     if (!memo) {
         return (
             <DefaultLayout userRole={role}>
@@ -45,7 +43,7 @@ const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
     }
 
     // Render table row for each test
-    const renderRow = (item: { id: string; name: string; price: number }) => (
+    const renderRow = (item: { id: string; testName: string; price: number }) => (
         <tr key={item.id} className="border-b text-sm hover:bg-lamaPurpleLight">
             <td>{item.testName}</td>
             <td>{item.price}</td>
