@@ -22,6 +22,7 @@ const Dashboard: React.FC = async () => {
     },
   });
 
+
   // Fetch total expense
   const totalExpense = await prisma.expense.aggregate({
     _sum: {

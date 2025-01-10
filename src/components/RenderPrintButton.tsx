@@ -5,6 +5,7 @@ import autoTable from "jspdf-autotable";
 import { FaPrint } from "react-icons/fa";
 
 const RenderPrintButton = ({ item }: { item: any }) => {
+  console.log("Item:", item);
   const generatePdf = async () => {
     const doc = new jsPDF({ format: "a6" });
 
@@ -30,19 +31,6 @@ const RenderPrintButton = ({ item }: { item: any }) => {
     };
 
     const logoBase64 = await loadLogoAsBase64("/images/logo/logo.png");
-
-    // Calculate age as a number
-    const calculateAge = (dob: string | null): string => {
-      if (!dob) return "N/A";
-      const birthDate = new Date(dob);
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age -= 1;
-      }
-      return age.toString();
-    };
 
     // Header Section
     const header = () => {
@@ -77,7 +65,7 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       const { Patient, referredBy, createdAt } = item;
       const createdDate = new Date(createdAt).toLocaleString();
       const patientGender = Patient?.gender || "N/A";
-      const patientAge = Patient?.dateOfBirth ? calculateAge(Patient.dateOfBirth) : "N/A";
+      const patientAge = Patient?.dateOfBirth || "N/A";
 
       const boxX = 10;
       const boxY = 25;
@@ -93,11 +81,12 @@ const RenderPrintButton = ({ item }: { item: any }) => {
 
       doc.text(`ID No: ${item.id}`, boxX + 2, boxY + 5);
       doc.text(`Name: ${Patient?.name || "N/A"}`, boxX + 2, boxY + 10);
+      doc.text(`Address: ${Patient?.address || "N/A"}`, boxX + 50, boxY + 10);
       doc.text(`Sex: ${patientGender}`, boxX + 2, boxY + 15);
       doc.text(`Age: ${patientAge}`, boxX + 30, boxY + 15);
       doc.text(`Contact: ${Patient?.phone || "N/A"}`, boxX + 50, boxY + 15);
       doc.text(`Refd By: ${referredBy?.name || "N/A"}`, boxX + 2, boxY + 20);
-      doc.text(`Date: ${createdDate}`, boxX + 40, boxY + 20);
+      doc.text(`Date: ${createdDate}`, boxX + 42, boxY + 20);
     };
 
     // Test Table Section
@@ -107,12 +96,13 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       const tableWidth = 90;
       const centerX = (pageWidth - tableWidth) / 2;
 
-      const testsData = item.tests.map((test: any, index: number) => [
+      const testsData = item.MemoToTest?.map((test: any, index: number) => [
         index + 1,
-        test.name,
-        test.price,
+        test.testName || "N/A",
+        test.price || "N/A",
         test.roomNo || "N/A",
-        test.deliveryTime ? `${test.deliveryTime} days` : "N/A",]);
+        test.deliveryTime ? `${test.deliveryTime}` : "N/A",
+      ]) || [];
 
       autoTable(doc, {
         head: [["SL", "Test/Service", "Price", "Room No", "Delivery Time"]],

@@ -2,19 +2,22 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Dispatch, SetStateAction, useState, ChangeEvent, useEffect } from "react";
+import { Dispatch, SetStateAction, useState, ChangeEvent, useEffect, ReactNode } from "react";
 import InputFields from "../InputFields";
 import { MdCancelPresentation } from "react-icons/md";
 import { memoSchema, MemoSchema } from "@/lib/FormValidationSchemas";
-import { createMemo, updateMemo, updateTest } from "@/lib/actions";
+import { createMemo, updateMemo } from "@/lib/actions";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
 interface Test {
-  id: string;
+  deliveryTime: null;
   name: string;
+  id: string;
+  testName: string;
   price: number;
   roomNo: string;
+  performer?: string;
 }
 
 interface Referral {
@@ -35,12 +38,14 @@ interface MemoFormProps {
     tests?: Test[];
     selectedTest?: Test[];
     referral?: ReferredBy[];
+    performers?: { id: string; name: string }[];
   };
 }
 
+
 const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
   const {
-    register,
+    register, 
     handleSubmit,
     formState: { errors },
     setValue,
@@ -53,28 +58,31 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
       paidAmount: data?.paidAmount || 0,
       discount: data?.discount || 0,
       referredBy: data?.referredBy || "",
+      memoTest: data?.memoTest || [],
     },
   });
-
   const router = useRouter();
   const referralMemo = Array.isArray(relatedData?.referral) ? relatedData.referral : [];
+  
   const patientTests = Array.isArray(relatedData?.tests) ? relatedData.tests : [];
-  const selectedTestsInitial = type === "update" && data?.memoTest
-    ? patientTests.filter((test) => data.memoTest?.includes(test))
-    : [];
+  const selectedTestsInitial =
+    type === "update" && data?.memoTest
+      ? patientTests.filter((test) =>
+          data?.memoTest?.some((memoTest) => memoTest.id === test.id) 
+        )
+      : [];
 
   const [selectedTests, setSelectedTests] = useState<Test[]>(selectedTestsInitial);
   const [selectedReferral, setSelectedReferral] = useState<Referral | null>(null);
 
   useEffect(() => {
-    // Set selectedReferral based on referredBy field in data
-    if (data?.referredById) {  // Change `referredBy` to `referredById` as per the schema
+    if (data?.referredById) {
       const referral = referralMemo.find((ref) => ref.id === data.referredById);
       setSelectedReferral(referral || null);
-      setValue("referredBy", referral?.id || "");  // Ensure we set the ID instead of the name
+      setValue("referredBy", referral?.id || "");
     } else if (type === "create") {
-      setSelectedReferral(null); // Clear referral for new memos
-      setValue("referredBy", ""); // Ensure we set an empty string for new memo
+      setSelectedReferral(null);
+      setValue("referredBy", "");
     }
   }, [data?.referredById, referralMemo, type, setValue]);
 
@@ -89,6 +97,20 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
     setSelectedTests((prev) => prev.filter((test) => test.id !== testId));
   };
 
+  const handlePerformerChange = (testId: string, performerId: string) => {
+    setSelectedTests((prev) =>
+      prev.map((test) =>
+        test.id === testId
+          ? {
+              ...test,
+              performer: performerId, 
+            }
+          : test
+      )
+    );
+  };
+  
+
   const totalCost = data?.totalAmount || selectedTests.reduce((sum, test) => sum + test.price, 0);
   const paidAmount = Number(watch("paidAmount") || 0);
   const discountPercentage = Number(watch("discount") || 0);
@@ -97,56 +119,59 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
   const dueAmount = Math.max(0, finalAmount - paidAmount);
   const returnableAmount = Math.max(0, paidAmount - finalAmount);
 
-  // Determine paymentMethod based on the due amount
   const paymentMethod: "PAID" | "DUE" | "PENDING" = dueAmount > 0 ? "DUE" : "PAID";
 
-  const onSubmit: SubmitHandler<MemoSchema> = async (formData) => {
-    console.log("Submitted Form Data:", formData);
 
+  const onSubmit: SubmitHandler<MemoSchema> = async (formData) => {
     const prismaFormattedTests = selectedTests.map((test) => ({
-      id: test.id,
-      name: test.name,
-      price: test.price,
-      roomNo: test.roomNo,
+        id: test.id,
+        testName: test.name, 
+        price: test.price,
+        roomNo: test.roomNo,
+        deliveryTime: test.deliveryTime || undefined,
+        performedById: test.performer || "", 
     }));
 
     const prismaInput = {
-      ...formData,
-      memoTest: prismaFormattedTests,
-      totalAmount: totalCost,
-      dueAmount: dueAmount,
-      paymentMethod: paymentMethod,
+        ...formData,
+        memoTest: prismaFormattedTests,
+        totalAmount: totalCost,
+        dueAmount: dueAmount,
+        paymentMethod: paymentMethod,
+        referredById: formData.referredBy || "",
     };
 
-    console.log("Updated Prisma Data:", prismaInput);
-
+    
     try {
-      if (type === "create") {
-        await createMemo(prismaInput);
-        toast.success("Memo successfully created.");
-      } else if (type === "update" && formData.id) {
-        await updateMemo(prismaInput);
-        toast.success("Memo successfully updated.");
-      } else {
-        throw new Error("ID is missing for update.");
-      }
-      setOpen(false);
-      router.refresh();
+        if (type === "create") {
+            await createMemo(prismaInput);  
+            toast.success("Memo successfully created.");
+        } else if (type === "update" && formData.id) {
+            await updateMemo(prismaInput);
+            toast.success("Memo successfully updated.");
+        } else {
+            throw new Error("ID is missing for update.");
+        }
+        setOpen(false);
+        router.refresh();
     } catch (error) {
-      toast.error("An error occurred. Please try again.");
-      console.error(error);
+        toast.error("An error occurred. Please try again.");
+        console.error(error);
     }
-  };
+};
+
 
   const availableTests = Array.isArray(relatedData?.tests) ? relatedData.tests : [];
 
   return (
     <form className="flex flex-col gap-2" onSubmit={handleSubmit(onSubmit)}>
-      <h1 className="text-xl font-semibold">{type === "create" ? "Create Memo" : "Update Memo"}</h1>
+      <h1 className="text-xl font-semibold">
+        {type === "create" ? "Create Memo" : "Update Memo"}
+      </h1>
 
       <span className="text-xl text-gray-400 font-medium">Patient Information</span>
       <div className="flex flex-wrap gap-2 justify-between items-center">
-        <div className="grid grid-cols-3 gap-4 justify-around items-center w-full">
+        <div className="grid grid-cols-4 gap-4 justify-around items-center w-full">
           {data && (
             <InputFields
               label="ID"
@@ -169,109 +194,153 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
             error={errors.phone}
           />
           <div>
-            <label htmlFor="gender" className="text-xs text-gray-500 block m-1">Gender</label>
+            <label htmlFor="gender" className="text-xs text-gray-500 block m-1">
+              Gender
+            </label>
             <select
               id="gender"
-              className={`p-2 border rounded-md ${errors.gender ? "border-red-400" : "border-gray-300"}`}
+              className={`p-2 border rounded-md ${errors.gender ? "border-red-400" : "border-gray-300"
+                }`}
               {...register("gender")}
             >
-              <option value="" disabled>Select Gender</option>
+              <option value="" disabled>
+                Select Gender
+              </option>
               <option value="MALE">Male</option>
               <option value="FEMALE">Female</option>
               <option value="OTHER">Other</option>
             </select>
-            {errors.gender && <p className="text-xs text-red-400 mt-1">{errors.gender.message}</p>}
+            {errors.gender && (
+              <p className="text-xs text-red-400 mt-1">{errors.gender.message}</p>
+            )}
           </div>
-          <div className="flex flex-col gap-2 w-full">
-            <label htmlFor="dateOfBirth" className="text-xs text-gray-500">Date of Birth</label>
-            <input
-              type="date"
-              id="dateOfBirth"
-              {...register("dateOfBirth")}
-              className={`ring-[1.5px] p-2 rounded-md text-sm w-full ${errors.dateOfBirth ? "ring-red-500" : "ring-gray-300"}`}
-            />
-            {errors.dateOfBirth && <p className="text-xs text-red-400 mt-1">{errors.dateOfBirth.message}</p>}
-          </div>
-
+          <InputFields
+            label="Age"
+            name="dateOfBirth"
+            register={register("dateOfBirth")}
+            error={errors.dateOfBirth}
+          />
           <InputFields
             label="Address"
             name="address"
             register={register("address")}
-            error={errors.address} />
-
-          <select
-            className={`p-2 border rounded-md ${errors.referredBy ? "border-red-400" : "border-gray-300"}`}
-            {...register("referredBy")}
-            value={selectedReferral?.id || ""}  // Use `selectedReferral?.id` for the correct value
-            onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-              const referral = referralMemo.find((ref) => ref.id === e.target.value);
-              setSelectedReferral(referral || null);
-              setValue("referredBy", referral?.id || "");  // Set the `id` on change
-            }}
-          >
-            <option disabled value="">
-              Select Reference
-            </option>
-            {referralMemo.length ? (
-              referralMemo.map((ref) => (
-                <option key={ref.id} value={ref.id}>
-                  {ref.name}
-                </option>
-              ))
-            ) : (
-              <option disabled>No references available</option>
+            error={errors.address}
+          />
+          <div className="">
+            <label className="text-xs text-gray-500 block mb-1">Referral</label>
+            <select
+              className={`p-2 border rounded-md ${errors.referredBy ? "border-red-400" : "border-gray-300"
+                }`}
+              {...register("referredBy")}
+              value={selectedReferral?.id || ""}
+              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                const referral = referralMemo.find((ref) => ref.id === e.target.value);
+                setSelectedReferral(referral || null);
+                setValue("referredBy", referral?.id || "");
+              }}
+            >
+              <option disabled value="">
+                Select Reference
+              </option>
+              {referralMemo.length ? (
+                referralMemo.map((ref) => (
+                  <option key={ref.id} value={ref.id}>
+                    {ref.name}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No references available</option>
+              )}
+            </select>
+            {errors.referredBy && (
+              <p className="text-xs text-red-400 mt-1">{errors.referredBy.message}</p>
             )}
-          </select>
-          {errors.referredBy && <p className="text-xs text-red-400 mt-1">{errors.referredBy.message}</p>}
+          </div>
+
+
         </div>
       </div>
 
       {type === "create" && (
         <div>
-          <span className="text-xl text-gray-400 font-medium">Test Information</span>
+  <span className="text-xl text-gray-400 font-medium">Test Information</span>
 
-          <div className="w-full grid grid-cols-2 gap-2 justify-between">
-            <div className="w-full">
-              <label className="text-xs text-gray-500 block mb-1">Select Test</label>
-              <select
-                multiple
-                className="p-2 border rounded-md"
-                onChange={(e: ChangeEvent<HTMLSelectElement>) => handleAddTest(e.target.value)}
-              >
-                <option value="" disabled>Select Test</option>
-                {availableTests.length ? (
-                  availableTests.map((test: Test) => (
-                    <option key={test.id} value={test.id}>{test.name} - ${test.price}</option>
-                  ))
-                ) : (
-                  <option disabled>No tests available</option>
-                )}
-              </select>
+  <div className="w-full flex justify-center gap-14">
+    {/* Available Tests List */}
+    <div className="w-1/3">
+      <label className="text-xs text-gray-500 block">Available Tests</label>
+      <div className="border rounded-md h-48 overflow-y-auto">
+        {availableTests.length ? (
+          availableTests.map((test: Test) => (
+            <div
+              key={test.id}
+              className="p-2 cursor-pointer hover:bg-gray-200 text-xs"
+              onDoubleClick={() => handleAddTest(test.id)}
+            >
+              {test.name} - ${test.price}
             </div>
+          ))
+        ) : (
+          <p className="text-gray-500 text-center p-2">No tests available</p>
+        )}
+      </div>
+    </div>
 
-            <div className="bg-gray-100 rounded-md w-full">
-              <label className="text-xs text-gray-500">Selected Tests</label>
-              <div className="px-1">
-                {selectedTests.length ? (
-                  selectedTests.map((test: Test) => (
-                    <div className="flex justify-between items-center" key={test.id}>
-                      <span>{test.name} - ${test.price}</span>
-                      <button type="button" onClick={() => handleRemoveTest(test.id)}>
-                        <MdCancelPresentation />
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <p>No tests selected</p>
-                )}
-              </div>
-            </div>
+    {/* Selected Tests List */}
+    <div className="bg-gray-100 rounded-md w-2/3">
+  <label className="text-xs text-gray-500">Selected Tests</label>
+  <div className="border rounded-md h-48 overflow-y-auto">
+    {selectedTests.length ? (
+      selectedTests.map((test: Test) => (
+        <div
+          key={test.id}
+          className="p-2 flex justify-between items-center hover:bg-gray-200"
+        >
+          <div className="text-xs flex-grow">
+            {test.name} - ${test.price}
           </div>
+          <select
+            value={test.performer || ""}
+            onChange={(e) => handlePerformerChange(test.id, e.target.value)}
+            className="p-1 border rounded-md mx-1 text-xs"
+          >
+            <option value="" disabled>
+              Select Performer
+            </option>
+            {relatedData?.performers && relatedData.performers.length > 0 ? (
+              relatedData.performers.map((performer) => (
+                <option key={performer.id} value={performer.id}>
+                  {performer.name}
+                </option>
+              ))
+            ) : (
+              <option disabled>No performers available</option>
+            )}
+          </select>
+          <button
+            type="button"
+            onClick={() => handleRemoveTest(test.id)}
+            className="text-red-500 hover:text-red-700"
+          >
+            <MdCancelPresentation size={20} />
+          </button>
         </div>
+      ))
+    ) : (
+      <p className="text-gray-500 text-center p-2">No tests selected</p>
+    )}
+  </div>
+</div>
+
+
+
+  </div>
+</div>
+
       )}
 
       <span className="text-xl text-gray-400 font-medium">Payment Information</span>
-      <div className="grid grid-cols-4 gap-2 w-full justify-center items-center">
+      <div className="grid grid-cols-5 gap-2 w-full justify-center items-center">
         {type === "update" && (
           <InputFields
             label="Total Amount"
@@ -296,15 +365,15 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
           register={register("discount", { valueAsNumber: true })}
           error={errors.discount}
         />
-        <div>
+        <div className="flex flex-col">
           <label className="text-xs text-gray-500 block m-1">Due</label>
           <input type="text" value={dueAmount} readOnly className="p-2 border rounded-md" />
         </div>
-        <div>
+        <div className="flex flex-col">
           <label className="text-xs text-gray-500 block m-1">Returnable</label>
           <input type="text" value={returnableAmount} readOnly className="p-2 border rounded-md" />
         </div>
-        <div>
+        <div className="flex flex-col">
           <label className="text-xs text-gray-500 block m-1">Payment Status</label>
           <input type="text" value={paymentMethod} readOnly className="p-2 border rounded-md" />
         </div>

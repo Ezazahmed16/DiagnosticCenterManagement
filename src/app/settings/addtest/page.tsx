@@ -16,7 +16,6 @@ const columns = [
   { header: "Amount", accessor: "testCost" },
   { header: "Additional Cost", accessor: "additionalCost" },
   { header: "Total Amount", accessor: "price" },
-  { header: "Performed By", accessor: "performedByName" },
   { header: "Actions", accessor: "actions" },
 ];
 
@@ -28,9 +27,6 @@ const renderRow = (item: any, role: string) => (
     <td>{item.testCost}</td>
     <td>{item.additionalCost}</td>
     <td>{item.price}</td>
-    <td>
-      {item.PerformedBy?.name ? item.PerformedBy.name : "N/A"}
-    </td>
     <td>
       <div className="flex items-center justify-start gap-2">
         {role === "admin" && (
@@ -63,9 +59,6 @@ const AllTestsPage = async ({
   const [tests, count] = await prisma.$transaction([
     prisma.test.findMany({
       where: query,
-      include: {
-        PerformedBy: true,
-      },
       orderBy: {
         id: "desc"
       },

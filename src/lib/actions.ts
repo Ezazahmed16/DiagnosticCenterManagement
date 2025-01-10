@@ -72,17 +72,17 @@ export const createMemo = async (data: MemoSchema): Promise<{ success: boolean; 
         const validatedData = memoSchema.parse(data);
 
         // Step 1: Check if a patient already exists with the provided phone number
-        let patientId = null;
+        let patientId: string | null = null;
 
         const existingPatient = await prisma.patient.findUnique({
             where: { phone: validatedData.phone },
         });
 
         if (existingPatient) {
-            // If the patient exists, use their id
+            // Use the existing patient's ID
             patientId = existingPatient.id;
         } else {
-            // If the patient does not exist, create a new patient and use the newly created patientId
+            // Create a new patient and assign their ID
             const newPatient = await prisma.patient.create({
                 data: {
                     name: validatedData.name,
@@ -92,10 +92,10 @@ export const createMemo = async (data: MemoSchema): Promise<{ success: boolean; 
                     address: validatedData.address,
                 },
             });
-            patientId = newPatient.id; // Assign the new patient's ID
+            patientId = newPatient.id;
         }
 
-        // Step 2: Create the memo with the validated data
+        // Step 2: Create the memo
         const memo = await prisma.memo.create({
             data: {
                 name: validatedData.name,
@@ -109,29 +109,41 @@ export const createMemo = async (data: MemoSchema): Promise<{ success: boolean; 
                 totalAmount: validatedData.totalAmount ?? 0,
                 discount: validatedData.discount ?? 0,
                 referredById: validatedData.referredBy || undefined,
-
-                performedById: validatedData.performedBy ?? null,
-
-                // Assign the patientId to the memo
+                // performedById: validatedData.performedBy ?? null,
                 patientId: patientId,
-
-                // Handle tests: ensure proper format for memoTest
-                tests: validatedData.memoTest
-                    ? {
-                        connect: validatedData.memoTest.map((test) => ({
-                            id: test.id,
-                        })),
-                    }
-                    : undefined,
             },
         });
 
-        console.log("Memo Created:", memo); // Check the created memo
+        // Step 3: Handle tests and insert into MemoToTest
+        if (validatedData.memoTest?.length) {
+            if (!memo.id) {
+                throw new Error("Memo ID is required for creating memo tests.");
+            }
+
+            if (!memo.id) {
+                throw new Error("Memo ID is required for creating memo tests.");
+            }
+
+            const memoTestData = validatedData.memoTest.map((test) => ({
+                memoId: memo.id as string,
+                testId: test.id,
+                testName: test.testName,
+                price: test.price,
+                roomNo: test.roomNo || null,
+                deliveryTime: test.deliveryTime || null,
+                performedById: test.performedById || null,
+            }));
+
+            await prisma.memoToTest.createMany({
+                data: memoTestData,
+            });
+        }
+
+        console.log("Memo and tests successfully created:", memo);
         return { success: true, error: false };
     } catch (error: unknown) {
         console.error("Error creating memo:", error);
 
-        // Handle the error based on its type
         if (error instanceof Error) {
             console.error("Error message:", error.message);
         }
@@ -139,40 +151,70 @@ export const createMemo = async (data: MemoSchema): Promise<{ success: boolean; 
         return { success: false, error: true };
     }
 };
+
+
+
 // Update a memo
-export const updateMemo = async (data: MemoSchema) => {
+export const updateMemo = async (data: MemoSchema): Promise<{ success: boolean; error: boolean }> => {
     try {
+        // Validate the incoming data using the memoSchema
+        const validatedData = memoSchema.parse(data);
+
+        // Step 1: Update the memo record
         const updatedMemo = await prisma.memo.update({
-            where: { id: data.id },
+            where: { id: validatedData.id },
             data: {
-                name: data.name,
-                phone: data.phone,
-                gender: data.gender,
-                dateOfBirth: data.dateOfBirth,
-                address: data.address,
-                paidAmount: data.paidAmount,
-                dueAmount: data.dueAmount,
-                totalAmount: data.totalAmount,
-                paymentMethod: data.paymentMethod as PaymentMethod ?? "DUE", discount: data.discount,
-                referredById: data.referredBy || undefined,
-                performedById: data.performedBy ?? null,
-                tests: data.memoTest
-                    ? {
-                        connect: data.memoTest.map((test) => ({
-                            id: test.id,
-                        })),
-                    }
-                    : undefined,
+                name: validatedData.name,
+                phone: validatedData.phone,
+                gender: validatedData.gender,
+                dateOfBirth: validatedData.dateOfBirth,
+                address: validatedData.address,
+                paidAmount: validatedData.paidAmount ?? 0,
+                dueAmount: validatedData.dueAmount ?? 0,
+                totalAmount: validatedData.totalAmount ?? 0,
+                paymentMethod: validatedData.paymentMethod as PaymentMethod ?? "DUE",
+                discount: validatedData.discount ?? 0,
+                referredById: validatedData.referredBy || undefined,
             },
         });
-        return updatedMemo; // Return updated memo if needed
-    } catch (error) {
+
+        // Step 2: Update MemoToTest entries
+        if (validatedData.memoTest?.length) {
+            // Delete existing memo-to-test entries for this memo
+            await prisma.memoToTest.deleteMany({
+                where: { memoId: validatedData.id },
+            });
+
+            // Create new memo-to-test entries
+            const memoTestData = validatedData.memoTest.map((test) => ({
+                memoId: validatedData.id,
+                testId: test.id,
+                testName: test.testName,
+                price: test.price,
+                roomNo: test.roomNo || null,
+                deliveryTime: test.deliveryTime || null,
+                performedById: test.performedById || null,
+            }));
+
+            await prisma.memoToTest.createMany({
+                data: memoTestData,
+            });
+        }
+
+        console.log("Memo successfully updated:", updatedMemo);
+        return { success: true, error: false };
+    } catch (error: unknown) {
         console.error("Error updating memo:", error);
-        throw new Error("Failed to update memo");
+
+        if (error instanceof Error) {
+            console.error("Error message:", error.message);
+        }
+
+        return { success: false, error: true };
     }
 };
-// Delete a Memo
 
+// Delete a Memo
 export const deleteMemo = async (formData: FormData): Promise<{ success: boolean; error: boolean }> => {
     try {
         const id = formData.get("id") as string;
@@ -210,7 +252,6 @@ export const createTest = async (data: TestSchema): Promise<{ success: boolean; 
                 additionalCost: data.additionalCost,
                 price: data.price,
                 roomNo: data.roomNo || null,
-                deliveryTime: data.deliveryTime || '',                 PerformedBy: data.PerformedBy ? { connect: { id: data.PerformedBy } } : undefined,
             },
         });
         // Revalidate the cache (adjust path as necessary)
@@ -240,8 +281,7 @@ export const updateTest = async (data: TestSchema): Promise<{ success: boolean; 
                 additionalCost: data.additionalCost,
                 price: data.price,
                 roomNo: data.roomNo || null,
-                deliveryTime: data.deliveryTime || null, // Use null if deliveryTime is not provided
-                PerformedBy: data.PerformedBy ? { connect: { id: data.PerformedBy } } : undefined,
+                deliveryTime: data.deliveryTime || null,
             },
         });
         // Revalidate the cache (adjust path as necessary)
@@ -276,17 +316,18 @@ export const createPerformedBy = async (
     data: PerformedBySchema
 ): Promise<{ success: boolean; error: boolean }> => {
     try {
-        // Create the performer in the database
         await prisma.performedBy.create({
             data: {
                 name: data.name,
                 phone: data.phone,
+                commission: data.commission,
+                totalPerformed: data.totalPerformed,
+                totalAmount: data.totalAmount,
+                payable: data.payable,
+                dueAmount: data.dueAmount,
             },
         });
-
         console.log("Performer created:", data);
-        // Revalidate the cache (adjust path as necessary)
-        // revalidatePath("/settings/all-performers");
         return { success: true, error: false };
     } catch (err) {
         console.error("Error creating performer:", err);
@@ -303,24 +344,31 @@ export const updatePerformedBy = async (
             throw new Error("Performer ID is required for update.");
         }
 
+        // Prepare the data for update
+        const updateData: { [key: string]: any } = {};
+
+        if (data.name) updateData.name = data.name;
+        if (data.phone) updateData.phone = data.phone;
+        if (data.commission !== undefined) updateData.commission = data.commission;
+        if (data.totalPerformed !== undefined) updateData.totalPerformed = data.totalPerformed;
+        if (data.totalAmount !== undefined) updateData.totalAmount = data.totalAmount;
+        if (data.payable !== undefined) updateData.payable = data.payable;
+        if (data.dueAmount !== undefined) updateData.dueAmount = data.dueAmount;
+
         // Perform the update operation
         await prisma.performedBy.update({
             where: { id: data.id },
-            data: {
-                name: data.name,
-                phone: data.phone,
-            },
+            data: updateData,
         });
 
         console.log("Performer updated:", data);
-        // Revalidate the cache (adjust path as necessary)
-        // revalidatePath("/settings/all-performers");
         return { success: true, error: false };
     } catch (err) {
         console.error("Error updating performer:", err);
         return { success: false, error: true };
     }
 };
+
 
 // Delete a Performer
 export const deletePerformedBy = async (

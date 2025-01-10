@@ -28,9 +28,11 @@ const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
         where: { id: memoId },
         include: {
             Patient: true,
-            tests: true,
+            MemoToTest: true,
         },
     });
+
+    console.log(memo)
 
     if (!memo) {
         return (
@@ -45,7 +47,7 @@ const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
     // Render table row for each test
     const renderRow = (item: { id: string; name: string; price: number }) => (
         <tr key={item.id} className="border-b text-sm hover:bg-lamaPurpleLight">
-            <td>{item.name}</td>
+            <td>{item.testName}</td>
             <td>{item.price}</td>
         </tr>
     );
@@ -62,9 +64,7 @@ const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
                             <h1 className="text-xl font-semibold mt-2">{memo.Patient?.name}</h1>
                             <p>
                                 Age:{" "}
-                                {memo.Patient?.dateOfBirth
-                                    ? new Date().getFullYear() - new Date(memo.Patient?.dateOfBirth).getFullYear()
-                                    : "N/A"}
+                                {memo.Patient?.dateOfBirth}
                             </p>
                             <p>Gender: {memo.Patient?.gender}</p>
                         </div>
@@ -102,7 +102,7 @@ const SingleMemoPage = async ({ params }: { params: { id: string } }) => {
                     {/* Test History */}
                     <div className="card flex flex-col gap-4 min-h-screen">
                         <h1 className="text-xl font-semibold">Test History</h1>
-                        <Table columns={columns} renderRow={renderRow} data={memo.tests} />
+                        <Table columns={columns} renderRow={renderRow} data={memo.MemoToTest} />
                     </div>
                 </div>
             </div>

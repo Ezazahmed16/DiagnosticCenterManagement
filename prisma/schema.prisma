@@ -8,16 +8,16 @@ datasource db {
 }
 
 model Patient {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
-  phone       String    @unique
+  phone       String   @unique
   address     String?
   bloodType   String?
   gender      Gender
-  dateOfBirth DateTime?
+  dateOfBirth String?
   memos       Memo[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Memo {
@@ -26,7 +26,7 @@ model Memo {
   Patient       Patient?      @relation(fields: [patientId], references: [id])
   name          String
   phone         String
-  dateOfBirth   DateTime?
+  dateOfBirth   String?
   gender        Gender
   address       String?
   tests         Test[]        @relation("MemoTest")
@@ -37,11 +37,9 @@ model Memo {
   discount      Float         @default(0)
   referredById  String?
   referredBy    ReferredBy?   @relation(fields: [referredById], references: [id])
-  performedById String?
-  performedBy   PerformedBy?  @relation(fields: [performedById], references: [id])
+  MemoToTest    MemoToTest[]  @relation("MemoToTestMemo")
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  MemoToTest    MemoToTest[]  @relation("MemoTests")
 }
 
 model Test {
@@ -56,36 +54,50 @@ model Test {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  memos Memo[] @relation("MemoTest")
-
-  PerformedBy   PerformedBy? @relation(fields: [performedById], references: [id])
-  performedById String?
-  MemoToTest    MemoToTest[]
+  memos      Memo[]       @relation("MemoTest")
+  MemoToTest MemoToTest[]
 }
 
 model MemoToTest {
-  id     String @id @default(uuid())
-  memoId String
-  testId String
+  id            String       @id @default(uuid())
+  memoId        String
+  testId        String
+  testName      String?      // Make testName nullable initially
+  price         Float?       // Make price nullable initially
+  roomNo        String? 
+  deliveryTime  String? 
+  performedById String?
+  PerformedBy   PerformedBy? @relation(fields: [performedById], references: [id], onDelete: SetNull)
 
-  // Memo Memo @relation(fields: [memoId], references: [id], onDelete: Cascade)
+  Memo Memo @relation(fields: [memoId], references: [id], onDelete: Cascade, name: "MemoToTestMemo")
   Test Test @relation(fields: [testId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  Memo Memo[] @relation("MemoTests")
+  updatedAt DateTime @default(now())
 }
 
-model PerformedBy {
-  id        String   @id @default(uuid())
-  name      String
-  phone     String?  @unique
-  memos     Memo[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  tests Test[]
+model PerformedBy {
+  id             String             @id @default(uuid())
+  name           String
+  phone          String?            @unique
+  commission     Float? 
+  totalPerformed Int?                @default(0) 
+  totalAmount    Float?              @default(0) 
+  payable        Float? 
+  paidAmounts    PerformerPayment[] 
+  dueAmount      Float? 
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @default(now())
+  MemoToTest     MemoToTest[]
+}
+
+model PerformerPayment {
+  id            String      @id @default(uuid())
+  amount        Float
+  date          DateTime    @default(now())
+  performedById String
+  PerformedBy   PerformedBy @relation(fields: [performedById], references: [id])
 }
 
 model Expense {
@@ -97,7 +109,7 @@ model Expense {
   expenseTypeId String
   expenseType   ExpenseType @relation(fields: [expenseTypeId], references: [id])
   createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  updatedAt     DateTime    @default(now())
 }
 
 model ExpenseType {
@@ -106,7 +118,7 @@ model ExpenseType {
   description String?
   expenses    Expense[]
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  updatedAt   DateTime  @default(now())
 }
 
 model Asset {
@@ -118,7 +130,7 @@ model Asset {
   value       Float
   purchasedBy String
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now())
 }
 
 model ReferralPayment {
@@ -128,7 +140,7 @@ model ReferralPayment {
   amount       Float
   date         DateTime   @default(now())
   createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  updatedAt    DateTime   @default(now())
 }
 
 model ReferredBy {
@@ -140,7 +152,7 @@ model ReferredBy {
   memos             Memo[]
   payments          ReferralPayment[]
   createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  updatedAt         DateTime          @default(now())
 }
 
 enum Gender {

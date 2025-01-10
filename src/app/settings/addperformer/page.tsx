@@ -4,20 +4,26 @@ import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
-import FormModal from "@/components/FormModal";
 import { auth } from "@clerk/nextjs/server";
 import { Prisma } from "@prisma/client";
+import FormContainer from "@/components/FormContainer";
 
 type Performer = {
   id: string;
   name: string;
-  phone: string;
+  phone?: string; // Optional field
+  commission?: number; // Optional field
+  totalAmount?: number; // Optional field
+  payable?: number; // Optional field
 };
 
 const columns = [
   { header: "Performer ID", accessor: "id" },
   { header: "Name", accessor: "name" },
   { header: "Phone", accessor: "phone" },
+  { header: "Commission (%)", accessor: "commission" },
+  { header: "Total Amount", accessor: "totalAmount" },
+  { header: "Payable", accessor: "payable" },
   { header: "Actions", accessor: "actions" },
 ];
 
@@ -26,16 +32,19 @@ const renderRow = (item: Performer, role: string) => (
     <td>{item.id}</td>
     <td>{item.name}</td>
     <td>{item.phone || "N/A"}</td>
+    <td>{item.commission ?? "N/A"}</td>
+    <td>{item.totalAmount?.toLocaleString() ?? 0}</td>
+    <td>{item.payable?.toLocaleString() ?? 0}</td>
     <td>
       <div className="flex items-center justify-start gap-2">
         {role === "admin" && (
           <>
-            <FormModal table="PerformerData" type="update" data={{
-              id: item?.id, 
-              name: item?.name,
-              phone: item?.phone,
-            }} />
-            <FormModal table="PerformerData" type="delete" id={item.id} />
+            <FormContainer
+              table="PerformerData"
+              type="update"
+              data={item}
+            />
+            <FormContainer table="PerformerData" type="delete" id={item.id} />
           </>
         )}
       </div>
@@ -62,12 +71,40 @@ const AllPerformerPage = async ({
   const [performers, count] = await prisma.$transaction([
     prisma.performedBy.findMany({
       where: query,
+      include: { MemoToTest: true },
       orderBy: { createdAt: "desc" },
       skip: (currentPage - 1) * ITEM_PER_PAGE,
       take: ITEM_PER_PAGE,
     }),
     prisma.performedBy.count({ where: query }),
   ]);
+
+
+  // Calculate the total price (sum of `price`) for each performer
+  const mappedPerformers = performers.map((performer) => {
+    // Step 1: Calculate the total amount (sum of `price` for each test)
+    const amountWithCommission = performer.MemoToTest.reduce(
+      (sum, test) => sum + (test.price || 0),
+      0
+    );
+
+    // Step 2: Calculate the commission amount if commission exists
+    const commissionAmount = performer.commission
+      ? amountWithCommission * (performer.commission / 100)
+      : 0;
+
+    // Step 3: Calculate the payable amount (after commission)
+    const payableAmount = amountWithCommission - commissionAmount;
+
+    // Map performers to ensure default values for missing fields
+    return {
+      ...performer,
+      phone: performer.phone || "N/A",
+      commission: performer.commission ?? "N/A",
+      totalAmount: commissionAmount,
+      payable: payableAmount, 
+    };
+  });
 
   return (
     <DefaultLayout userRole={userRole}>
@@ -78,7 +115,7 @@ const AllPerformerPage = async ({
           <div className="flex items-center gap-2">
             <TableSearch />
             {userRole === "admin" && (
-              <FormModal table="PerformerData" type="create" />
+              <FormContainer table="PerformerData" type="create" />
             )}
           </div>
         </div>
@@ -87,7 +124,7 @@ const AllPerformerPage = async ({
         <Table
           columns={columns}
           renderRow={(item) => renderRow(item, userRole)}
-          data={performers}
+          data={mappedPerformers}
         />
 
         {/* Pagination */}

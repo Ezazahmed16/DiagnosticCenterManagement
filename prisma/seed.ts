@@ -32,7 +32,7 @@ async function main() {
       address: "123 Main Street",
       bloodType: "O+",
       gender: "MALE",
-      dateOfBirth: new Date("1990-01-01"),
+      dateOfBirth: "24",
     },
   });
 
@@ -45,7 +45,7 @@ async function main() {
       address: "456 Elm Street",
       bloodType: "A+",
       gender: "FEMALE",
-      dateOfBirth: new Date("1985-06-15"),
+      dateOfBirth: "32",
     },
   });
 
@@ -91,23 +91,6 @@ async function main() {
     },
   });
 
-  // Seed ReferralPayments
-  await prisma.referralPayment.createMany({
-    data: [
-      {
-        referredById: referredBy1.id,
-        amount: 500.0,
-        date: new Date("2023-12-01"),
-      },
-      {
-        referredById: referredBy1.id,
-        amount: 300.0,
-        date: new Date("2023-12-05"),
-      },
-    ],
-    skipDuplicates: true,
-  });
-
   // Seed PerformedBy
   const performedBy1 = await prisma.performedBy.upsert({
     where: { phone: "2233445566" },
@@ -129,7 +112,7 @@ async function main() {
       additionalCost: 20.0,
       price: 120.0,
       roomNo: "A1",
-      deliveryTime: '2 ', // Added this field
+      deliveryTime: "2 hours",
     },
   });
 
@@ -143,113 +126,94 @@ async function main() {
       additionalCost: 30.0,
       price: 180.0,
       roomNo: "B2",
-      deliveryTime: '1 ',
+      deliveryTime: "1 hour",
     },
   });
 
   // Seed Memos
-  const memo1 = await prisma.memo.upsert({
-    where: { id: patient1.id },  
-    update: {
-      name: "Memo for John Doe",
-      gender: "MALE",
-      phone: patient1.phone,  
-      referredById: referredBy1.id,
-      performedById: performedBy1.id,
-      paymentMethod: "PAID",
-      paidAmount: 120.0,
-      dueAmount: 0.0,
-      totalAmount: 120.0,
-    },
-    create: {
-      name: "Memo for John Doe",
-      gender: "MALE",
-      phone: patient1.phone,
-      referredById: referredBy1.id,
-      performedById: performedBy1.id,
-      paymentMethod: "PAID",
-      paidAmount: 120.0,
-      dueAmount: 0.0,
-      totalAmount: 120.0,
-    },
-  });
-
-  const memo2 = await prisma.memo.upsert({
-    where: { id: patient2.id },  // Corrected relation to id
-    update: {
-      name: "Memo for Jane Smith",
-      gender: "FEMALE",
-      phone: patient2.phone,  // You can keep phone if necessary
-      referredById: referredBy1.id,
-      performedById: performedBy1.id,
-      paymentMethod: "DUE",
-      paidAmount: 100.0,
-      dueAmount: 80.0,
-      totalAmount: 180.0,
-    },
-    create: {
-      name: "Memo for Jane Smith",
-      gender: "FEMALE",
-      phone: patient2.phone,
-      referredById: referredBy1.id,
-      performedById: performedBy1.id,
-      paymentMethod: "DUE",
-      paidAmount: 100.0,
-      dueAmount: 80.0,
-      totalAmount: 180.0,
-    },
-  });
-
-  await prisma.memoToTest.create({
+  const memo1 = await prisma.memo.create({
     data: {
-      memoId: memo2.id,
-      testId: test2.id,
+      name: "Memo for John Doe",
+      phone: patient1.phone,
+      gender: "MALE",
+      referredById: referredBy1.id,
+      // performedById: performedBy1.id,
+      paymentMethod: "PAID",
+      totalAmount: 120.0,
+      paidAmount: 120.0,
+      dueAmount: 0.0,
+      discount: 0.0,
     },
   });
+
+  const memo2 = await prisma.memo.create({
+    data: {
+      name: "Memo for Jane Smith",
+      phone: patient2.phone,
+      gender: "FEMALE",
+      referredById: referredBy1.id,
+      // performedById: performedBy1.id,
+      paymentMethod: "DUE",
+      totalAmount: 180.0,
+      paidAmount: 100.0,
+      dueAmount: 80.0,
+      discount: 0.0,
+    },
+  });
+
+  // Seed MemoToTest
+  await prisma.memoToTest.createMany({
+    data: [
+      {
+        memoId: memo1.id,
+        testId: test1.id,
+      },
+      {
+        memoId: memo2.id,
+        testId: test2.id,
+      },
+    ],
+    skipDuplicates: true,
+  });
+
+  console.log("Memos and Tests seeded successfully!");
 
   // Update totalAmount for ReferredBy (commission calculation)
   const referredMemos = await prisma.memo.findMany({
     where: { referredById: referredBy1.id },
   });
 
-  const totalCommission = referredMemos.reduce((sum: number, memo: any) => {
-    return sum + memo.totalAmount * (referredBy1.commissionPercent / 100);
-  }, 0);
+  const totalCommission = referredMemos.reduce(
+    (sum, memo) => sum + memo.totalAmount * (referredBy1.commissionPercent / 100),
+    0
+  );
 
   await prisma.referredBy.update({
     where: { id: referredBy1.id },
-    data: { totalAmmount: Math.round(totalCommission) },
+    data: { totalAmmount: totalCommission },
   });
-
-  console.log("Memos and Tests seeded successfully!");
 
   // Seed Assets
-  await prisma.asset.upsert({
-    where: { id: "asset-ultrasound" },
-    update: { qty: { increment: 1 }, value: { increment: 20000.0 } },
-    create: {
-      id: "asset-ultrasound",
-      name: "Ultrasound Machine",
-      description: "High-resolution ultrasound imaging device.",
-      amount: 1,
-      qty: 1,
-      value: 20000.0,
-      purchasedBy: "Admin",
-    },
-  });
-
-  await prisma.asset.upsert({
-    where: { id: "asset-mri" },
-    update: { qty: { increment: 1 }, value: { increment: 75000.0 } },
-    create: {
-      id: "asset-mri",
-      name: "MRI Scanner",
-      description: "Advanced magnetic resonance imaging system.",
-      amount: 1,
-      qty: 1,
-      value: 75000.0,
-      purchasedBy: "Admin",
-    },
+  await prisma.asset.createMany({
+    data: [
+      {
+        name: "Ultrasound Machine",
+        description: "High-resolution ultrasound imaging device.",
+        amount: 1,
+        qty: 1,
+        value: 20000.0,
+        purchasedBy: "Admin",
+      },
+      {
+        name: "MRI Scanner",
+        description: "Advanced magnetic resonance imaging system.",
+        amount: 1,
+        qty: 1,
+        value: 75000.0,
+        purchasedBy: "Admin",
+      },
+    ],
+    skipDuplicates: true,
   });
 
   console.log("Assets seeded successfully!");

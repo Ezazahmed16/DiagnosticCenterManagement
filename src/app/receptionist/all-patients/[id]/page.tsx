@@ -94,7 +94,7 @@ export default async function SinglePatientPage({ params }: { params: { id: stri
                         <FaUser size={80} />
                         <div>
                             <h1 className="text-2xl font-semibold">{patient.name}</h1>
-                            {/* <p><span className="font-bold">Date of Birth:</span> {format(new Date(patient?.dateOfBirth), "MMMM dd, yyyy")}</p> */}
+                            <p><span className="font-bold">Age: </span>{patient.dateOfBirth}</p>
                             <p><span className="font-bold">Gender:</span> {patient.gender}</p>
                         </div>
                     </div>

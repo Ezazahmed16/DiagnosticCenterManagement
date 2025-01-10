@@ -17,7 +17,7 @@ import RenderPrintButton from "@/components/RenderPrintButton";
 type MemoWithPatient = Prisma.MemoGetPayload<{
   include: {
     Patient: { select: { id: true, name: true; phone: true; address: true } };
-    tests: { select: { id: true, name: true; price: true; roomNo: true } };
+    MemoToTest: { select: { testId: true; testName: true; deliveryTime: true; roomNo: true, price: true } };
     referredBy: { select: { id: true; name: true } };
   };
 }>;
@@ -83,7 +83,6 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
       { Patient: { phone: { contains: search, mode: "insensitive" } } },
     ];
   }
-
   const [memo, count] = await prisma.$transaction([
     prisma.memo.findMany({
       orderBy: {
@@ -91,8 +90,8 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
       },
       include: {
         Patient: { select: { id: true, name: true, phone: true, address: true, gender: true, dateOfBirth: true } },
-        tests: { select: { id: true, name: true, price: true, roomNo: true, deliveryTime: true } },
         referredBy: { select: { name: true, id: true } },
+        MemoToTest: { select: { testId: true, testName: true, deliveryTime: true, roomNo: true, price: true } },
       },
       where: query,
       take: ITEM_PER_PAGE,
@@ -100,6 +99,7 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
     }),
     prisma.memo.count({ where: query }),
   ]);
+console.log(memo)
   return (
     <DefaultLayout userRole={userRole}>
       <div className="min-h-screen">

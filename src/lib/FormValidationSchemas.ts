@@ -8,13 +8,7 @@ export const patientSchema = z.object({
         .string()
         .min(10, { message: "Phone number must be at least 10 digits long!" }),
     gender: z.enum(["MALE", "FEMALE", "OTHER"], { message: "Gender is required!" }),
-    dateOfBirth: z.preprocess(
-        (val) => (typeof val === "string" ? new Date(val) : val),
-        z.date({
-            required_error: "Date of birth is required!",
-            invalid_type_error: "Date of birth must be a valid date!",
-        })
-    ),
+    dateOfBirth: z.string().optional(),
     address: z.string().optional(),
     bloodType: z.string().optional(),
 });
@@ -22,42 +16,49 @@ export const patientSchema = z.object({
 export type PatientSchema = z.infer<typeof patientSchema>;
 
 
-// Memo
+// Memo schema
 export const memoSchema = z.object({
-  id: z.string().uuid().optional(),  
-  name: z.string().min(3, { message: "Patient name must be at least 3 characters long!" }),
-  phone: z.string().min(10, { message: "Phone number must be at least 10 digits long!" }),
-  gender: z.enum(["MALE", "FEMALE", "OTHER"], { message: "Gender is required!" }),
-  dateOfBirth: z.preprocess(
-    (val) => (typeof val === "string" ? new Date(val) : val),
-    z.date({
-      required_error: "Date of birth is required!",
-      invalid_type_error: "Date of birth must be a valid date!",
-    })
-  ),
-  address: z.string().optional(),
-  referredBy: z.string().optional(), 
-  referredById: z.string().nullable().optional(), 
-  memoTest: z.array(
-    z.object({
-      id: z.string().uuid({ message: "Test ID must be a valid UUID!" }),
-      name: z.string().min(3, { message: "Test name must be at least 3 characters long!" }),
-      price: z.number().positive({ message: "Price must be a positive number!" }), 
-      roomNo: z.string().optional(),  
-    })
-  ).optional(),
+    id: z.string().uuid().optional(),
+    name: z.string().min(3, { message: "Patient name must be at least 3 characters long!" }),
+    phone: z.string().min(10, { message: "Phone number must be at least 10 digits long!" }),
+    gender: z.enum(["MALE", "FEMALE", "OTHER"], { message: "Gender is required!" }),
+    dateOfBirth: z.string().optional(),
+    address: z.string().optional(),
+    referredById: z.string().uuid().nullable().optional(),
 
-  paidAmount: z.number().positive({ message: "Paid amount must be a positive number!" }).optional(),
-  dueAmount: z.number().nonnegative({ message: "Due amount must be zero or a positive number!" }).optional(),
-  totalAmount: z.number().positive({ message: "Total amount must be a positive number!" }).optional(),
-  discount: z.number().nonnegative({ message: "Discount must be a non-negative number!" }).optional(),
-  
-  paymentMethod: z.enum(["PAID", "DUE", "PENDING"]).optional(),  // Optional payment method
+    // Test data (memoTest)
+    memoTest: z.array(
+        z.object({
+            id: z.string().uuid({ message: "Test ID must be a valid UUID!" }),
+            testName: z.string().min(3, { message: "Test name must be at least 3 characters long!" }),
+            price: z.number().positive({ message: "Price must be a positive number!" }),
+            roomNo: z.string().optional(),
+            deliveryTime: z.string().optional(),
+            performedById: z.string().refine(val => val === "" || val === null || z.string().uuid().safeParse(val).success, {
+                message: "Invalid UUID or empty string for performedById"
+            }).optional(),
+        })
+    ).optional(),
 
-  performedBy: z.string().uuid({ message: "Performed by must be a valid UUID!" }).optional(),  // UUID for performedBy
+
+    // Financial details
+    paidAmount: z.number().positive({ message: "Paid amount must be a positive number!" }).optional(),
+    dueAmount: z.number().nonnegative({ message: "Due amount must be zero or a positive number!" }).optional(),
+    totalAmount: z.number().positive({ message: "Total amount must be a positive number!" }).optional(),
+    discount: z.number().nonnegative({ message: "Discount must be a non-negative number!" }).optional(),
+
+    // Payment method (optional)
+    paymentMethod: z.enum(["PAID", "DUE"]).optional(), // Fixed to "PAID" or "DUE"
+
+    // Relations
+    performedBy: z.string().uuid().optional(), // If you want to assign a performer directly to the memo, keep it optional
+    referredBy: z.string().uuid().optional(), // Optional referral ID for the memo
 });
 
+// Type inference for memoSchema
 export type MemoSchema = z.infer<typeof memoSchema>;
+
+
 
 // Test
 export const testSchema = z.object({
@@ -98,9 +99,35 @@ export const performedBySchema = z.object({
         .max(50, { message: "Name cannot exceed 50 characters!" }),
     phone: z
         .string()
-        .min(10, { message: "Phone number must be at least 10 digits long!" })
+        .regex(/^\d{10,15}$/, { message: "Phone number must be 10-15 digits long!" })
         .optional(),
-    testId: z.string().uuid().optional(),
+    commission: z
+        .number()
+        .min(0, { message: "Commission percentage cannot be negative!" })
+        .max(100, { message: "Commission percentage cannot exceed 100%!" })
+        .optional(),
+    totalPerformed: z
+        .number()
+        .int()
+        .min(0, { message: "Total performed tests cannot be negative!" })
+        .optional(),
+    totalAmount: z
+        .number()
+        .min(0, { message: "Total amount cannot be negative!" })
+        .optional(),
+    payable: z
+        .number()
+        .min(0, { message: "Payable amount cannot be negative!" })
+        .optional(),
+    dueAmount: z
+        .number()
+        .min(0, { message: "Due amount cannot be negative!" })
+        .optional(),
+    paidAmounts: z.array(z.object({
+        id: z.string().uuid(),
+        amount: z.number().min(0, { message: "Payment amount cannot be negative!" }),
+        date: z.string().datetime({ message: "Invalid date format!" }),
+    })).optional(),
 });
 
 export type PerformedBySchema = z.infer<typeof performedBySchema>;
@@ -124,8 +151,8 @@ export const expenseSchema = z.object({
         .refine((val) => val >= 1, { message: "Amount must be at least 1!" })
         .refine((val) => val <= 100000, { message: "Amount must not exceed 100,000!" }),
     expenseTypeId: z
-    .string()
-    .uuid({ message: "Expense Type is required!" }).optional(),   
+        .string()
+        .uuid({ message: "Expense Type is required!" }).optional(),
 });
 
 export type ExpenseSchema = z.infer<typeof expenseSchema>;
@@ -133,10 +160,10 @@ export type ExpenseSchema = z.infer<typeof expenseSchema>;
 
 // Referral
 export const referredBySchema = z.object({
-  id: z.string().uuid().optional(),
-  name: z.string().min(1, { message: "Referral name is required and cannot be empty." }),
-  phone: z.string().optional(),
-  commissionPercent: z.number().min(0, { message: "Commission percent must be a non-negative number." }).optional(),
+    id: z.string().uuid().optional(),
+    name: z.string().min(1, { message: "Referral name is required and cannot be empty." }),
+    phone: z.string().optional(),
+    commissionPercent: z.number().min(0, { message: "Commission percent must be a non-negative number." }).optional(),
 });
 
 export type ReferredBySchema = z.infer<typeof referredBySchema>;

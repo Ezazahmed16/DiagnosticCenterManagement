@@ -101,24 +101,13 @@ const PatientForm = ({
           register={register("bloodType")}
           error={errors.bloodType}
         />
-        {/* Date of Birth Selector */}
-        <div className="flex flex-col gap-2 w-full">
-          <label htmlFor="dateOfBirth" className="text-xs text-gray-500">
-            Date of Birth
-          </label>
-          <input
-            type="date"
-            id="dateOfBirth"
-            {...register("dateOfBirth")}
-            className={`ring-[1.5px] p-2 rounded-md text-sm w-full ${errors.dateOfBirth ? "ring-red-500" : "ring-gray-300"
-              }`}
-          />
-          {errors.dateOfBirth && (
-            <p className="text-xs text-red-400 mt-1">{errors.dateOfBirth.message}</p>
-          )}
-        </div>
-
-
+        <InputFields
+          label="Age"
+          name="dateOfBirth"
+          register={register("dateOfBirth")}
+          error={errors.dateOfBirth}
+        />
+        
 
         {/* Gender Select Input */}
         <div className="flex flex-col gap-2 w-full">

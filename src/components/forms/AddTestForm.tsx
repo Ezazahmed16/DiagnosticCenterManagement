@@ -29,7 +29,6 @@ const AddTestForm = ({
     resolver: zodResolver(testSchema),
     defaultValues: {
       ...data,
-      PerformedBy: data?.PerformedBy || "",
     },
   });
 
@@ -45,7 +44,7 @@ const AddTestForm = ({
   }, [testCost, additionalCost, setValue]);
 
   // Ensure performers is always an array
-  const performers = Array.isArray(relatedData?.performers) ? relatedData.performers : [];
+  // const performers = Array.isArray(relatedData?.performers) ? relatedData.performers : [];
 
   const onSubmit = async (formData: TestSchema) => {
     console.log(formData);
@@ -131,27 +130,6 @@ const AddTestForm = ({
           />
         )}
 
-        <div className="w-full md:w-3/4">
-          <label htmlFor="performer" className="text-xs text-gray-500 block m-1">
-            Performer:
-          </label>
-          <select
-            id="performer"
-            className={`p-2 border rounded-md ${errors.PerformedBy ? "border-red-400" : "border-gray-300"}`}
-            {...register("PerformedBy")} // Register as a string field
-            defaultValue={data?.PerformedBy || ""} // Default value for the select field
-          >
-            <option value="" disabled>
-              Select a Performer
-            </option>
-            {performers.map((performer: { id: string; name: string }) => (
-              <option key={performer.id} value={performer.id}>
-                {performer.name}
-              </option>
-            ))}
-          </select>
-          {errors.PerformedBy && <p className="text-xs text-red-400 mt-1">{errors.PerformedBy.message}</p>}
-        </div>
       </div>
 
       <button type="submit" className="bg-blue-400 text-white p-2 rounded-md">

@@ -16,6 +16,7 @@ const PatientForm = dynamic(() => import("./forms/AddPatientForm"), { loading: (
 const ExpenseForm = dynamic(() => import("./forms/ExpenseForm"), { loading: () => <h1>Loading...</h1> });
 const AddTestForm = dynamic(() => import("./forms/AddTestForm"), { loading: () => <h1>Loading...</h1> });
 const ReferalForm = dynamic(() => import("./forms/ReferalForm"), { loading: () => <h1>Loading...</h1> });
+const PerformerData = dynamic(() => import("./forms/PerformerForm"), { loading: () => <h1>Loading...</h1> });
 // const ExpenseTypeForm = dynamic(() => import("./forms/ExpenseTypeForm "), { loading: () => <h1>Loading...</h1> });
 // const AssetsForm = dynamic(() => import("./forms/AssetsForm"), { loading: () => <h1>Loading...</h1> });
 // const AddRoleForm = dynamic(() => import("./forms/AddRole"), { loading: () => <h1>Loading...</h1> });
@@ -40,12 +41,18 @@ const forms: {
         relatedData?: any
     ) => JSX.Element;
 } = {
-    patientData: (type, data, setOpen) => <PatientForm type={type} data={data} setOpen={setOpen} />,
-    PerformerData: (type, data, setOpen) => <PerformersForm type={type} data={data} setOpen={setOpen} />,
-    testData: (type, data, setOpen, relatedData) => <AddTestForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
-    memoData: (type, data, setOpen, relatedData) => <MemoForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
-    ExpenseData: (type, data, setOpen, relatedData) => <ExpenseForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
-    ReferalData: (type, data, setOpen) => <ReferalForm type={type} data={data} setOpen={setOpen}  />,
+    patientData: (type, data, setOpen) =>
+        <PatientForm type={type} data={data} setOpen={setOpen} />,
+    PerformerData: (type, data, setOpen, relatedData) =>
+        <PerformersForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+    testData: (type, data, setOpen, relatedData) =>
+        <AddTestForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+    memoData: (type, data, setOpen, relatedData) =>
+        <MemoForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+    ExpenseData: (type, data, setOpen, relatedData) =>
+        <ExpenseForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+    ReferalData: (type, data, setOpen) =>
+        <ReferalForm type={type} data={data} setOpen={setOpen} />,
 };
 
 type FormModalProps = {
@@ -151,7 +158,7 @@ const FormModal = ({ table, type, data, id, relatedData }: FormModalProps) => {
             </button>
             {open && (
                 <div className="w-full h-full fixed left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
-                    <div className="bg-white text-black p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%] max-h-[90%] overflow-y-auto">
+                    <div className="bg-white text-black p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[50%] max-h-[80%] overflow-y-auto">
                         <button
                             className="absolute top-4 right-4 cursor-pointer text-gray-700"
                             onClick={() => setOpen(false)}
