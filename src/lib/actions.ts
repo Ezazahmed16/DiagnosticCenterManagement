@@ -134,9 +134,9 @@ export const createMemo = async (data: MemoSchema): Promise<{ success: boolean; 
                 performedById: test.performedById || null,
             }));
 
-            // await prisma.memoToTest.createMany({
-            //     data: memoTestData,
-            // });
+            await prisma.memoToTest.createMany({
+                data: memoTestData,
+            });
         }
 
         console.log("Memo and tests successfully created:", memo);
@@ -195,10 +195,6 @@ export const updateMemo = async (data: MemoSchema): Promise<{ success: boolean; 
                 deliveryTime: test.deliveryTime || null,
                 performedById: test.performedById || null,
             }));
-
-            await prisma.memoToTest.createMany({
-                data: memoTestData,
-            });
         }
 
         console.log("Memo successfully updated:", updatedMemo);
