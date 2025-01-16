@@ -85,19 +85,11 @@ model PerformedBy {
   totalPerformed Int?                @default(0) 
   totalAmount    Float?              @default(0) 
   payable        Float? 
-  paidAmounts    PerformerPayment[] 
+  paidAmounts    Float?
   dueAmount      Float? 
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @default(now())
   MemoToTest     MemoToTest[]
-}
-
-model PerformerPayment {
-  id            String      @id @default(uuid())
-  amount        Float
-  date          DateTime    @default(now())
-  performedById String
-  PerformedBy   PerformedBy @relation(fields: [performedById], references: [id])
 }
 
 model Expense {

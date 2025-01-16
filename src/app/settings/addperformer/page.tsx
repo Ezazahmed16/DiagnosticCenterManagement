@@ -63,9 +63,15 @@ const AllPerformerPage = async ({
   const { page, search } = searchParams;
   const currentPage = page ? parseInt(page, 10) : 1;
 
-  const query: Prisma.PerformedByWhereInput = search
-    ? { name: { contains: search, mode: "insensitive" } }
-    : {};
+  // const query: Prisma.PerformedByWhereInput = search
+  //   ? { name: { contains: search, mode: "insensitive" } }
+  //   : {};
+  const query: Prisma.PerformedByWhereInput = {};
+  if (search) {
+    query.OR = [
+      { id: { contains: search, mode: "insensitive" } },
+      { phone: { contains: search, mode: "insensitive" } },];
+  }
 
   // Fetch performers and their count
   const [performers, count] = await prisma.$transaction([
@@ -93,8 +99,17 @@ const AllPerformerPage = async ({
       ? amountWithCommission * (performer.commission / 100)
       : 0;
 
-    // Step 3: Calculate the payable amount (after commission)
-    const payableAmount = amountWithCommission - commissionAmount;
+    // Step 3: paid Amount
+    const paidAmounts = performer.paidAmounts ?? 0;
+
+    // Step 4: Calculate the payable amount (after commission)
+    const payableAmount = commissionAmount - paidAmounts;
+
+    // Step 5: Total performed tests)
+    const totalPerformed = performer.MemoToTest.length;
+
+    // Step 5: paid Amount
+    const dueAmount = commissionAmount - paidAmounts;
 
     // Map performers to ensure default values for missing fields
     return {
@@ -102,9 +117,13 @@ const AllPerformerPage = async ({
       phone: performer.phone || "N/A",
       commission: performer.commission ?? "N/A",
       totalAmount: commissionAmount,
-      payable: payableAmount, 
+      payable: payableAmount,
+      totalPerformed,
+      paidAmounts: paidAmounts,
+      dueAmount: dueAmount,
     };
   });
+
 
   return (
     <DefaultLayout userRole={userRole}>

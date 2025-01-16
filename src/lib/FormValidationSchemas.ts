@@ -123,11 +123,12 @@ export const performedBySchema = z.object({
         .number()
         .min(0, { message: "Due amount cannot be negative!" })
         .optional(),
-    paidAmounts: z.array(z.object({
-        id: z.string().uuid(),
-        amount: z.number().min(0, { message: "Payment amount cannot be negative!" }),
-        date: z.string().datetime({ message: "Invalid date format!" }),
-    })).optional(),
+    paidAmounts: z
+        .number()
+        .min(0, { message: "Paid amount cannot be negative!" })
+        .optional(),
+    pay: z.number().min(0, "Pay must be a positive number").optional(),
+
 });
 
 export type PerformedBySchema = z.infer<typeof performedBySchema>;

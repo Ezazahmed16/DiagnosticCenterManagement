@@ -36,10 +36,10 @@ const ReferralForm = ({
 
     try {
       if (type === "create") {
-        await createReferredBy(formData); // Implement this action
+        await createReferredBy(formData); 
         toast.success("Referral successfully created.");
       } else if (formData.id) {
-        await updateReferredBy(formData); // Implement this action
+        await updateReferredBy(formData);
         toast.success("Referral successfully updated.");
       } else {
         console.error("Referral ID is missing for update");

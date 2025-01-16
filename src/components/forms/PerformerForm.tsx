@@ -24,7 +24,7 @@ const PerformersForm = ({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<PerformedBySchema>({
+  } = useForm<PerformedBySchema & { pay: number }>({
     resolver: zodResolver(performedBySchema),
     defaultValues: {
       ...data,
@@ -32,24 +32,34 @@ const PerformersForm = ({
       totalAmount: data?.totalAmount ?? 0,
       dueAmount: data?.dueAmount ?? 0,
       payable: data?.payable ?? 0,
+      paidAmounts: data?.paidAmounts ?? 0,
+      pay: 0,
     },
   });
 
-  console.log(relatedData)
-
   const router = useRouter();
 
-  const onSubmit = async (formData: PerformedBySchema) => {
+  const onSubmit = async (formData: PerformedBySchema & { pay: number }) => {
+    console.log(formData)
+    // Calculate new paidAmounts as sum of existing paidAmounts and pay
+    // const updatedPaidAmounts = (data?.paidAmounts ?? 0) + (formData.pay ?? 0);
+
+    // Prepare data for submission
+    const updatedData = {
+      ...formData,
+      paidAmounts: formData.pay,
+    };
+    // console.log('paidAmounts', updatedPaidAmounts);
     try {
       if (type === "create") {
-        const result = await createPerformedBy(formData); // Ensure create API function exists
+        const result = await createPerformedBy(formData);
         if (result.success) {
           toast.success("Performer successfully created.");
         } else {
           throw new Error("Error creating performer.");
         }
       } else if (type === "update" && formData.id) {
-        const result = await updatePerformedBy(formData); // Ensure update API function exists
+        const result = await updatePerformedBy(updatedData);
         if (result.success) {
           toast.success("Performer successfully updated.");
         } else {
@@ -76,21 +86,18 @@ const PerformersForm = ({
 
       <div className="flex flex-col gap-2">
         <div className="grid grid-cols-3 gap-4">
-          {/* Name Input */}
           <InputFields
             label="Performer Name"
             name="name"
             register={register("name")}
             error={errors.name}
           />
-          {/* Phone Input */}
           <InputFields
             label="Phone"
             name="phone"
             register={register("phone")}
             error={errors.phone}
           />
-          {/* Commission Input */}
           <InputFields
             label="Commission (%)"
             name="commission"
@@ -98,36 +105,56 @@ const PerformersForm = ({
             error={errors.commission}
           />
         </div>
-        <div className="grid grid-cols-3 gap-4">
-          {/* Total Performed Input */}
+
+        <div className="grid grid-cols-4 gap-4">
           <InputFields
             label="Total Performed Tests"
             name="totalPerformed"
             register={register("totalPerformed", { valueAsNumber: true })}
             error={errors.totalPerformed}
+            disabled={true}
           />
-          {/* Total Amount Input */}
           <InputFields
             label="Total Amount"
             name="totalAmount"
             register={register("totalAmount", { valueAsNumber: true })}
             error={errors.totalAmount}
+            disabled={true}
           />
-          {/* Due Amount Input */}
           <InputFields
             label="Due Amount"
             name="dueAmount"
             register={register("dueAmount", { valueAsNumber: true })}
             error={errors.dueAmount}
+            disabled={true}
+            hidden={true}
+          />
+          <InputFields
+            label="Payable Amount"
+            name="payable"
+            register={register("payable", { valueAsNumber: true })}
+            error={errors.payable}
+            disabled={true}
+          />
+          <InputFields
+            label="Total Paid Amount"
+            name="paidAmounts"
+            register={register("paidAmounts", { valueAsNumber: true })}
+            error={errors.paidAmounts}
+            disabled={true}
           />
         </div>
-        {/* Payable Input */}
-        <InputFields
-          label="Payable Amount"
-          name="payable"
-          register={register("payable", { valueAsNumber: true })}
-          error={errors.payable}
-        />
+
+        {/* Pay Input */}
+        <div className="grid grid-cols-4 gap-4">
+          <InputFields
+            label="Pay"
+            name="pay"
+            register={register("pay", { valueAsNumber: true })}
+            error={errors.pay}
+          />
+        </div>
+
         {/* Hidden ID Field (For Update Only) */}
         {data && data.id && (
           <input
@@ -137,7 +164,6 @@ const PerformersForm = ({
         )}
       </div>
 
-      {/* Display Validation Errors */}
       {errors && (
         <div className="text-red-500">
           {Object.values(errors).map((err, index) => (

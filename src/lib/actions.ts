@@ -153,7 +153,6 @@ export const createMemo = async (data: MemoSchema): Promise<{ success: boolean; 
 };
 
 
-
 // Update a memo
 export const updateMemo = async (data: MemoSchema): Promise<{ success: boolean; error: boolean }> => {
     try {
@@ -340,31 +339,43 @@ export const updatePerformedBy = async (
             throw new Error("Performer ID is required for update.");
         }
 
-        // Prepare the data for update
-        const updateData: { [key: string]: any } = {};
+        // Fetch the existing performer data
+        const existingPerformer = await prisma.performedBy.findUnique({
+            where: { id: data.id },
+        });
 
-        if (data.name) updateData.name = data.name;
-        if (data.phone) updateData.phone = data.phone;
-        if (data.commission !== undefined) updateData.commission = data.commission;
-        if (data.totalPerformed !== undefined) updateData.totalPerformed = data.totalPerformed;
-        if (data.totalAmount !== undefined) updateData.totalAmount = data.totalAmount;
-        if (data.payable !== undefined) updateData.payable = data.payable;
-        if (data.dueAmount !== undefined) updateData.dueAmount = data.dueAmount;
+        if (!existingPerformer) {
+            throw new Error("Performer not found.");
+        }
+
+        // Calculate cumulative paidAmounts
+        const updatedPaidAmounts = (existingPerformer.paidAmounts ?? 0) + (data.paidAmounts ?? 0);
+
+        // Prepare the data for update
+        const updateData: { [key: string]: any } = {
+            name: data.name ?? existingPerformer.name,
+            phone: data.phone ?? existingPerformer.phone,
+            commission: data.commission ?? existingPerformer.commission,
+            totalPerformed: data.totalPerformed ?? existingPerformer.totalPerformed,
+            totalAmount: data.totalAmount ?? existingPerformer.totalAmount,
+            payable: data.payable ?? existingPerformer.payable,
+            dueAmount: data.dueAmount ?? existingPerformer.dueAmount,
+            paidAmounts: updatedPaidAmounts, 
+        };
 
         // Perform the update operation
-        await prisma.performedBy.update({
+        const updatedPerformer = await prisma.performedBy.update({
             where: { id: data.id },
             data: updateData,
         });
 
-        console.log("Performer updated:", data);
+        console.log("Performer updated successfully:", updatedPerformer);
         return { success: true, error: false };
     } catch (err) {
         console.error("Error updating performer:", err);
         return { success: false, error: true };
     }
 };
-
 
 // Delete a Performer
 export const deletePerformedBy = async (
