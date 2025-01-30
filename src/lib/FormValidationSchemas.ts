@@ -52,10 +52,9 @@ export const memoSchema = z.object({
 
     // Relations
     performedBy: z.string().uuid().optional(), // If you want to assign a performer directly to the memo, keep it optional
-    referredBy: z.string().uuid().optional(), // Optional referral ID for the memo
+    referredBy: z.string().uuid().nullable().optional(), // Optional referral ID for the memo
 });
 
-// Type inference for memoSchema
 export type MemoSchema = z.infer<typeof memoSchema>;
 
 
@@ -159,14 +158,33 @@ export const expenseSchema = z.object({
 export type ExpenseSchema = z.infer<typeof expenseSchema>;
 
 
-// Referral
+// Referral with Payment Schema
 export const referredBySchema = z.object({
-    id: z.string().uuid().optional(),
-    name: z.string().min(1, { message: "Referral name is required and cannot be empty." }),
-    phone: z.string().optional(),
-    commissionPercent: z.number().min(0, { message: "Commission percent must be a non-negative number." }).optional(),
+  id: z.string().optional(), // For updates
+  name: z.string().min(1, "Referral name is required"),
+  phone: z.string().min(10, "Phone number is required"),
+  commissionPercent: z.number().min(0, "Commission percent must be non-negative"),
+  payments: z
+    .array(
+      z.object({
+        amount: z.number().min(0, "Amount must be non-negative"),
+        date: z
+          .string()
+          .refine(
+            (value) => /^\d{4}-\d{2}-\d{2}$/.test(value), // Validate YYYY-MM-DD format
+            {
+              message: "Invalid date format. Use YYYY-MM-DD.",
+            }
+          ),
+        referredById: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 export type ReferredBySchema = z.infer<typeof referredBySchema>;
+
+
+
 
 

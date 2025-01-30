@@ -496,16 +496,47 @@ export const updateReferredBy = async (data: ReferredBySchema): Promise<{ succes
         // Validate the incoming data
         const validatedData = referredBySchema.parse(data);
 
-        // Perform the update operation
-        await prisma.referredBy.update({
+        // Fetch the existing referral data
+        const existingReferral = await prisma.referredBy.findUnique({
             where: { id: validatedData.id },
-            data: {
-                name: validatedData.name,
-                phone: validatedData.phone,
-                commissionPercent: validatedData.commissionPercent ?? 0,
-            },
         });
 
+        if (!existingReferral) {
+            throw new Error("Referral not found.");
+        }
+
+        // Prepare update data
+        const updateData: { [key: string]: any } = {
+            name: validatedData.name ?? existingReferral.name,
+            phone: validatedData.phone ?? existingReferral.phone,
+            commissionPercent: validatedData.commissionPercent ?? existingReferral.commissionPercent,
+        };
+
+        // Perform the update operation
+        const updatedReferral = await prisma.referredBy.update({
+            where: { id: validatedData.id },
+            data: updateData,
+        });
+
+        // Handle referral payments if provided
+        if (validatedData.payments && validatedData.payments.length > 0) {
+            const paymentPromises = validatedData.payments.map(payment => {
+                if (!validatedData.id) {
+                    throw new Error("ReferredBy ID is required for creating referral payments.");
+                }
+                return prisma.referralPayment.create({
+                    data: {
+                        referredById: validatedData.id,
+                        amount: payment.amount,
+                        date: payment.date,
+                    },
+                });
+            });
+
+            await Promise.all(paymentPromises);
+        }
+
+        console.log("Referral updated successfully:", updatedReferral);
         return { success: true, error: false };
     } catch (err) {
         console.error("Error updating referredBy:", err);

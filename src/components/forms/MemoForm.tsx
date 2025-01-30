@@ -9,6 +9,7 @@ import { memoSchema, MemoSchema } from "@/lib/FormValidationSchemas";
 import { createMemo, updateMemo } from "@/lib/actions";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+// import AvailableTests from "../AvailableTestsSearch";
 
 interface Test {
   deliveryTime: null;
@@ -43,9 +44,11 @@ interface MemoFormProps {
 }
 
 
+
+
 const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
   const {
-    register, 
+    register,
     handleSubmit,
     formState: { errors },
     setValue,
@@ -63,26 +66,35 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
   });
   const router = useRouter();
   const referralMemo = Array.isArray(relatedData?.referral) ? relatedData.referral : [];
-  
+
   const patientTests = Array.isArray(relatedData?.tests) ? relatedData.tests : [];
   const selectedTestsInitial =
     type === "update" && data?.memoTest
       ? patientTests.filter((test) =>
-          data?.memoTest?.some((memoTest) => memoTest.id === test.id) 
-        )
+        data?.memoTest?.some((memoTest) => memoTest.id === test.id)
+      )
       : [];
 
   const [selectedTests, setSelectedTests] = useState<Test[]>(selectedTestsInitial);
   const [selectedReferral, setSelectedReferral] = useState<Referral | null>(null);
 
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+
+  const availableTests = Array.isArray(relatedData?.tests) ? relatedData.tests : [];
+
+  const filteredTests = availableTests.filter((test) =>
+    test.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   useEffect(() => {
     if (data?.referredById) {
       const referral = referralMemo.find((ref) => ref.id === data.referredById);
       setSelectedReferral(referral || null);
-      setValue("referredBy", referral?.id || "");
+      setValue("referredBy", referral?.id || null);
     } else if (type === "create") {
       setSelectedReferral(null);
-      setValue("referredBy", "");
+      setValue("referredBy", null);
     }
   }, [data?.referredById, referralMemo, type, setValue]);
 
@@ -102,14 +114,14 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
       prev.map((test) =>
         test.id === testId
           ? {
-              ...test,
-              performer: performerId, 
-            }
+            ...test,
+            performer: performerId,
+          }
           : test
       )
     );
   };
-  
+
 
   const totalCost = data?.totalAmount || selectedTests.reduce((sum, test) => sum + test.price, 0);
   const paidAmount = Number(watch("paidAmount") || 0);
@@ -124,44 +136,44 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
 
   const onSubmit: SubmitHandler<MemoSchema> = async (formData) => {
     const prismaFormattedTests = selectedTests.map((test) => ({
-        id: test.id,
-        testName: test.name, 
-        price: test.price,
-        roomNo: test.roomNo,
-        deliveryTime: test.deliveryTime || undefined,
-        performedById: test.performer || "", 
+      id: test.id,
+      testName: test.name,
+      price: test.price,
+      roomNo: test.roomNo,
+      deliveryTime: test.deliveryTime || undefined,
+      performedById: test.performer || "",
     }));
 
     const prismaInput = {
-        ...formData,
-        memoTest: prismaFormattedTests,
-        totalAmount: totalCost,
-        dueAmount: dueAmount,
-        paymentMethod: paymentMethod,
-        referredById: formData.referredBy || "",
+      ...formData,
+      memoTest: prismaFormattedTests,
+      totalAmount: totalCost,
+      dueAmount: dueAmount,
+      paymentMethod: paymentMethod,
+      referredById: formData.referredBy || null,
     };
 
-    
+
     try {
-        if (type === "create") {
-            await createMemo(prismaInput);  
-            toast.success("Memo successfully created.");
-        } else if (type === "update" && formData.id) {
-            await updateMemo(prismaInput);
-            toast.success("Memo successfully updated.");
-        } else {
-            throw new Error("ID is missing for update.");
-        }
-        setOpen(false);
-        router.refresh();
+      if (type === "create") {
+        await createMemo(prismaInput);
+        toast.success("Memo successfully created.");
+      } else if (type === "update" && formData.id) {
+        await updateMemo(prismaInput);
+        toast.success("Memo successfully updated.");
+      } else {
+        throw new Error("ID is missing for update.");
+      }
+      setOpen(false);
+      router.refresh();
     } catch (error) {
-        toast.error("An error occurred. Please try again.");
-        console.error(error);
+      toast.error("An error occurred. Please try again.");
+      console.error(error);
     }
-};
+  };
 
 
-  const availableTests = Array.isArray(relatedData?.tests) ? relatedData.tests : [];
+  // const availableTests = Array.isArray(relatedData?.tests) ? relatedData.tests : [];
 
   return (
     <form className="flex flex-col gap-2" onSubmit={handleSubmit(onSubmit)}>
@@ -263,11 +275,11 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
 
       {type === "create" && (
         <div>
-  <span className="text-xl text-gray-400 font-medium">Test Information</span>
+          <span className="text-xl text-gray-400 font-medium">Test Information</span>
 
-  <div className="w-full flex justify-center gap-14">
-    {/* Available Tests List */}
-    <div className="w-1/3">
+          <div className="w-full flex justify-center gap-14">
+            {/* Available Tests List */}
+            {/* <div className="w-1/3">
       <label className="text-xs text-gray-500 block">Available Tests</label>
       <div className="border rounded-md h-48 overflow-y-auto">
         {availableTests.length ? (
@@ -284,58 +296,93 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
           <p className="text-gray-500 text-center p-2">No tests available</p>
         )}
       </div>
-    </div>
+    </div> */}
 
-    {/* Selected Tests List */}
-    <div className="bg-gray-100 rounded-md w-2/3">
-  <label className="text-xs text-gray-500">Selected Tests</label>
-  <div className="border rounded-md h-48 overflow-y-auto">
-    {selectedTests.length ? (
-      selectedTests.map((test: Test) => (
-        <div
-          key={test.id}
-          className="p-2 flex justify-between items-center hover:bg-gray-200"
-        >
-          <div className="text-xs flex-grow">
-            {test.name} - ${test.price}
+            {/* Available Tests List with Search Filter */}
+            <div className="w-1/3">
+              <label className="text-xs text-gray-500 block">Available Tests</label>
+              <div className="border rounded-md">
+                {/* Search Input */}
+                <div className="relative p-2">
+                  <input
+                    type="text"
+                    placeholder="Search tests..."
+                    className="w-full p-2 border rounded-md focus:outline-none text-xs"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <div className="h-48 overflow-y-auto border-t">
+                  {filteredTests.length ? (
+                    filteredTests.map((test: Test) => (
+                      <div
+                        key={test.id}
+                        className="p-2 cursor-pointer hover:bg-gray-200 text-xs"
+                        onDoubleClick={() => handleAddTest(test.id)}
+                      >
+                        {test.name} - ${test.price}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-center p-2">No tests available</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+
+
+
+            {/* Selected Tests List */}
+            <div className="bg-gray-100 rounded-md w-2/3">
+              <label className="text-xs text-gray-500">Selected Tests</label>
+              <div className="border rounded-md h-48 overflow-y-auto">
+                {selectedTests.length ? (
+                  selectedTests.map((test: Test) => (
+                    <div
+                      key={test.id}
+                      className="p-2 flex justify-between items-center hover:bg-gray-200"
+                    >
+                      <div className="text-xs flex-grow">
+                        {test.name} - ${test.price}
+                      </div>
+                      <select
+                        value={test.performer || ""}
+                        onChange={(e) => handlePerformerChange(test.id, e.target.value)}
+                        className="p-1 border rounded-md mx-1 text-xs"
+                      >
+                        <option value="" disabled>
+                          Select Performer
+                        </option>
+                        {relatedData?.performers && relatedData.performers.length > 0 ? (
+                          relatedData.performers.map((performer) => (
+                            <option key={performer.id} value={performer.id}>
+                              {performer.name}
+                            </option>
+                          ))
+                        ) : (
+                          <option disabled>No performers available</option>
+                        )}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTest(test.id)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <MdCancelPresentation size={20} />
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center p-2">No tests selected</p>
+                )}
+              </div>
+            </div>
+
+
+
           </div>
-          <select
-            value={test.performer || ""}
-            onChange={(e) => handlePerformerChange(test.id, e.target.value)}
-            className="p-1 border rounded-md mx-1 text-xs"
-          >
-            <option value="" disabled>
-              Select Performer
-            </option>
-            {relatedData?.performers && relatedData.performers.length > 0 ? (
-              relatedData.performers.map((performer) => (
-                <option key={performer.id} value={performer.id}>
-                  {performer.name}
-                </option>
-              ))
-            ) : (
-              <option disabled>No performers available</option>
-            )}
-          </select>
-          <button
-            type="button"
-            onClick={() => handleRemoveTest(test.id)}
-            className="text-red-500 hover:text-red-700"
-          >
-            <MdCancelPresentation size={20} />
-          </button>
         </div>
-      ))
-    ) : (
-      <p className="text-gray-500 text-center p-2">No tests selected</p>
-    )}
-  </div>
-</div>
-
-
-
-  </div>
-</div>
 
       )}
 

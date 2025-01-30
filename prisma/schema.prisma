@@ -130,7 +130,7 @@ model ReferralPayment {
   referredById String
   referredBy   ReferredBy @relation(fields: [referredById], references: [id])
   amount       Float
-  date         DateTime   @default(now())
+  date         String?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now())
 }

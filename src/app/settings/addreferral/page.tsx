@@ -99,6 +99,9 @@ const AllReferralsPage = async ({
   const [referredBy, count] = await prisma.$transaction([
     prisma.referredBy.findMany({
       where: query,
+      orderBy: {
+        id: "desc"
+      },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
       include: {
