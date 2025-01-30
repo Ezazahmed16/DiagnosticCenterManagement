@@ -24,16 +24,26 @@ export type FormModalProps = {
         referral?: { id: string; name: string; }[];
         expenseTypes?: { id: string; name: string; }[];
         performersMemo?: { id: string; name: string; }[];
-        PerformerTotalAmount?: {  id: true, price: true, performedById: true, testName: true }[];
+        PerformerTotalAmount?: { id: true, price: true, performedById: true, testName: true }[];
+        ReferalMemoData?: { id: true, }[];
     };
 };
-
 
 const FormContainer = async ({ table, type, data, id }: FormModalProps) => {
     let relatedData: any = {};
 
     if (type !== "delete") {
         switch (table) {
+            // case "ReferalData":
+            //     const ReferalMemoData = await prisma.memo.findMany({
+            //         where: {
+            //             id: id, // Filter memos where referalId matches the provided id
+            //         },
+            //         select: { id: true, name: true, phone: true },
+            //     });
+            //     relatedData = { ReferalMemoData };
+            //     break;
+
             case "PerformerData":
                 const PerformerTotalAmount = await prisma.memoToTest.findMany({
                     select: { id: true, price: true, performedById: true, testName: true, },

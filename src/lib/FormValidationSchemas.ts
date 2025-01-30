@@ -164,6 +164,7 @@ export const referredBySchema = z.object({
   name: z.string().min(1, "Referral name is required"),
   phone: z.string().min(10, "Phone number is required"),
   commissionPercent: z.number().min(0, "Commission percent must be non-negative"),
+  totalAmmount: z.number().min(0, "Total amount must be non-negative").optional(),
   payments: z
     .array(
       z.object({

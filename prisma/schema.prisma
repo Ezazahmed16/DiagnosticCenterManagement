@@ -140,7 +140,7 @@ model ReferredBy {
   name              String
   phone             String?           @unique
   commissionPercent Float
-  totalAmmount      Float?
+  totalAmount      Float?
   memos             Memo[]
   payments          ReferralPayment[]
   createdAt         DateTime          @default(now())

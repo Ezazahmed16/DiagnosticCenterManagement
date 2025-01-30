@@ -27,7 +27,7 @@ const columns = [
   },
   {
     header: "Total Amount",
-    accessor: "totalAmmount",
+    accessor: "totalAmount",
   },
   {
     header: "Amount Paid",
@@ -50,7 +50,7 @@ const renderRow = (item: ReferredBy & { amountPaid: number; totalDue: number }, 
       <td>{item.id}</td>
       <td>{item.name}</td>
       <td>{item.commissionPercent}%</td>
-      <td>{item.totalAmmount}</td>
+      <td>{item.totalAmount}</td>
       <td>{item.amountPaid}</td>
       <td>{item.totalDue}</td>
       <td>
@@ -106,6 +106,11 @@ const AllReferralsPage = async ({
       skip: ITEM_PER_PAGE * (p - 1),
       include: {
         payments: true,
+        memos: {
+          select: {
+            totalAmount: true,
+          },
+        }
       },
     }),
     prisma.referredBy.count({ where: query }),
@@ -113,14 +118,22 @@ const AllReferralsPage = async ({
 
   // Map data to include amountPaid and totalDue
   const dataWithPayments = referredBy.map((referral) => {
+    const totalMemoAmount = referral.memos.reduce((sum, memo) => sum + (memo.totalAmount || 0), 0);
+  
+    const totalAmount = (totalMemoAmount * (referral.commissionPercent ?? 0)) / 100; // Calculate totalAmount as commission percentage of total memo amount
     const amountPaid = referral.payments.reduce((sum, payment) => sum + payment.amount, 0);
-    const totalDue = (referral.totalAmmount ?? 0) - amountPaid;
+    const totalDue = totalAmount - amountPaid;
+  
     return {
       ...referral,
+      totalAmount,
       amountPaid,
       totalDue,
     };
   });
+  
+
+  // console.log(dataWithPayments)
 
   return (
     <DefaultLayout userRole={userRole}> {/* Pass the dynamic role here */}

@@ -87,7 +87,7 @@ async function main() {
       name: "Dr. Alex Johnson",
       phone: "1122334455",
       commissionPercent: 10,
-      totalAmmount: 0,
+      totalAmount: 0,
     },
   });
 
@@ -190,7 +190,7 @@ async function main() {
 
   await prisma.referredBy.update({
     where: { id: referredBy1.id },
-    data: { totalAmmount: totalCommission },
+    data: { totalAmount: totalCommission },
   });
 
   // Seed Assets

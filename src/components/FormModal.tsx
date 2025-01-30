@@ -51,8 +51,8 @@ const forms: {
         <MemoForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
     ExpenseData: (type, data, setOpen, relatedData) =>
         <ExpenseForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
-    ReferalData: (type, data, setOpen) =>
-        <ReferalForm type={type} data={data} setOpen={setOpen} />,
+    ReferalData: (type, data, setOpen, relatedData) =>
+        <ReferalForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
 };
 
 type FormModalProps = {

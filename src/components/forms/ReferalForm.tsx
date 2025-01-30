@@ -5,16 +5,18 @@ import InputFields from "../InputFields";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { createReferredBy, updateReferredBy,  } from "@/lib/actions";
+import { createReferredBy, updateReferredBy, } from "@/lib/actions";
 
 const ReferralForm = ({
   type,
   data,
   setOpen,
+  relatedData,
 }: {
   type: "create" | "update";
   data?: Partial<ReferredBySchema>;
   setOpen: Dispatch<SetStateAction<boolean>>;
+  relatedData?: any;
 }) => {
   const {
     register,
@@ -26,15 +28,10 @@ const ReferralForm = ({
     resolver: zodResolver(referredBySchema),
     defaultValues: {
       ...data,
-      payments: data?.payments?.map((payment) => ({
-        ...payment,
-        date: payment.date
-          ? new Date(payment.date).toISOString().split("T")[0] // Ensure YYYY-MM-DD format
-          : "",
-      })) || [],
+      payments: [],
     },
   });
-
+console.log(relatedData)
   const { fields, append, remove } = useFieldArray({
     control,
     name: "payments",
@@ -91,7 +88,7 @@ const ReferralForm = ({
         Referral Information
       </span>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-4 gap-4">
         <InputFields
           label="Referral Name"
           name="name"
@@ -110,12 +107,23 @@ const ReferralForm = ({
           register={register("commissionPercent", { valueAsNumber: true })}
           error={errors.commissionPercent}
         />
+        {
+          type === "update" &&
+          <InputFields
+            label="Total Amount"
+            name="totalAmmount"
+            register={register("totalAmmount", { valueAsNumber: true })}
+            error={errors.totalAmmount}
+            disabled
+          />
+        }
         {data && (
           <InputFields
             label="Id"
             name="id"
             register={register("id")}
             error={errors.id}
+            hidden
           />
         )}
       </div>
