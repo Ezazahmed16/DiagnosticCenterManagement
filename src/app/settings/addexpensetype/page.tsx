@@ -7,7 +7,7 @@ import { Prisma, ExpenseType } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import TableSearch from "@/components/TableSearch";
-import { auth } from "@clerk/nextjs/server"; 
+import { auth } from "@clerk/nextjs/server";
 
 // Table columns definition
 const columns = [
@@ -77,6 +77,7 @@ const AllExpenseTypePage = async ({
   const [expenseType, count] = await prisma.$transaction([
     prisma.expenseType.findMany({
       where: query,
+      orderBy: { createdAt: 'desc' },
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
     }),
@@ -94,13 +95,12 @@ const AllExpenseTypePage = async ({
             <TableSearch />
 
             {/* Add Button */}
-            <Link
-              href="#"
+            <div
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
               <FormModal table="ExpenseType" type="create" />
               Add
-            </Link>
+            </div>
           </div>
         </div>
 

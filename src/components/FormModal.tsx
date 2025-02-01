@@ -5,10 +5,11 @@ import { AiOutlineDelete } from "react-icons/ai";
 import { FaEdit, FaPlus } from "react-icons/fa";
 import { IoMdCloseCircle } from "react-icons/io";
 import dynamic from "next/dynamic";
-import { deleteExpense, deleteMemo, deletePatient, deletePerformedBy, deleteReferredBy, deleteTest } from "@/lib/actions";
+import { deleteAsset, deleteExpense, deleteExpenseType, deleteMemo, deletePatient, deletePerformedBy, deleteReferredBy, deleteTest } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import PerformersForm from "./forms/PerformerForm";
+// import AssetsForm from "./forms/AssetsForm";
 
 // Lazy load form components
 const MemoForm = dynamic(() => import("./forms/MemoForm"), { loading: () => <h1>Loading...</h1> });
@@ -17,8 +18,9 @@ const ExpenseForm = dynamic(() => import("./forms/ExpenseForm"), { loading: () =
 const AddTestForm = dynamic(() => import("./forms/AddTestForm"), { loading: () => <h1>Loading...</h1> });
 const ReferalForm = dynamic(() => import("./forms/ReferalForm"), { loading: () => <h1>Loading...</h1> });
 const PerformerData = dynamic(() => import("./forms/PerformerForm"), { loading: () => <h1>Loading...</h1> });
-// const ExpenseTypeForm = dynamic(() => import("./forms/ExpenseTypeForm "), { loading: () => <h1>Loading...</h1> });
-// const AssetsForm = dynamic(() => import("./forms/AssetsForm"), { loading: () => <h1>Loading...</h1> });
+const ExpenseTypeForm = dynamic(() => import("./forms/ExpenseTypeForm "), { loading: () => <h1>Loading...</h1> });
+const AssetsForm = dynamic(() => import("./forms/AssetsForm"), { loading: () => <h1>Loading...</h1> });
+
 // const AddRoleForm = dynamic(() => import("./forms/AddRole"), { loading: () => <h1>Loading...</h1> });
 
 
@@ -29,7 +31,10 @@ const deleteActionMap: {
     testData: deleteTest,
     PerformerData: deletePerformedBy,
     memoData: deleteMemo,
-    ReferalData: deleteReferredBy
+    ReferalData: deleteReferredBy,
+    ExpenseType: deleteExpenseType,
+    ExpenseData: deleteExpense,
+    AssetsData: deleteAsset,
 };
 
 // Define form components based on table
@@ -53,6 +58,10 @@ const forms: {
         <ExpenseForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
     ReferalData: (type, data, setOpen, relatedData) =>
         <ReferalForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+    ExpenseType: (type, data, setOpen, relatedData) =>
+        <ExpenseTypeForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
+    AssetsData: (type, data, setOpen, relatedData) => 
+        <AssetsForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />,
 };
 
 type FormModalProps = {

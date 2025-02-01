@@ -55,13 +55,16 @@ const renderRow = (item: ExpenseSchema & { expenseType?: { name: string } }, rol
         {role === "admin" && (
           <>
             <button className="w-7 h-7 flex items-center justify-center rounded-full">
-              {role === "admin" && (
-                <>
-                  <FormContainer table="ExpenseData" type="update" data={item} />
-                  <FormContainer table="ExpenseData" type="delete" id={item.id} />
-                </>
-              )}
+              <>
+                <FormContainer table="ExpenseData" type="update" data={item} />
+              </>
             </button>
+            {/* Delete Action (Admin Only) */}
+            {role === "admin" && (
+              <button className="w-7 h-7 flex items-center justify-center rounded-full">
+                <FormModal table="ExpenseData" type="delete" id={item.id} />
+              </button>
+            )}
           </>
         )}
       </div>
@@ -72,7 +75,7 @@ const renderRow = (item: ExpenseSchema & { expenseType?: { name: string } }, rol
 const AllExpensesPage = async ({ searchParams }: { searchParams: { [key: string]: string | undefined } }) => {
   // Fetch user role from Clerk authentication
   const { sessionClaims } = await auth();
-  const userRole = (sessionClaims?.metadata as { role?: string })?.role || "";  
+  const userRole = (sessionClaims?.metadata as { role?: string })?.role || "";
   const { page, search } = searchParams;
   const p = page ? parseInt(page) : 1;
 
@@ -92,6 +95,7 @@ const AllExpensesPage = async ({ searchParams }: { searchParams: { [key: string]
           select: { id: true, name: true },
         },
       },
+      orderBy: { createdAt: "desc" },
       where: query,
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
@@ -107,15 +111,12 @@ const AllExpensesPage = async ({ searchParams }: { searchParams: { [key: string]
           <h1 className="text-lg font-semibold">All Expenses</h1>
           <div className="flex justify-center items-center gap-2">
             <TableSearch />
-            <Link
-              href="#"
+            <div
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
               <FormContainer table="ExpenseData" type="create" data='' />
-              {/* <FormModal table="patientData" type="create" data="" /> */}
-
               Add
-            </Link>
+            </div>
           </div>
         </div>
 

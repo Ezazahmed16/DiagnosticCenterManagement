@@ -1,66 +1,77 @@
-"use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import InputFields from "../InputFields";
-import { IoCloudUploadOutline } from "react-icons/io5";
-import Image from "next/image";
+import { AssetInputs, assetSchema } from "@/lib/FormValidationSchemas";
+import { Dispatch, SetStateAction } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { createAsset, updateAsset } from "@/lib/actions";
 
-const schema = z.object({
-    assetsTitle: z
-        .string()
-        .min(3, { message: "Title must be at least 3 characters long!" })
-        .max(50, { message: "Title must be at most 50 characters long!" }),
-    purchaseAmount: z
-        .preprocess(
-            (val) => (typeof val === "string" && val.trim() !== "" ? Number(val) : undefined),
-            z.number({ invalid_type_error: "Amount must be a valid number!" })
-        )
-        .refine((val) => val >= 1, { message: "Amount must be at least 1!" })
-        .refine((val) => val <= 100000, { message: "Amount must not exceed 100,000!" }),
-    purchaseQty: z
-        .preprocess(
-            (val) => (typeof val === "string" && val.trim() !== "" ? Number(val) : undefined),
-            z.number({ invalid_type_error: "Quantity must be a valid number!" })
-        )
-        .refine((val) => val >= 1, { message: "Quantity must be at least 1!" }),
-    purchaseBy: z
-        .string()
-        .min(3, { message: "Purchaser name must be at least 3 characters long!" })
-        .max(50, { message: "Purchaser name must be at most 50 characters long!" }),
-    img: z
-        .custom<File | undefined>((val) => val instanceof File || val === undefined, {
-            message: "Please upload a valid document!",
-        })
-        .optional(),
-    description: z
-        .string()
-        .max(100, { message: "Description must not exceed 100 characters!" })
-        .optional(),
-});
-
-type Inputs = z.infer<typeof schema>;
-
+// Form Component
 const AssetsForm = ({
     type,
     data,
+    setOpen,
+    relatedData,
 }: {
     type: "create" | "update";
-    data?: Partial<Inputs>;
+    data?: Partial<AssetInputs>;
+    setOpen: Dispatch<SetStateAction<boolean>>;
+    relatedData?: any;
 }) => {
     const {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm<Inputs>({
-        resolver: zodResolver(schema),
-        defaultValues: data || {},
+        setValue,
+        reset,
+        watch,
+    } = useForm<AssetInputs>({
+        resolver: zodResolver(assetSchema),
+        defaultValues: {
+            ...data,
+            amount: data?.amount ? parseFloat(data.amount.toString()) : 0,  // Ensure amount is a number
+            qty: data?.qty ? parseInt(data.qty.toString(), 10) : 1,        // Ensure qty is an integer
+        },
     });
 
-    const onSubmit = (formData: Inputs) => {
-        console.log("Form Submitted:", formData);
-        alert(`Asset ${type === "create" ? "created" : "updated"} successfully!`);
+    // Watch amount and qty fields
+    const amount = watch("amount");
+    const qty = watch("qty");
+
+    // Calculate value as amount * qty
+    const value = amount * qty;
+
+    // Dynamically set the calculated value (amount * qty) in the form
+    if (value !== undefined) {
+        setValue("value", value); // Update the value field dynamically
+    }
+
+    const router = useRouter();
+
+    const onSubmit = async (formData: AssetInputs) => {
+        console.log('Form data:', formData);  // Log the actual form data
+
+        try {
+            if (type === "create") {
+                await createAsset(formData);
+                toast.success("Test record successfully created.");
+            } else if (type === "update" && formData.id) {
+                if (formData.id) {
+                    await updateAsset({ ...formData, id: formData.id as string });
+                } else {
+                    throw new Error("Test ID is missing for update.");
+                }
+                toast.success("Test record successfully updated.");
+            } else {
+                throw new Error("Test ID is missing for update.");
+            }
+            setOpen(false);
+            router.refresh();
+        } catch (error) {
+            toast.error("An error occurred! Please try again.");
+            console.error(error);
+        }
     };
 
     return (
@@ -70,48 +81,59 @@ const AssetsForm = ({
             </h1>
 
             {/* Asset Information Section */}
-            <span className="text-xl text-gray-400 font-medium">Asset Details</span>
-            <div className="flex flex-wrap gap-4 justify-between items-center">
+            <div className="grid grid-cols-4 gap-4 justify-between items-center">
+                {
+                    data && (
+                        <InputFields
+                            label="ID"
+                            name="id"
+                            register={register("id")}
+                            error={errors.id}
+                            hidden
+                        />
+                    )}
                 <InputFields
-                    label="Title"
-                    name="assetsTitle"
-                    register={register("assetsTitle")}
-                    error={errors.assetsTitle}
+                    label="Asset Name"
+                    name="name"
+                    register={register("name")}
+                    error={errors.name}
                 />
                 <InputFields
                     label="Amount"
-                    name="purchaseAmount"
+                    name="amount"
                     type="number"
-                    register={register("purchaseAmount")}
-                    error={errors.purchaseAmount}
+                    register={register("amount", {
+                        setValueAs: (v) => parseFloat(v) || 0, // Ensure amount is parsed as a number
+                    })}
+                    error={errors.amount}
                 />
                 <InputFields
                     label="Quantity"
-                    name="purchaseQty"
+                    name="qty"
                     type="number"
-                    register={register("purchaseQty")}
-                    error={errors.purchaseQty}
+                    register={register("qty", {
+                        setValueAs: (v) => parseInt(v, 10) || 1, // Ensure qty is parsed as an integer
+                    })}
+                    error={errors.qty}
                 />
+                {/* Total Amount (calculated dynamically based on amount * qty) */}
                 <InputFields
-                    label="Purchased By"
-                    name="purchaseBy"
-                    register={register("purchaseBy")}
-                    error={errors.purchaseBy}
+                    label="Total Amount"
+                    name="value"
+                    type="number"
+                    register={register("value")}
+                    error={errors.value}
+                    disabled
                 />
-                
-                <div className="flex flex-col gap-2 w-full md:w-1/4 justify-center">
-                    <label
-                        className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-                        htmlFor="img"
-                    >
-                        <Image src="/upload.png" alt="Upload" width={28} height={28} />
-                        <span>Upload a photo</span>
-                    </label>
-                    <input type="file" id="img" {...register("img")} className="hidden" />
-                </div>
             </div>
 
-
+            {/* Purchased By */}
+            <InputFields
+                label="Purchased By"
+                name="purchasedBy"
+                register={register("purchasedBy")}
+                error={errors.purchasedBy}
+            />
 
             {/* Description */}
             <InputFields
@@ -123,11 +145,8 @@ const AssetsForm = ({
             />
 
             {/* Submit Button */}
-            <button
-                type="submit"
-                className="bg-blue-500 text-white py-2 rounded-md mt-4 hover:bg-blue-600 transition"
-            >
-                {type === "create" ? "Add Asset" : "Update Asset"}
+            <button type="submit" className="bg-blue-400 text-white p-2 rounded-md">
+                {type === "create" ? "Create" : "Update"}
             </button>
         </form>
     );

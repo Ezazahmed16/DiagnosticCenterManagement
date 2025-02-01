@@ -103,6 +103,7 @@ const AllInventoryList = async ({ searchParams }: { searchParams: { [key: string
   // Fetch data from Prisma
   const [assets, count] = await prisma.$transaction([
     prisma.asset.findMany({
+      orderBy: { createdAt: "desc" },
       where: query,
       take: ITEM_PER_PAGE,
       skip: ITEM_PER_PAGE * (p - 1),
@@ -120,13 +121,12 @@ const AllInventoryList = async ({ searchParams }: { searchParams: { [key: string
             <div className="relative">
               <TableSearch />
             </div>
-            <Link
-              href="#"
+            <div
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
-              <FormModal table="AssetsData" type="create" />
+              <FormModal table="AssetsData" type="create" data="" />
               Add
-            </Link>
+            </div>
           </div>
         </div>
 

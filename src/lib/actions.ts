@@ -1,6 +1,6 @@
 "use server";
 import { PaymentMethod } from "@prisma/client";
-import { ExpenseSchema, memoSchema, MemoSchema, PatientSchema, PerformedBySchema, TestSchema } from "./FormValidationSchemas";
+import { AssetInputs, assetSchema, ExpenseSchema, ExpenseTypeInputs, expenseTypeSchema, memoSchema, MemoSchema, PatientSchema, PerformedBySchema, TestSchema } from "./FormValidationSchemas";
 import prisma from "./prisma";
 import { referredBySchema, ReferredBySchema } from "./FormValidationSchemas";
 
@@ -360,7 +360,7 @@ export const updatePerformedBy = async (
             totalAmount: data.totalAmount ?? existingPerformer.totalAmount,
             payable: data.payable ?? existingPerformer.payable,
             dueAmount: data.dueAmount ?? existingPerformer.dueAmount,
-            paidAmounts: updatedPaidAmounts, 
+            paidAmounts: updatedPaidAmounts,
         };
 
         // Perform the update operation
@@ -405,14 +405,14 @@ export const deletePerformedBy = async (
 // Expense Create
 export const createExpense = async (data: ExpenseSchema): Promise<{ success: boolean; error: boolean }> => {
     try {
-        // await prisma.expense.create({
-        //     data: {
-        //         title: data.title,
-        //         description: data.description || "", 
-        //         amount: data.amount,
-        //         expenseTypeId: data.expenseTypeId,
-        //     },
-        // });
+        await prisma.expense.create({
+            data: {
+                title: data.title,
+                description: data.description || "",
+                amount: data.amount,
+                expenseTypeId: data.expenseTypeId,
+            },
+        });
         return { success: true, error: false };
     } catch (err) {
         console.error("Error creating expense:", err);
@@ -445,22 +445,24 @@ export const updateExpense = async (data: ExpenseSchema): Promise<{ success: boo
 };
 
 // Expense Delete
-export const deleteExpense = async (id: string): Promise<{ success: boolean; error: boolean }> => {
-    try {
-        if (!id) {
-            throw new Error("Expense ID is required for deletion.");
-        }
+export const deleteExpense = async (formData: FormData) => {
+    const id = formData.get("id") as string;
 
-        // Delete the expense from the database
+    if (!id) {
+        return { success: false, error: true };
+    }
+
+    try {
         await prisma.expense.delete({
             where: { id },
         });
         return { success: true, error: false };
-    } catch (err) {
-        console.error("Error deleting expense:", err);
+    } catch (error) {
+        console.error(error);
         return { success: false, error: true };
     }
 };
+
 
 
 
@@ -564,3 +566,188 @@ export const deleteReferredBy = async (formData: FormData): Promise<{ success: b
         return { success: false, error: true };
     }
 };
+
+// Create an ExpenseType
+export const createExpenseType = async (
+    data: ExpenseTypeInputs
+): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        // Validate the incoming data
+        const validatedData = expenseTypeSchema.parse(data);
+
+        // Create the expense type in the database
+        await prisma.expenseType.create({
+            data: {
+                name: validatedData.name,
+                description: validatedData.description
+            },
+        });
+
+        return { success: true, error: false };
+    } catch (err) {
+        console.error('Error creating ExpenseType:', err);
+        return { success: false, error: true };
+    }
+};
+
+// Update an ExpenseType
+export const updateExpenseType = async (
+    data: ExpenseTypeInputs & { id: string }
+): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        if (!data.id) {
+            throw new Error('ExpenseType ID is required for update.');
+        }
+
+        // Validate the incoming data
+        const validatedData = expenseTypeSchema.parse(data);
+
+        // Fetch the existing ExpenseType
+        const existingExpenseType = await prisma.expenseType.findUnique({
+            where: { id: validatedData.id },
+        });
+
+        if (!existingExpenseType) {
+            throw new Error('ExpenseType not found.');
+        }
+
+        // Prepare update data
+        const updateData = {
+            name: validatedData.name ?? existingExpenseType.name,
+            description: validatedData.description ?? existingExpenseType.description,
+            updatedAt: new Date(),
+        };
+
+        // Perform the update operation
+        await prisma.expenseType.update({
+            where: { id: validatedData.id },
+            data: updateData,
+        });
+
+        return { success: true, error: false };
+    } catch (err) {
+        console.error('Error updating ExpenseType:', err);
+        return { success: false, error: true };
+    }
+};
+
+// Delete an ExpenseType
+export const deleteExpenseType = async (
+    formData: FormData
+): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        const id = formData.get('id') as string;
+
+        if (!id) {
+            throw new Error('ExpenseType ID is required for deletion.');
+        }
+
+        // Delete the ExpenseType from the database
+        await prisma.expenseType.delete({
+            where: { id },
+        });
+
+        return { success: true, error: false };
+    } catch (err) {
+        console.error('Error deleting ExpenseType:', err);
+        return { success: false, error: true };
+    }
+};
+
+
+// Create an Asset
+export const createAsset = async (
+    data: AssetInputs
+): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        // Validate the incoming data
+        const validatedData = assetSchema.parse(data);
+
+        // Create the asset in the database
+        await prisma.asset.create({
+            data: {
+                name: validatedData.name,
+                amount: validatedData.amount,
+                qty: validatedData.qty,
+                value: validatedData.value,
+                purchasedBy: validatedData.purchasedBy,
+                description: validatedData.description,
+            },
+        });
+
+        return { success: true, error: false };
+    } catch (err) {
+        console.error('Error creating Asset:', err);
+        return { success: false, error: true };
+    }
+};
+
+// Update an Asset
+export const updateAsset = async (
+    data: AssetInputs & { id: string }
+): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        if (!data.id) {
+            throw new Error('Asset ID is required for update.');
+        }
+
+        // Validate the incoming data
+        const validatedData = assetSchema.parse(data);
+
+        // Fetch the existing Asset
+        const existingAsset = await prisma.asset.findUnique({
+            where: { id: validatedData.id },
+        });
+
+        if (!existingAsset) {
+            throw new Error('Asset not found.');
+        }
+
+        // Prepare update data
+        const updateData = {
+            name: validatedData.name ?? existingAsset.name,
+            amount: validatedData.amount ?? existingAsset.amount,
+            qty: validatedData.qty ?? existingAsset.qty,
+            value: validatedData.value ?? existingAsset.value,
+            purchasedBy: validatedData.purchasedBy ?? existingAsset.purchasedBy,
+            description: validatedData.description ?? existingAsset.description,
+            updatedAt: new Date(),
+        };
+
+        // Perform the update operation
+        await prisma.asset.update({
+            where: { id: validatedData.id },
+            data: updateData,
+        });
+
+        return { success: true, error: false };
+    } catch (err) {
+        console.error('Error updating Asset:', err);
+        return { success: false, error: true };
+    }
+};
+
+// Delete an Asset
+export const deleteAsset = async (
+    formData: FormData
+): Promise<{ success: boolean; error: boolean }> => {
+    try {
+        const id = formData.get('id') as string;
+
+        if (!id) {
+            throw new Error('Asset ID is required for deletion.');
+        }
+
+        // Delete the Asset from the database
+        await prisma.asset.delete({
+            where: { id },
+        });
+
+        return { success: true, error: false };
+    } catch (err) {
+        console.error('Error deleting Asset:', err);
+        return { success: false, error: true };
+    }
+};
+
+

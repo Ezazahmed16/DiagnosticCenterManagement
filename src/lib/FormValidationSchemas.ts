@@ -15,7 +15,6 @@ export const patientSchema = z.object({
 
 export type PatientSchema = z.infer<typeof patientSchema>;
 
-
 // Memo schema
 export const memoSchema = z.object({
     id: z.string().uuid().optional(),
@@ -56,7 +55,6 @@ export const memoSchema = z.object({
 });
 
 export type MemoSchema = z.infer<typeof memoSchema>;
-
 
 
 // Test
@@ -132,58 +130,127 @@ export const performedBySchema = z.object({
 
 export type PerformedBySchema = z.infer<typeof performedBySchema>;
 
-// Expense Type
-export const expenseSchema = z.object({
-    id: z.string().uuid().optional(), // Optional for create, required for update
-    title: z
-        .string()
-        .min(3, { message: "Title must be at least 3 characters long!" })
-        .max(50, { message: "Title must be at most 50 characters long!" }),
-    description: z
-        .string()
-        .max(100, { message: "Description must not exceed 100 characters!" })
-        .optional(),
-    amount: z
-        .preprocess(
-            (val) => (typeof val === "string" && val.trim() !== "" ? Number(val) : undefined),
-            z.number({ invalid_type_error: "Amount must be a valid number!" })
-        )
-        .refine((val) => val >= 1, { message: "Amount must be at least 1!" })
-        .refine((val) => val <= 100000, { message: "Amount must not exceed 100,000!" }),
-    expenseTypeId: z
-        .string()
-        .uuid({ message: "Expense Type is required!" }).optional(),
-});
 
-export type ExpenseSchema = z.infer<typeof expenseSchema>;
-
-
-// Referral with Payment Schema
+// Referral Schema
 export const referredBySchema = z.object({
-  id: z.string().optional(), // For updates
-  name: z.string().min(1, "Referral name is required"),
-  phone: z.string().min(10, "Phone number is required"),
-  commissionPercent: z.number().min(0, "Commission percent must be non-negative"),
-  totalAmmount: z.number().min(0, "Total amount must be non-negative").optional(),
-  payments: z
-    .array(
-      z.object({
-        amount: z.number().min(0, "Amount must be non-negative"),
-        date: z
-          .string()
-          .refine(
-            (value) => /^\d{4}-\d{2}-\d{2}$/.test(value), // Validate YYYY-MM-DD format
-            {
-              message: "Invalid date format. Use YYYY-MM-DD.",
-            }
-          ),
-        referredById: z.string().optional(),
-      })
-    )
-    .optional(),
+    id: z.string().optional(), // For updates
+    name: z.string().min(1, "Referral name is required"),
+    phone: z.string().min(10, "Phone number is required"),
+    commissionPercent: z.number().min(0, "Commission percent must be non-negative"),
+    totalAmmount: z.number().min(0, "Total amount must be non-negative").optional(),
+    payments: z
+        .array(
+            z.object({
+                amount: z.number().min(0, "Amount must be non-negative"),
+                date: z
+                    .string()
+                    .refine(
+                        (value) => /^\d{4}-\d{2}-\d{2}$/.test(value), // Validate YYYY-MM-DD format
+                        {
+                            message: "Invalid date format. Use YYYY-MM-DD.",
+                        }
+                    ),
+                referredById: z.string().optional(),
+            })
+        )
+        .optional(),
 });
 
 export type ReferredBySchema = z.infer<typeof referredBySchema>;
+
+// Expense Schema
+export const expenseSchema = z.object({
+    id: z.string().uuid().optional(),
+
+    title: z
+        .string()
+        .trim()
+        .min(3, { message: "Title must be at least 3 characters long!" })
+        .max(50, { message: "Title must be at most 50 characters long!" }),
+
+    description: z
+        .string()
+        .max(300, { message: "Description must not exceed 300 characters!" })
+        .optional()
+        .transform((val) => (val === "" ? undefined : val)),
+
+    amount: z
+        .union([z.string(), z.number()])
+        .refine((val) => val !== "", { message: "Amount is required!" })
+        .transform((val) => (typeof val === "string" ? parseFloat(val) : val))
+        .refine((val) => !isNaN(val) && val > 0, { message: "Amount must be a positive number!" }),
+
+    date: z
+        .union([z.string(), z.date()])
+        .optional()
+        .transform((val) => {
+            if (!val) return new Date();
+            const parsedDate = typeof val === "string" ? new Date(val) : val;
+            return isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+        }),
+
+    expenseTypeId: z
+        .string()
+        .trim()
+        .min(1, { message: "Expense Type is required!" })
+        .uuid({ message: "Invalid Expense Type ID!" }),
+});
+export type ExpenseSchema = z.infer<typeof expenseSchema>;
+
+// Expense Type Schema
+export const expenseTypeSchema = z.object({
+    id: z.string().uuid().optional(),
+    name: z
+        .string()
+        .min(3, { message: "Name must be at least 3 characters long!" })
+        .max(50, { message: "Name must be at most 50 characters long!" }),
+    description: z
+        .string()
+        .max(255, { message: "Description must be at most 255 characters long!" })
+        .optional()
+        .or(z.literal("")), // Allows optional empty string
+});
+
+export type ExpenseTypeInputs = z.infer<typeof expenseTypeSchema>;
+
+
+// Assets Schema
+export const assetSchema = z.object({
+    id: z.string().uuid().optional(), // Optional UUID for asset ID
+    name: z
+        .string()
+        .min(3, { message: "Name must be at least 3 characters long!" }) // Simple length validation
+        .max(50, { message: "Name must be at most 50 characters long!" }),
+    amount: z
+        .number()
+        .positive({ message: "Amount must be a positive number!" }) // Validate positive number
+        .max(100000, { message: "Amount must not exceed 100,000!" }), // Limit max value
+    qty: z
+        .number()
+        .int({ message: "Quantity must be an integer!" }) // Ensuring the quantity is an integer
+        .min(1, { message: "Quantity must be at least 1!" }), // Minimum value validation
+    value: z
+        .number()
+        .positive({ message: "Value must be a positive number!" }) // Positive number validation
+        .max(100000, { message: "Value must not exceed 100,000!" }), // Maximum value check
+    purchasedBy: z
+        .string()
+        .min(3, { message: "Purchaser name must be at least 3 characters long!" }) // Name validation
+        .max(50, { message: "Purchaser name must be at most 50 characters long!" }),
+    img: z
+        .string()
+        .url({ message: "Image URL must be valid!" }) // Simple URL validation for image link
+        .optional(), // Image is optional
+    description: z
+        .string()
+        .max(255, { message: "Description must not exceed 255 characters!" }) // Adjusted max length to 255 for description
+        .optional(), // Optional description
+});
+
+export type AssetInputs = z.infer<typeof assetSchema>;
+
+
+
 
 
 
