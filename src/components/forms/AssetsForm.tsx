@@ -2,10 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputFields from "../InputFields";
 import { AssetInputs, assetSchema } from "@/lib/FormValidationSchemas";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { createAsset, updateAsset } from "@/lib/actions";
+import { CldUploadButton, CldUploadWidget } from 'next-cloudinary';
+import Image from "next/image";
 
 // Form Component
 const AssetsForm = ({
@@ -30,10 +32,14 @@ const AssetsForm = ({
         resolver: zodResolver(assetSchema),
         defaultValues: {
             ...data,
-            amount: data?.amount ? parseFloat(data.amount.toString()) : 0,  // Ensure amount is a number
-            qty: data?.qty ? parseInt(data.qty.toString(), 10) : 1,        // Ensure qty is an integer
+            amount: data?.amount ? parseFloat(data.amount.toString()) : 0,
+            qty: data?.qty ? parseInt(data.qty.toString(), 10) : 1,
+
         },
     });
+
+    // Image Upload
+    const [image, setImage] = useState<any>();
 
     // Watch amount and qty fields
     const amount = watch("amount");
@@ -134,6 +140,47 @@ const AssetsForm = ({
                 register={register("purchasedBy")}
                 error={errors.purchasedBy}
             />
+
+            <div className="grid grid-cols-2 gap-4 justify-between items-center">
+                <CldUploadWidget
+                    uploadPreset="AlokHealthCare"
+                    onSuccess={(result: any, { widget }) => {
+                        if (result?.info?.secure_url) {
+                            setImage(result.info.secure_url);
+                            setValue("img", result.info.secure_url);
+                        }
+                        widget.close();
+                        console.log(result);
+                    }}
+                >
+                    {({ open }) => (
+                        <button
+                            type="button"
+                            className="flex flex-row gap-2 w-full md:w-1/4 justify-center btn bg-gray-200 text-black p-2 rounded-md font-bold items-center"
+                            onClick={() => open()}
+                        >
+                            <Image src="/upload.png" alt="Upload" width={32} height={32} />
+                            <span>Upload a photo</span>
+                        </button>
+                    )}
+                </CldUploadWidget>
+
+                {/* Display uploaded image */}
+                <div className="">
+                    {image && (
+                        <div className="w-32 h-32 mt-4">
+                            <Image src={image} alt="Uploaded Image" width={128} height={128} className="rounded-md" />
+                        </div>
+                    )}
+                    {
+                        type === "update" && data?.img && (
+                            <div className="w-32 h-32 mt-4">
+                                <Image src={data?.img} alt="Uploaded Image" width={128} height={128} className="rounded-md" />
+                            </div>
+                        )
+                    }
+                </div>
+            </div>
 
             {/* Description */}
             <InputFields

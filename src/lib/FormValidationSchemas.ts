@@ -239,7 +239,6 @@ export const assetSchema = z.object({
         .max(50, { message: "Purchaser name must be at most 50 characters long!" }),
     img: z
         .string()
-        .url({ message: "Image URL must be valid!" }) // Simple URL validation for image link
         .optional(), // Image is optional
     description: z
         .string()

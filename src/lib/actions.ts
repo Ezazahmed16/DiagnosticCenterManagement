@@ -672,6 +672,7 @@ export const createAsset = async (
                 value: validatedData.value,
                 purchasedBy: validatedData.purchasedBy,
                 description: validatedData.description,
+                img: validatedData.img,
             },
         });
 
@@ -712,6 +713,7 @@ export const updateAsset = async (
             purchasedBy: validatedData.purchasedBy ?? existingAsset.purchasedBy,
             description: validatedData.description ?? existingAsset.description,
             updatedAt: new Date(),
+            img: validatedData.img,
         };
 
         // Perform the update operation
