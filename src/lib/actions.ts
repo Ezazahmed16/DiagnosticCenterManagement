@@ -108,6 +108,7 @@ export const createMemo = async (data: MemoSchema): Promise<{ success: boolean; 
                 dueAmount: validatedData.dueAmount ?? 0,
                 totalAmount: validatedData.totalAmount ?? 0,
                 discount: validatedData.discount ?? 0,
+                extraDiscount: validatedData.extraDiscount ?? 0,
                 referredById: validatedData.referredBy || undefined,
                 // performedById: validatedData.performedBy ?? null,
                 patientId: patientId,

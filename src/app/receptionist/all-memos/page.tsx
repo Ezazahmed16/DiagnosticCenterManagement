@@ -23,7 +23,7 @@ type MemoWithPatient = Prisma.MemoGetPayload<{
 }>;
 
 const columns = [
-  { header: "Memo ID", accessor: "id" },
+  { header: "Memo ID", accessor: "memoNo" },
   { header: "Name", accessor: "Patient.name" },
   { header: "Contact", accessor: "Patient.phone" },
   { header: "Total Amount", accessor: "totalAmount" },
@@ -34,7 +34,7 @@ const columns = [
 
 const renderRow = (item: any, role: string) => (
   <tr key={item.id} className="border-b text-sm my-2">
-    <td>{item.id}</td>
+    <td>{item.memoNo}</td>
     <td>{item?.name}</td>
     <td>{item.phone}</td>
     <td>{item.totalAmount}</td>
@@ -99,7 +99,7 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
     }),
     prisma.memo.count({ where: query }),
   ]);
-console.log(memo)
+
   return (
     <DefaultLayout userRole={userRole}>
       <div className="min-h-screen">

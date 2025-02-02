@@ -5,7 +5,7 @@ import autoTable from "jspdf-autotable";
 import { FaPrint } from "react-icons/fa";
 
 const RenderPrintButton = ({ item }: { item: any }) => {
-  console.log("Item:", item);
+  // console.log("Item:", item);
   const generatePdf = async () => {
     const doc = new jsPDF({ format: "a6" });
 
@@ -37,28 +37,36 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       const pageWidth = doc.internal.pageSize.width; // Get the page width
       const imageWidth = 25;
       const imageHeight = 15;
-      const leftX = 10; // Position for the logo
-      const spaceBetween = 5; // Space between the logo and the text
 
-      const rightX = leftX + imageWidth + spaceBetween; // Adjust text position by adding space after the logo
-      const imageY = 5;
-      const textY = imageY + imageHeight / 2 + 5; // Align text vertically with the logo
+      const centerX = pageWidth / 2; // Center of the page
+      const imageY = 5;              // Y-position for the logo
+      const textY = imageY + imageHeight + 5; // Position the text below the image
 
-      // Add logo image
-      doc.addImage(logoBase64, "PNG", leftX, imageY, imageWidth, imageHeight);
+      // Add logo image (centered)
+      doc.addImage(
+        logoBase64,
+        "PNG",
+        centerX - imageWidth / 2, // Center the image horizontally
+        imageY,
+        imageWidth,
+        imageHeight
+      );
 
       // Set font to bold
       doc.setFont("helvetica", "bold");
 
-      // Set the logo color (replace r, g, b with the actual logo's RGB values)
-      doc.setTextColor(0, 123, 255);  // Example color (blue, replace with your logo color)
+      // Set the text color (adjust RGB if needed)
+      doc.setTextColor(0, 123, 255);
 
       // Set font size
-      doc.setFontSize(18);
+      doc.setFontSize(10);
 
-      // Add the text "Alok Health Care" in the right column with some space after the logo
-      doc.text("Alok Health Care", rightX, textY);
+      // Add the text (centered below the logo)
+      doc.text("Alok Health Care and Diagnostic Solution", centerX, textY, {
+        align: "center",
+      });
     };
+
 
     // Patient Information Section
     const patientInfo = () => {
@@ -68,7 +76,7 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       const patientAge = Patient?.dateOfBirth || "N/A";
 
       const boxX = 10;
-      const boxY = 25;
+      const boxY = 30;
       const boxWidth = 85;
       const boxHeight = 22;
 
@@ -79,19 +87,21 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       doc.setFontSize(8);
       doc.setTextColor(40);
 
-      doc.text(`ID No: ${item.id}`, boxX + 2, boxY + 5);
+      // doc.text(`Address: ${Patient?.address || "N/A"}`, boxX + 50, boxY + 10);
+      doc.text(`Memo No: ${item.memoNo}`, boxX + 2, boxY + 5);
+      doc.text(`Date: ${createdDate}`, boxX + 40, boxY + 5);
+
       doc.text(`Name: ${Patient?.name || "N/A"}`, boxX + 2, boxY + 10);
-      doc.text(`Address: ${Patient?.address || "N/A"}`, boxX + 50, boxY + 10);
-      doc.text(`Sex: ${patientGender}`, boxX + 2, boxY + 15);
-      doc.text(`Age: ${patientAge}`, boxX + 30, boxY + 15);
-      doc.text(`Contact: ${Patient?.phone || "N/A"}`, boxX + 50, boxY + 15);
+      doc.text(`Age: ${patientAge}`, boxX + 32, boxY + 10);
+      doc.text(`Sex: ${patientGender}`, boxX + 50, boxY + 10);
+
+      doc.text(`Contact: ${Patient?.phone || "N/A"}`, boxX + 2, boxY + 15);
       doc.text(`Refd By: ${referredBy?.name || "N/A"}`, boxX + 2, boxY + 20);
-      doc.text(`Date: ${createdDate}`, boxX + 42, boxY + 20);
     };
 
     // Test Table Section
     const testTable = () => {
-      const tableStartY = 50;
+      const tableStartY = 55;
       const pageWidth = doc.internal.pageSize.getWidth();
       const tableWidth = 90;
       const centerX = (pageWidth - tableWidth) / 2;
@@ -122,39 +132,45 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       });
     };
 
-    const summary = () => {
-      const finalY = (doc as any).previousAutoTable.finalY + 5;
-      const { totalAmount, paidAmount, dueAmount, discount, paymentMethod } = item;
+// Summary Section
+const summary = () => {
+  const finalY = (doc as any).previousAutoTable.finalY + 5;
+  const { totalAmount, paidAmount, dueAmount, discount, paymentMethod, extraDiscount } = item;
 
-      const leftX = 10;
-      const rightX = 60;
-      const rowHeight = 5;
+  const leftX = 10;
+  const rightX = 60;
+  const rowHeight = 5;
 
-      const paymentStatus = paymentMethod === "PAID" ? "PAID" : "DUE";
-      const statusColor = paymentMethod === "PAID" ? [0, 128, 0] : [255, 0, 0];
-      const boxWidth = 30;
-      const boxHeight = 10;
+  const paymentStatus = paymentMethod === "PAID" ? "PAID" : "DUE";
+  const statusColor = paymentMethod === "PAID" ? [0, 128, 0] : [255, 0, 0];
+  const boxWidth = 30;
+  const boxHeight = 10;
 
-      // Draw the payment status box
-      doc.setDrawColor(statusColor[0], statusColor[1], statusColor[2]);
-      doc.setLineWidth(0.5);
-      doc.rect(leftX, finalY, boxWidth, boxHeight);
+  // Draw the payment status box
+  doc.setDrawColor(statusColor[0], statusColor[1], statusColor[2]);
+  doc.setLineWidth(0.5);
+  doc.rect(leftX, finalY, boxWidth, boxHeight);
 
-      const textX = leftX + boxWidth / 2;
-      const textY = finalY + boxHeight / 2 + 3;
-      doc.setFontSize(10);
-      doc.setTextColor(0);
-      doc.text(paymentStatus, textX, textY, { align: "center" });
+  const textX = leftX + boxWidth / 2;
+  const textY = finalY + boxHeight / 2 + 3;
+  doc.setFontSize(10);
+  doc.setTextColor(0);
+  doc.text(paymentStatus, textX, textY, { align: "center" });
 
-      // Display the financial details
-      doc.setFontSize(8);
-      doc.text(`Total Amount: ${totalAmount} BDT`, rightX, finalY);
-      doc.text(`Discount: ${discount || 0} %`, rightX, finalY + rowHeight);
-      const payableAmount = totalAmount - (totalAmount * (discount || 0) / 100);
-      doc.text(`Payable Amount: ${payableAmount} BDT`, rightX, finalY + 2 * rowHeight);
-      doc.text(`Received: ${paidAmount || 0} BDT`, rightX, finalY + 3 * rowHeight);
-      doc.text(`Due Amount: ${dueAmount || 0} BDT`, rightX, finalY + 4 * rowHeight);
-    };
+  // Display the financial details
+  doc.setFontSize(8);
+  doc.text(`Total Amount: ${totalAmount} BDT`, rightX, finalY);
+  doc.text(`Discount: ${discount || 0} %`, rightX, finalY + rowHeight);
+
+  // Display extra discount below the discount
+  doc.text(`Extra Discount: ${extraDiscount || 0} BDT`, rightX, finalY + 2 * rowHeight);
+
+  const payableAmount = totalAmount - (totalAmount * (discount || 0) / 100) - (extraDiscount || 0);
+  doc.text(`Payable Amount: ${payableAmount} BDT`, rightX, finalY + 3 * rowHeight);
+  doc.text(`Received: ${paidAmount || 0} BDT`, rightX, finalY + 4 * rowHeight);
+  doc.text(`Due Amount: ${dueAmount || 0} BDT`, rightX, finalY + 5 * rowHeight);
+};
+
 
     // Footer Section
     const footer = () => {

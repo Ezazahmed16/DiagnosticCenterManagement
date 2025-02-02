@@ -62,6 +62,7 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
       discount: data?.discount || 0,
       referredBy: data?.referredBy || "",
       memoTest: data?.memoTest || [],
+      extraDiscount: data?.extraDiscount || 0,
     },
   });
   const router = useRouter();
@@ -126,8 +127,9 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
   const totalCost = data?.totalAmount || selectedTests.reduce((sum, test) => sum + test.price, 0);
   const paidAmount = Number(watch("paidAmount") || 0);
   const discountPercentage = Number(watch("discount") || 0);
+  const extraDiscount = Number(watch("extraDiscount") || 0);
   const discountAmount = (totalCost * discountPercentage) / 100;
-  const finalAmount = totalCost - discountAmount;
+  const finalAmount = totalCost - (discountAmount + extraDiscount);
   const dueAmount = Math.max(0, finalAmount - paidAmount);
   const returnableAmount = Math.max(0, paidAmount - finalAmount);
 
@@ -151,9 +153,10 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
       dueAmount: dueAmount,
       paymentMethod: paymentMethod,
       referredById: formData.referredBy || null,
+      discountAmount: discountAmount,
     };
 
-
+console.log(prismaInput)
     try {
       if (type === "create") {
         await createMemo(prismaInput);
@@ -171,9 +174,6 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
       console.error(error);
     }
   };
-
-
-  // const availableTests = Array.isArray(relatedData?.tests) ? relatedData.tests : [];
 
   return (
     <form className="flex flex-col gap-2" onSubmit={handleSubmit(onSubmit)}>
@@ -278,25 +278,6 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
           <span className="text-xl text-gray-400 font-medium">Test Information</span>
 
           <div className="w-full flex justify-center gap-14">
-            {/* Available Tests List */}
-            {/* <div className="w-1/3">
-      <label className="text-xs text-gray-500 block">Available Tests</label>
-      <div className="border rounded-md h-48 overflow-y-auto">
-        {availableTests.length ? (
-          availableTests.map((test: Test) => (
-            <div
-              key={test.id}
-              className="p-2 cursor-pointer hover:bg-gray-200 text-xs"
-              onDoubleClick={() => handleAddTest(test.id)}
-            >
-              {test.name} - ${test.price}
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-500 text-center p-2">No tests available</p>
-        )}
-      </div>
-    </div> */}
 
             {/* Available Tests List with Search Filter */}
             <div className="w-1/3">
@@ -406,11 +387,18 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
           error={errors.paidAmount}
         />
         <InputFields
-          label="Discount"
+          label="Discount(%)"
           name="discount"
           type="number"
           register={register("discount", { valueAsNumber: true })}
           error={errors.discount}
+        />
+        <InputFields
+          label="Extra Discount"
+          name="extraDiscount"
+          type="number"
+          register={register("extraDiscount", { valueAsNumber: true })}
+          error={errors.extraDiscount}
         />
         <div className="flex flex-col">
           <label className="text-xs text-gray-500 block m-1">Due</label>
