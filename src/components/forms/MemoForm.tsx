@@ -386,13 +386,13 @@ console.log(prismaInput)
           register={register("paidAmount", { valueAsNumber: true })}
           error={errors.paidAmount}
         />
-        <InputFields
+        {/* <InputFields
           label="Discount(%)"
           name="discount"
           type="number"
           register={register("discount", { valueAsNumber: true })}
           error={errors.discount}
-        />
+        /> */}
         <InputFields
           label="Extra Discount"
           name="extraDiscount"

@@ -59,7 +59,7 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       doc.setTextColor(0, 123, 255);
 
       // Set font size
-      doc.setFontSize(10);
+      doc.setFontSize(12);
 
       // Add the text (centered below the logo)
       doc.text("Alok Health Care and Diagnostic Solution", centerX, textY, {
@@ -92,10 +92,11 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       doc.text(`Date: ${createdDate}`, boxX + 40, boxY + 5);
 
       doc.text(`Name: ${Patient?.name || "N/A"}`, boxX + 2, boxY + 10);
-      doc.text(`Age: ${patientAge}`, boxX + 32, boxY + 10);
-      doc.text(`Sex: ${patientGender}`, boxX + 50, boxY + 10);
 
       doc.text(`Contact: ${Patient?.phone || "N/A"}`, boxX + 2, boxY + 15);
+      doc.text(`Age: ${patientAge}`, boxX + 40, boxY + 15);
+      doc.text(`Sex: ${patientGender}`, boxX + 60, boxY + 15);
+
       doc.text(`Refd By: ${referredBy?.name || "N/A"}`, boxX + 2, boxY + 20);
     };
 
@@ -132,44 +133,55 @@ const RenderPrintButton = ({ item }: { item: any }) => {
       });
     };
 
-// Summary Section
-const summary = () => {
-  const finalY = (doc as any).previousAutoTable.finalY + 5;
-  const { totalAmount, paidAmount, dueAmount, discount, paymentMethod, extraDiscount } = item;
+    // Summary Section
+    const summary = () => {
+      const finalY = (doc as any).previousAutoTable.finalY + 5;
 
-  const leftX = 10;
-  const rightX = 60;
-  const rowHeight = 5;
+      const {
+        totalAmount,
+        paidAmount,
+        dueAmount,
+        discount,
+        paymentMethod,
+        extraDiscount
+      } = item;
 
-  const paymentStatus = paymentMethod === "PAID" ? "PAID" : "DUE";
-  const statusColor = paymentMethod === "PAID" ? [0, 128, 0] : [255, 0, 0];
-  const boxWidth = 30;
-  const boxHeight = 10;
+      const leftX = 10;
+      const rightX = 60;
+      const rowHeight = 5;
 
-  // Draw the payment status box
-  doc.setDrawColor(statusColor[0], statusColor[1], statusColor[2]);
-  doc.setLineWidth(0.5);
-  doc.rect(leftX, finalY, boxWidth, boxHeight);
+      const paymentStatus = paymentMethod === "PAID" ? "PAID" : "DUE";
+      const statusColor = paymentMethod === "PAID" ? [0, 128, 0] : [255, 0, 0];
 
-  const textX = leftX + boxWidth / 2;
-  const textY = finalY + boxHeight / 2 + 3;
-  doc.setFontSize(10);
-  doc.setTextColor(0);
-  doc.text(paymentStatus, textX, textY, { align: "center" });
+      const boxWidth = 30;
+      const boxHeight = 10;
 
-  // Display the financial details
-  doc.setFontSize(8);
-  doc.text(`Total Amount: ${totalAmount} BDT`, rightX, finalY);
-  doc.text(`Discount: ${discount || 0} %`, rightX, finalY + rowHeight);
+      // Draw the payment status box
+      doc.setDrawColor(statusColor[0], statusColor[1], statusColor[2]);
+      doc.setLineWidth(0.5);
+      doc.rect(leftX, finalY, boxWidth, boxHeight);
 
-  // Display extra discount below the discount
-  doc.text(`Extra Discount: ${extraDiscount || 0} BDT`, rightX, finalY + 2 * rowHeight);
+      const textX = leftX + boxWidth / 2;
+      const textY = finalY + boxHeight / 2 + 3;
 
-  const payableAmount = totalAmount - (totalAmount * (discount || 0) / 100) - (extraDiscount || 0);
-  doc.text(`Payable Amount: ${payableAmount} BDT`, rightX, finalY + 3 * rowHeight);
-  doc.text(`Received: ${paidAmount || 0} BDT`, rightX, finalY + 4 * rowHeight);
-  doc.text(`Due Amount: ${dueAmount || 0} BDT`, rightX, finalY + 5 * rowHeight);
-};
+      doc.setFontSize(10);
+      doc.setTextColor(0);
+      doc.text(paymentStatus, textX, textY, { align: "center" });
+
+      // Display the financial details
+      doc.setFontSize(8);
+      doc.text(`Total Amount: ${totalAmount} BDT`, rightX, finalY + 1 * rowHeight);
+
+      doc.text(`Discount: ${extraDiscount || 0} BDT`, rightX, finalY + 2 * rowHeight);
+
+      const payableAmount =
+        totalAmount - (totalAmount * (discount || 0) / 100) - (extraDiscount || 0);
+
+      doc.text(`Payable Amount: ${payableAmount} BDT`, rightX, finalY + 3 * rowHeight);
+      doc.text(`Received: ${paidAmount || 0} BDT`, rightX, finalY + 4 * rowHeight);
+      doc.text(`Due Amount: ${dueAmount || 0} BDT`, rightX, finalY + 5 * rowHeight);
+    };
+
 
 
     // Footer Section

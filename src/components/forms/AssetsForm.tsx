@@ -156,7 +156,7 @@ const AssetsForm = ({
                     {({ open }) => (
                         <button
                             type="button"
-                            className="flex flex-row gap-2 w-full md:w-1/4 justify-center btn bg-gray-200 text-black p-2 rounded-md font-bold items-center"
+                            className="flex flex-row gap-2 w-full md:w-2/4 justify-center btn bg-gray-200 text-black p-2 rounded-md font-bold items-center"
                             onClick={() => open()}
                         >
                             <Image src="/upload.png" alt="Upload" width={32} height={32} />
