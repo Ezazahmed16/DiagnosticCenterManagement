@@ -18,7 +18,7 @@ export type PatientSchema = z.infer<typeof patientSchema>;
 // Memo schema
 export const memoSchema = z.object({
     id: z.string().uuid().optional(),
-    memoNo: z.number().int().min(1000, { message: "Memo number must start from 1000!" }).optional(),
+    memoNo: z.number().int().optional(),
     name: z.string().min(3, { message: "Patient name must be at least 3 characters long!" }),
     phone: z.string().min(10, { message: "Phone number must be at least 10 digits long!" }),
     gender: z.enum(["MALE", "FEMALE", "OTHER"], { message: "Gender is required!" }),

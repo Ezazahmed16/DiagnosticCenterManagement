@@ -60,7 +60,7 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
       ...data,
       paidAmount: data?.paidAmount || 0,
       discount: data?.discount || 0,
-      referredBy: data?.referredBy || "",
+      referredBy: data?.referredBy || null,
       memoTest: data?.memoTest || [],
       extraDiscount: data?.extraDiscount || 0,
     },
@@ -156,7 +156,7 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
       discountAmount: discountAmount,
     };
 
-console.log(prismaInput)
+
     try {
       if (type === "create") {
         await createMemo(prismaInput);
@@ -193,6 +193,13 @@ console.log(prismaInput)
               hidden
             />
           )}
+          {/* <InputFields
+            label="Memo No"
+            name="memoNo"
+            register={register("memoNo")}
+            error={errors.memoNo}
+            hidden
+          /> */}
           <InputFields
             label="Patient Name"
             name="name"
@@ -377,6 +384,7 @@ console.log(prismaInput)
             register={register("totalAmount", { valueAsNumber: true })}
             error={errors.totalAmount}
             disabled
+            
           />
         )}
         <InputFields
@@ -386,15 +394,16 @@ console.log(prismaInput)
           register={register("paidAmount", { valueAsNumber: true })}
           error={errors.paidAmount}
         />
-        {/* <InputFields
+        <InputFields
           label="Discount(%)"
           name="discount"
           type="number"
           register={register("discount", { valueAsNumber: true })}
           error={errors.discount}
-        /> */}
+          hidden
+        />
         <InputFields
-          label="Extra Discount"
+          label="Discount"
           name="extraDiscount"
           type="number"
           register={register("extraDiscount", { valueAsNumber: true })}
@@ -402,15 +411,15 @@ console.log(prismaInput)
         />
         <div className="flex flex-col">
           <label className="text-xs text-gray-500 block m-1">Due</label>
-          <input type="text" value={dueAmount} readOnly className="p-2 border rounded-md" />
+          <input type="text" value={dueAmount} readOnly className="p-2 border rounded-md bg-slate-200" />
         </div>
         <div className="flex flex-col">
           <label className="text-xs text-gray-500 block m-1">Returnable</label>
-          <input type="text" value={returnableAmount} readOnly className="p-2 border rounded-md" />
+          <input type="text" value={returnableAmount} readOnly className="p-2 border rounded-md  bg-slate-200" />
         </div>
         <div className="flex flex-col">
           <label className="text-xs text-gray-500 block m-1">Payment Status</label>
-          <input type="text" value={paymentMethod} readOnly className="p-2 border rounded-md" />
+          <input type="text" value={paymentMethod} readOnly className="p-2 border rounded-md  bg-slate-200" />
         </div>
       </div>
 

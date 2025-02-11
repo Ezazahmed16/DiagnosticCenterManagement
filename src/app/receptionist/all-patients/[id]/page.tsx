@@ -42,6 +42,7 @@ export default async function SinglePatientPage({ params }: { params: { id: stri
         where: { patientId },
         select: {
             id: true,
+            memoNo: true,
             totalAmount: true,
             paymentMethod: true,
             createdAt: true,
@@ -65,7 +66,7 @@ export default async function SinglePatientPage({ params }: { params: { id: stri
     // Render table row for each memo
     const renderRow = (item: any) => (
         <tr key={item.id} className="border-b text-md">
-            <td>{item.id}</td>
+            <td>{item.memoNo}</td>
             <td>{item.totalAmount}</td>
             <td>
                 <p className={`w-min p-2 rounded-full ${item.paymentMethod === "DUE" ? "bg-red-600" : "bg-success"} text-white`}>
