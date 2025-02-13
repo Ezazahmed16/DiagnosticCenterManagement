@@ -14,10 +14,6 @@ import { auth } from "@clerk/nextjs/server";
 // Table Columns definition
 const columns = [
   {
-    header: "ID",
-    accessor: "id",
-  },
-  {
     header: "Title",
     accessor: "name",
   },
@@ -54,9 +50,9 @@ const columns = [
 // Row rendering function that depends on the user's role
 const renderRow = (item: Asset, role: string) => (
   <tr key={item.id} className="border-b text-sm">
-    <td>{item.id}</td>
+    {/* <td>{item.id}</td> */}
     <td>{item.name}</td>
-    <td>{item.description}</td>
+    <td className="max-w-14">{item.description}</td>
     <td>{item.amount}</td>
     <td>{item.qty}</td>
     <td>{item.value}</td>
@@ -70,14 +66,14 @@ const renderRow = (item: Asset, role: string) => (
           </button>
         </Link>
         {role === "admin" && (
-          <button className="w-7 h-7 flex items-center justify-center rounded-full">
+          <div className="w-7 h-7 flex items-center justify-center rounded-full">
             <FormModal table="AssetsData" type="update" data={item} />
-          </button>
+          </div>
         )}
         {role === "admin" && (
-          <button className="w-8 h-8 flex items-center justify-center rounded-full">
+          <div className="w-8 h-8 flex items-center justify-center rounded-full">
             <FormModal table="AssetsData" type="delete" id={item.id} />
-          </button>
+          </div>
         )}
       </div>
     </td>

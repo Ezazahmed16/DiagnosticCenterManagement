@@ -6,8 +6,10 @@ import React from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
+  manifest: "/manifest.json",
   title: "Alok Health Care - CRM For Diagnostic Centers",
   description:
     "Alok Health Care is a CRM for Diagnostic Centers. It helps you manage your patients, appointments, and reports.",
@@ -21,10 +23,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <head>
+        {/* <head>
           <meta name="description" content={metadata.description} />
           <meta name="title" content={metadata.title} />
-        </head>
+        </head> */}
         <body className="dark:bg-boxdark-2 dark:text-bodydark">
           <div className="min-h-screen">
             <ToastContainer position="bottom-right" theme="dark" />

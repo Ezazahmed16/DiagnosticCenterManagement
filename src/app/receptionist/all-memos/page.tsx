@@ -53,16 +53,16 @@ const renderRow = (item: any, role: string) => (
             <FaRegEye size={18} />
           </button>
         </Link>
-        <button className="w-7 h-7 flex items-center justify-center rounded-full">
+        <div className="w-7 h-7 flex items-center justify-center rounded-full">
           <FormContainer table="memoData" type="update" data={item} />
-        </button>
+        </div>
         <div className="">
           <RenderPrintButton item={item} />
         </div>
         {role === "admin" && (
-          <button className="w-8 h-8 flex items-center justify-center rounded-full">
+          <div className="w-8 h-8 flex items-center justify-center rounded-full">
             <FormContainer table="memoData" type="delete" id={item.id} />
-          </button>
+          </div>
         )}
       </div>
     </td>
@@ -107,12 +107,12 @@ const AllMemosPage = async ({ searchParams }: { searchParams: { [key: string]: s
           <h1 className="text-lg font-semibold">All Memos</h1>
           <div className="flex justify-center items-center gap-2">
             <TableSearch />
-            <button
+            <div
               className="inline-flex items-center justify-center gap-1.5 border border-white bg-primary dark:bg-transparent px-4 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 rounded-full"
             >
               <FormContainer table="memoData" type="create" data='' />
               Add
-            </button>
+            </div>
           </div>
         </div>
         {memo.length === 0 ? (

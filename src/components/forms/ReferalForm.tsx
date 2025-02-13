@@ -31,14 +31,14 @@ const ReferralForm = ({
       payments: [],
     },
   });
-console.log(relatedData)
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: "payments",
   });
 
   const router = useRouter();
-
+  
   const onSubmit = async (formData: ReferredBySchema) => {
     console.log(formData)
     try {
@@ -111,9 +111,9 @@ console.log(relatedData)
           type === "update" &&
           <InputFields
             label="Total Amount"
-            name="totalAmmount"
-            register={register("totalAmmount", { valueAsNumber: true })}
-            error={errors.totalAmmount}
+            name="totalAmount"
+            register={register("totalAmount", { valueAsNumber: true })}
+            error={errors.totalAmount}
             disabled
           />
         }

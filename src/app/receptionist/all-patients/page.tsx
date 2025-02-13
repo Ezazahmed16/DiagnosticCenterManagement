@@ -14,7 +14,7 @@ import { auth } from "@clerk/nextjs/server";
 import dynamic from "next/dynamic";
 
 const columns = [
-  { header: "Patient ID", accessor: "patientId" },
+  // { header: "Patient ID", accessor: "patientId" },
   { header: "Name", accessor: "name" },
   { header: "Phone", accessor: "phone" },
   { header: "Address", accessor: "address" },
@@ -24,7 +24,7 @@ const columns = [
 
 const renderRow = (item: Patient & { memo: Memo[] }, role: string) => (
   <tr key={item.id} className="border-b text-sm hover:bg-lamaPurpleLight">
-    <td>{item.id}</td>
+    {/* <td>{item.id}</td> */}
     <td>{item.name}</td>
     <td>{item.phone}</td>
     <td>{item.address}</td>
