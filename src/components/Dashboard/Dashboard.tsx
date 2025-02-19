@@ -1,61 +1,47 @@
 'use server';
-import dynamic from "next/dynamic";
 import React from "react";
-import CardDataStats from "../CardDataStats";
 import { FaMoneyCheck, FaUserTie } from "react-icons/fa";
 import { GiExpense } from "react-icons/gi";
 import { PiMathOperationsFill } from "react-icons/pi";
+import CardDataStats from "../CardDataStats";
 import prisma from "@/lib/prisma";
+import { MdVideogameAsset } from "react-icons/md";
 
 const Dashboard: React.FC = async () => {
-  const userCount = await prisma.patient?.count();
+  // Fetch total patient count
+  const userCount = await prisma.patient?.count() ?? 0;
 
-  // Fetch total income
-  const totalIncome = await prisma.memo.aggregate({
-    _sum: {
-      totalAmount: true,
-    },
-  });
-
-
-  // Fetch total expense
-  const totalExpense = await prisma.expense.aggregate({
-    _sum: {
-      amount: true,
-    },
-  });
-
-  // Ensure null values are handled
-  const totalIncomeAmount = totalIncome._sum?.totalAmount ?? 0; // Default to 0 if null
-  const totalExpenseAmount = totalExpense._sum?.amount ?? 0; // Default to 0 if null
+  // Fetch aggregates with null-safe defaults
+  const totalIncomeAmount = (await prisma.memo.aggregate({ _sum: { totalAmount: true } }))._sum?.totalAmount ?? 0;
+  const totalExpenseAmount = (await prisma.expense.aggregate({ _sum: { amount: true } }))._sum?.amount ?? 0;
+  const totalAssetAmount = (await prisma.asset.aggregate({ _sum: { amount: true } }))._sum?.amount ?? 0;
 
   // Calculate profit
   const profit = totalIncomeAmount - totalExpenseAmount;
 
   return (
-    <>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
-        <CardDataStats title="Total Patient" total={String(userCount)} rate="">
-          <FaUserTie />
-        </CardDataStats>
-        <CardDataStats title="Total Income" total={String(totalIncomeAmount)} rate="">
-          <PiMathOperationsFill />
-        </CardDataStats>
-        <CardDataStats
-          title="Total Expense"
-          total={String(totalExpenseAmount)}
-          rate=""
-        >
-          <GiExpense />
-        </CardDataStats>
-        <CardDataStats title="Total Profit" total={String(profit)} rate="">
-          <FaMoneyCheck />
-        </CardDataStats>
-      </div>
-    </>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-5 2xl:gap-7.5">
+      <CardDataStats title="Total Patients" total={userCount.toString()} rate="">
+        <FaUserTie />
+      </CardDataStats>
+
+      <CardDataStats title="Total Income" total={`${totalIncomeAmount.toLocaleString()}`} rate="">
+        <PiMathOperationsFill />
+      </CardDataStats>
+
+      <CardDataStats title="Total Expense" total={`${totalExpenseAmount.toLocaleString()}`} rate="">
+        <GiExpense />
+      </CardDataStats>
+
+      <CardDataStats title="Total Assets" total={`${totalAssetAmount.toLocaleString()}`} rate="">
+        <MdVideogameAsset />
+      </CardDataStats>
+
+      <CardDataStats title="Total Profit" total={`${profit.toLocaleString()}`} rate="">
+        <FaMoneyCheck />
+      </CardDataStats>
+    </div>
   );
 };
 
 export default Dashboard;
-
-

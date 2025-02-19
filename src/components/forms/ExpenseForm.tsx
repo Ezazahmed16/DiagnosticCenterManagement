@@ -108,13 +108,17 @@ const ExpenseForm = ({
                     )}
                 </div>
 
-                <InputFields
-                    label="Date"
-                    name="date"
-                    type="date"
-                    register={register("date")}
-                    error={errors.date}
-                />
+                {
+                    type === "create" && (
+                        <InputFields
+                            label="Date"
+                            name="date"
+                            type="date"
+                            register={register("date")}
+                            error={errors.date}
+                        />
+                    )
+                }
             </div>
 
             <div>
