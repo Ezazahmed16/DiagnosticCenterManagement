@@ -1,134 +1,90 @@
-# TailAdmin Next.js - Free Next.js Tailwind Admin Dashboard Template
+# 🏥 Alok Health Care - Diagnostic Management System
 
-TailAdmin is a free and open-source admin dashboard template built on **Next.js and Tailwind CSS** providing developers with everything they need to create a feature-rich and data-driven: back-end, dashboard, or admin panel solution for any sort of web project.
+Welcome to **Alok Health Care**, a robust and scalable diagnostic management system crafted to optimize operations for diagnostic centers. This project highlights my expertise in developing full-stack applications with modern web technologies, ensuring seamless user experiences, data integrity, and operational efficiency. I designed and implemented this software to address real-world healthcare management challenges while prioritizing maintainability, scalability, and performance.
 
-[![tailwind nextjs admin template](https://github.com/TailAdmin/free-nextjs-admin-dashboard/blob/main/tailadmin-nextjs.jpg)](https://nextjs-demo.tailadmin.com/)
+> 🚀 *This project serves as a testament to my technical proficiency, problem-solving capabilities, and commitment to delivering impactful software solutions.*
 
-With TailAdmin Next.js, you get access to all the necessary dashboard UI components, elements, and pages required to build a high-quality and complete dashboard or admin panel. Whether you're building a dashboard or admin panel for a complex web application or a simple website. 
+---
 
-TailAdmin utilizes the powerful features of **Next.js 14** and common features of Next.js such as server-side rendering (SSR), static site generation (SSG), and seamless API route integration. Combined with the advancements of **React 18** and the robustness of **TypeScript**, TailAdmin is the perfect solution to help get your project up and running quickly.
+## 🌟 Key Features
+- **👨‍⚕️ Patient Management:** Effortlessly register and manage patient data.
+- **📝 Memo Management:** Create and edit memos with dynamic test selection, referrals, performer assignments, and real-time payment calculations.
+- **🔬 Test Management:** Maintain a comprehensive catalog of diagnostic tests and pricing.
+- **💵 Expense Tracking:** Record and categorize expenses with detailed breakdowns.
+- **📊 Revenue Visualization:** Interactive monthly and yearly revenue charts with filters.
+- **📱 PWA Support:** Installable web app with offline capabilities for improved accessibility.
+- **🔒 Secure Deployment:** VPS-hosted with controlled access, transitioning to domain deployment after stability checks.
 
-### [✨ Visit Website](https://tailadmin.com/)
-### [🚀 PRO Demo](https://nextjs-demo.tailadmin.com/)
-### [🚀 FREE Demo](https://nextjs-free-demo.tailadmin.com/)
+---
 
-### TailAdmin Next.js PRO vs TailAdmin Next.js FREE Comparison 📊
+## 🛠️ Tech Stack & Tools
+| **Category** | **Technologies Used** |
+|--------------|------------------------|
+| Frontend     | React, Tailwind CSS, Recharts |
+| Forms & Validation | React Hook Form, Zod |
+| Backend      | TypeScript, Prisma ORM |
+| Database     | PostgreSQL |
+| Deployment   | VPS Hosting |
+| PWA Features | Web Manifest, Service Workers |
 
-#### [TailAdmin Next.js PRO](https://nextjs-demo.tailadmin.com/)
-- 5 Unique Dashboards: Analytics, Ecommerce, Marketing, and CRM (More will be added)
-- 150+ Dashboard UI Components
-- 200+ Total UI Elements
-- 45+ HTML Files
-- All Essential Elements and Files
-- Full Figma Design Source - As Shown on Demo
-___
+---
 
-#### [TailAdmin Next.js FREE](https://free-nextjs-demo.tailadmin.com/)
-- 1 Unique Dashboard
-- 30+ Dashboard UI Components
-- 50+ Total UI Elements 
-- 10+ HTML Files
-- TypeScript Support
-- Basic UI Kit Elements and Files
-- Figma Design Source - Free Sample
-___
-
-### [⬇️ Download Now](https://tailadmin.com/download)
-
-### [⚡ Get PRO Version](https://tailadmin.com/pricing)
-
-### [📄 Documentation/Installation](https://tailadmin.com/docs)
-
-### [🖌️ TailAdmin Figma Free Sample](https://www.figma.com/community/file/1214477970819985778)
-
-### [👉 TailAdmin HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
-
-
-## Installation
-Here are the steps you need to follow to install the dependencies.
-
-1. Download and extract the template from Next.js Templates.
-
-2. After that **cd** into the template directory then run this command to install all the dependencies
-
+## 📊 Revenue Calculation Formula
 ```
-npm install
+Revenue = totalIncomeAmount - totalExpenseAmount - totalAssets
 ```
-or
+Users can filter revenue data to analyze monthly and yearly trends directly from the dashboard.
 
+---
+
+## 🗂️ Project Structure (Overview)
 ```
-yarn install
+/alok-health-care
+├── components
+│   ├── RevenueChart.tsx       # Revenue visualization with filters
+│   ├── MemoForm.tsx           # Dynamic memo creation/update form
+│   └── ExpenseForm.tsx        # Expense tracking form
+├── prisma
+│   └── schema.prisma          # Database models (Patient, Test, Memo, Expense, ExpenseType)
+├── pages
+│   └── dashboard.tsx          # Dashboard with revenue monitoring
+└── public
+    └── manifest.json          # PWA configuration
 ```
 
-3. Now run this command to start the developement server
+---
 
-```
-npm run dev
-```
+## 🚀 Deployment Details
+- **Current Status:** Deployed on a VPS with IP-based access restrictions for admin review.
+- **Next Steps:** Transitioning to a public domain after successful stability and configuration testing.
 
-or 
+---
 
-```
-yarn dev
-```
+## 📖 Why This Project Stands Out 🏆
+- ✅ **Real-world application**: Designed for a functioning diagnostic center with live data and user feedback.
+- ✅ **Full-stack expertise**: Built end-to-end with attention to frontend responsiveness and backend robustness.
+- ✅ **Modern tech integration**: Utilized best practices in form handling, validation, and database management.
+- ✅ **Performance-focused**: Optimized for smooth operations, quick load times, and minimal downtime.
+- ✅ **User-centric design**: Prioritized ease of use with clear navigation and accessible features.
 
+---
 
-## Free Admin Dashboard Template for Next.js Built-with Tailwind CSS, React 18 and TypeScript
-TailAdmin Next.js is a free dashboard template, which uses Tailwind CSS, is a great starting point for dashboard UI. This template uses the Next.js JavaScript framework and the easy-to-use Tailwind CSS framework. The Tailwind CSS and Next.js Dashboard Template comes with ready-made components like navigation menus, charts, tables, and forms. These components can be easily adjusted and added to any Next.js web application.
+## 💼 About Me
+I am a dedicated software developer passionate about solving real-world problems through technology. This project showcases my ability to handle full-cycle software development, from conception to deployment. I continuously seek opportunities to apply my skills in impactful projects and innovative teams.
 
-TailAdmin for Next.js provides all essential Next.js + Tailwind CSS UI components that can be copied and pasted directly into your dashboard projects. The range of components includes charts, graphs, navbars, tabs, buttons, cards, tables, profiles, forms, modals, app pages, calendars, web app example templates, and more, all coded for Next.js React and styled using Tailwind CSS.
+---
 
-If you're on the hunt for a top-quality Next.js-Tailwind Dashboard, Admin Panel Template, or UI Kit, TailAdmin is the perfect choice for you!
+## 🤝 Let’s Connect
+- **LinkedIn:** [Your LinkedIn Profile](#)
+- **Portfolio:** [Your Portfolio Link](#)
+- **Email:** [Your Email Address](#)
 
-### 📄 License
-TailAdmin Next.js Free is 100% free and open-source; feel free to use it with your personal and commercial projects.
+---
 
-### 💜 Support
-If you like the template, please star this repository to inspire the team to create more stuff like this and reach more users like you!
+## 📢 Final Thoughts
+If you’re looking for a developer who can deliver robust solutions, adapt to evolving requirements, and maintain high coding standards, I’d love to connect! Alok Health Care is more than just a project—it's a demonstration of my dedication to excellence in software development.
 
+---
 
-## Update Logs
+© 2025 Alok Health Care - Diagnostic Management System
 
-### Version 1.3.4 - [July 01, 2024]
-
-#### Issues
-
-- **Issues 01:** JSvectormap rendering issue resolved.
-
-### Version 1.3.3 - [June 20, 2024]
-
-#### Issues
-
-- **Issues 01:** Fixed Not building when Loader component removed
-
-### Version 1.3.2 - [June 19, 2024]
-
-#### Enhancements
-
-- **Enhancement 01:** Add ClickOutside Component for reduce repeated functionality in Header Message, Notification and User Dropdowns
-- **Enhancement 02:** Remove Repeated code from Sidebar Menu and Refactor Sidebar Components
-- **Enhancement 03:** Update Jsvectormap Package and it's imports for latest changes
-
-### Version 1.3.1 - [Feb 12, 2024]
-
-#### Issues
-
-- **Issues 01:** Fix Misspelling issue [Default Layout/Layouts].
-
-#### Enhancements
-- **Enhancement 01:** Update style.css
-
-### Version 1.3.0 - [Feb 05, 2024]
-
-#### Enhancements
-
-- **Enhancement 01:** Update Next.js into version 14
-- **Enhancement 02:** Integrate flatpickr in [Date Picker/Form Elements]
-- **Enhancement 03:** Change color after select an option [Select Element/Form Elements].
-- **Enhancement 04:** Make it functional [Multiselect Dropdown/Form Elements].
-- **Enhancement 05:** Make best value editable [Pricing Table One/Pricing Table].
-- **Enhancement 06:** Add Default Layout Component and make App/Layout more clean and use it in every pages.
-
-### Version 0.1.0 - Initial Release - [Aug 3, 2023]
-
-- Initial release of TailAdmin Next.
