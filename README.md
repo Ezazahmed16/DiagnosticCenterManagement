@@ -31,7 +31,7 @@ Welcome to **Alok Health Care**, a robust and scalable diagnostic management sys
 
 ## 📊 Revenue Calculation Formula
 ```
-Revenue = totalIncomeAmount - totalExpenseAmount - totalAssets
+Revenue = totalIncomeAmount - ( totalExpenseAmount + totalAssets )
 ```
 Users can filter revenue data to analyze monthly and yearly trends directly from the dashboard.
 
