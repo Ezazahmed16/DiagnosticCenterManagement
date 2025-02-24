@@ -1,4 +1,5 @@
 'use server';
+
 import React from "react";
 import { FaMoneyCheck, FaUserTie } from "react-icons/fa";
 import { GiExpense } from "react-icons/gi";
@@ -11,7 +12,7 @@ import ExpenseChart from "./ExpenseChart";
 import MostExpenseChart from "./MostExpenseChart";
 
 const Dashboard: React.FC = async () => {
-  const userCount = (await prisma.patient?.count()) ?? 0;
+  const userCount = (await prisma.patient.count()) ?? 0; // Removed cacheStrategy
   const totalIncomeAmount = (await prisma.memo.aggregate({ _sum: { totalAmount: true } }))._sum?.totalAmount ?? 0;
   const totalExpenseAmount = (await prisma.expense.aggregate({ _sum: { amount: true } }))._sum?.amount ?? 0;
   const totalAssetAmount = (await prisma.asset.aggregate({ _sum: { amount: true } }))._sum?.amount ?? 0;
@@ -53,26 +54,20 @@ const Dashboard: React.FC = async () => {
 
   const expensesByType = await prisma.expense.groupBy({
     by: ["expenseTypeId"],
-    where: {
-      date: {
-        gte: startOfMonth,
-        lte: endOfMonth,
-      },
-    },
+    where: { date: { gte: startOfMonth, lte: endOfMonth } },
     _sum: { amount: true },
   });
 
   const expenseTypeIds = expensesByType.map(e => e.expenseTypeId);
-
   const expenseTypes = await prisma.expenseType.findMany({
     where: { id: { in: expenseTypeIds } },
     select: { id: true, name: true },
   });
 
-  const formattedExpenseTypeData = expensesByType.map(expense => {
-    const typeName = expenseTypes.find(type => type.id === expense.expenseTypeId)?.name ?? "Unknown";
-    return { name: typeName, value: expense._sum.amount ?? 0 };
-  });
+  const formattedExpenseTypeData = expensesByType.map(expense => ({
+    name: expenseTypes.find(type => type.id === expense.expenseTypeId)?.name ?? "Unknown",
+    value: expense._sum.amount ?? 0,
+  }));
 
   return (
     <>
@@ -84,7 +79,6 @@ const Dashboard: React.FC = async () => {
         <CardDataStats title="Total Profit" total={`${profit.toLocaleString()}`} rate=""><FaMoneyCheck /></CardDataStats>
       </div>
 
-      {/* Charts */}
       <div className="py-5">
         <IncomeChart data={formattedIncomeData} />
       </div>
