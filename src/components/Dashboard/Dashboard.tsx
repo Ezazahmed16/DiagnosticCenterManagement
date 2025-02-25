@@ -1,5 +1,3 @@
-'use server';
-
 import React from "react";
 import { FaMoneyCheck, FaUserTie } from "react-icons/fa";
 import { GiExpense } from "react-icons/gi";
