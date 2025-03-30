@@ -13,7 +13,7 @@ const MostExpenseChart: React.FC<MostExpenseChartProps> = ({ data }) => {
 
   return (
     <div className="w-full h-100 rounded-2xl shadow-lg p-4 text-gray-800 dark:text-white bg-white dark:bg-gray-900">
-      <h2 className="text-lg font-semibold mb-4 text-center">Most Expense</h2>
+      <h2 className="text-lg font-semibold mb-4 text-center">Yearly Expense Analysis</h2>
       {hasData ? (
         <ResponsiveContainer width="80%" height="80%" className="flex justify-center items-center mx-auto">
           <PieChart>
@@ -23,21 +23,21 @@ const MostExpenseChart: React.FC<MostExpenseChartProps> = ({ data }) => {
               nameKey="name"
               cx="50%"
               cy="50%"
-              outerRadius={70}  
+              outerRadius={70}
               label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
             >
               {data.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip 
-              contentStyle={{ backgroundColor: "#F9FAFB", borderColor: "#E5E7EB" }} 
-              labelStyle={{ color: "#374151" }} 
+            <Tooltip
+              contentStyle={{ backgroundColor: "#F9FAFB", borderColor: "#E5E7EB" }}
+              labelStyle={{ color: "#374151" }}
               itemStyle={{ color: "#374151" }}
               wrapperClassName="dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
             />
-            <Legend 
-              wrapperStyle={{ color: "#374151" }} 
+            <Legend
+              wrapperStyle={{ color: "#374151" }}
               className="dark:text-gray-100 text-sm"
             />
           </PieChart>

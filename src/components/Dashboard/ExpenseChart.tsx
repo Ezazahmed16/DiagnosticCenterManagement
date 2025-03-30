@@ -20,7 +20,7 @@ const ExpenseChart: React.FC<ExpenseChartProps> = ({ data }) => {
   return (
     <div className="w-full h-80 bg-white dark:bg-gray-900 rounded-2xl shadow-md p-4">
       <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
-        Monthly Expenses
+        Yearly Expenses
       </h2>
       <ResponsiveContainer width="90%" height="90%" className="justify-center items-center flex mx-auto">
         <BarChart
