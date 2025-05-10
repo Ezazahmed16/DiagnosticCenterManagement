@@ -10,6 +10,7 @@ import IncomeChart from "./IncomeChart";
 import ExpenseChart from "./ExpenseChart";
 import MostExpenseChart from "./MostExpenseChart";
 import { getDashboardData } from "@/lib/prismaUtils";
+import SyncStatus from "../SyncStatus";
 
 const Dashboard: React.FC = () => {
   const [data, setData] = useState<any>(null);
@@ -17,11 +18,25 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const dashboardData = await getDashboardData();
-      setData(dashboardData);
-      setLoading(false);
+      try {
+        const dashboardData = await getDashboardData();
+        setData(dashboardData);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
+    
     fetchData();
+    
+    // Refresh data when online status changes
+    const handleOnline = () => fetchData();
+    window.addEventListener('online', handleOnline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+    };
   }, []);
 
   if (loading) {
@@ -30,6 +45,10 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
+      <div className="flex justify-end mb-4">
+        <SyncStatus />
+      </div>
+    
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-5 2xl:gap-7.5">
         <CardDataStats title="Total Patients" total={data.userCount.toString()} rate=""><FaUserTie /></CardDataStats>
         <CardDataStats title="Total Income" total={`${data.totalIncomeAmount.toLocaleString()}`} rate=""><PiMathOperationsFill /></CardDataStats>

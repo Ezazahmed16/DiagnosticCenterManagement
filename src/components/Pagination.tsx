@@ -15,6 +15,31 @@ const Pagination = ({ page, count }: { page: number; count: number }) => {
         router.push(`${window.location.pathname}?${params.toString()}`);
     };
 
+    // Calculate which pages to show
+    const getVisiblePages = () => {
+        const pages = [];
+        const showPages = 7;
+        const halfShow = Math.floor(showPages / 2);
+
+        let start = Math.max(1, page - halfShow);
+        let end = Math.min(totalPages, start + showPages - 1);
+
+        // Adjust if we're near the end
+        if (end === totalPages) {
+            start = Math.max(1, end - showPages + 1);
+        }
+        // Adjust if we're near the start
+        if (start === 1) {
+            end = Math.min(totalPages, start + showPages - 1);
+        }
+
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
+
+        return pages;
+    };
+
     return (
         <div className="p-4 flex items-center justify-between text-gray-500">
             <button
@@ -28,21 +53,18 @@ const Pagination = ({ page, count }: { page: number; count: number }) => {
                 Prev
             </button>
             <div className="flex items-center gap-2 text-sm">
-                {Array.from({ length: totalPages }, (_, i) => {
-                    const pageIndex = i + 1;
-                    return (
-                        <button
-                            key={pageIndex}
-                            onClick={() => changePage(pageIndex)}
-                            className={`px-3 py-1 rounded-sm ${page === pageIndex
-                                    ? "bg-blue-500 text-white"
-                                    : "bg-gray-200 hover:bg-gray-300"
-                                }`}
-                        >
-                            {pageIndex}
-                        </button>
-                    );
-                })}
+                {getVisiblePages().map((pageIndex) => (
+                    <button
+                        key={pageIndex}
+                        onClick={() => changePage(pageIndex)}
+                        className={`px-3 py-1 rounded-sm ${page === pageIndex
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-200 hover:bg-gray-300"
+                            }`}
+                    >
+                        {pageIndex}
+                    </button>
+                ))}
             </div>
             <button
                 onClick={() => changePage(page + 1)}

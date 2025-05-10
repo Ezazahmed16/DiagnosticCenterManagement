@@ -7,6 +7,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Metadata } from "next";
+import OfflineAuthProvider from "@/components/OfflineAuthProvider";
 
 export const metadata: Metadata = {
   manifest: "/manifest.json",
@@ -30,7 +31,9 @@ export default function RootLayout({
         <body className="dark:bg-boxdark-2 dark:text-bodydark">
           <div className="min-h-screen">
             <ToastContainer position="bottom-right" theme="dark" />
-            {children}
+            <OfflineAuthProvider>
+              {children}
+            </OfflineAuthProvider>
           </div>
         </body>
       </html>
