@@ -22,21 +22,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        {/* <head>
-          <meta name="description" content={metadata.description} />
-          <meta name="title" content={metadata.title} />
-        </head> */}
-        <body className="dark:bg-boxdark-2 dark:text-bodydark">
-          <div className="min-h-screen">
+    <html lang="en">
+      <body className="dark:bg-boxdark-2 dark:text-bodydark">
+        <div className="min-h-screen">
+          <ClerkProvider>
             <ToastContainer position="bottom-right" theme="dark" />
             <OfflineAuthProvider>
               {children}
             </OfflineAuthProvider>
-          </div>
-        </body>
-      </html>
-    </ClerkProvider>
+          </ClerkProvider>
+        </div>
+      </body>
+    </html>
   );
 }
