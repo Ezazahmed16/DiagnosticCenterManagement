@@ -23,9 +23,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <meta name="theme-color" content="#000000" />
+      </head>
       <body className="dark:bg-boxdark-2 dark:text-bodydark">
         <div className="min-h-screen">
-          <ClerkProvider>
+          <ClerkProvider
+            appearance={{
+              baseTheme: undefined,
+              elements: {
+                formButtonPrimary: 'bg-primary hover:bg-primary/90',
+                footerActionLink: 'text-primary hover:text-primary/90',
+              },
+            }}
+          >
             <ToastContainer position="bottom-right" theme="dark" />
             <OfflineAuthProvider>
               {children}
