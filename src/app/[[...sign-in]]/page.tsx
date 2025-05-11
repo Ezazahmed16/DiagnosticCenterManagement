@@ -1,20 +1,24 @@
 'use client'
 
-import * as Clerk from '@clerk/elements/common'
-import * as SignIn from '@clerk/elements/sign-in'
-import { useUser } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { MdWifiOff } from 'react-icons/md'
-import Image from 'next/image'
+import { useSignIn } from "@clerk/nextjs";
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { MdWifiOff } from 'react-icons/md';
+import Image from 'next/image';
+import { toast } from 'react-toastify';
 
 export default function SignInPage() {
     const { isLoaded, isSignedIn, user } = useUser();
+    const { signIn, isLoaded: isSignInLoaded } = useSignIn();
     const router = useRouter();
     const [isOnline, setIsOnline] = useState(
         typeof navigator !== 'undefined' ? navigator.onLine : true
     );
+    const [identifier, setIdentifier] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const handleOnline = () => setIsOnline(true);
@@ -35,64 +39,102 @@ export default function SignInPage() {
         }
     }, [isLoaded, isSignedIn, user, router]);
 
+    const handleSignIn = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!isSignInLoaded) return;
+
+        setIsLoading(true);
+        try {
+            const result = await signIn.create({
+                identifier,
+                password,
+            });
+
+            if (result.status === "complete") {
+                // Sign in successful
+                toast.success("Sign in successful!");
+                // The session will be automatically set active by Clerk
+                // No need to manually set it
+            } else {
+                // Handle multi-factor authentication if needed
+                console.log("Multi-factor authentication required");
+            }
+        } catch (err: any) {
+            toast.error(err.errors?.[0]?.message || "Sign in failed. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="grid h-screen w-full flex-grow items-center bg-zinc-100 px-4 sm:justify-center">
             {isOnline ? (
-                <SignIn.Root>
-                    <SignIn.Step
-                        name="start"
-                        className="w-full space-y-6 rounded-2xl bg-white px-4 py-10 shadow-md ring-1 ring-black/5 sm:w-96 sm:px-8"
-                    >
-                        <header>
-                            {/* <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 40 40"
-                                className="mx-auto size-10 text-zinc-950"
-                                aria-hidden
-                            >
-                                <mask id="a" width="40" height="40" x="0" y="0" maskUnits="userSpaceOnUse">
-                                    <circle cx="20" cy="20" r="20" fill="#D9D9D9" />
-                                </mask>
-                                <g fill="currentColor" mask="url(#a)">
-                                    <path d="M43.5 3a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46V2ZM43.5 8a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46V7ZM43.5 13a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46v-1ZM43.5 18a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46v-1ZM43.5 23a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46v-1ZM43.5 28a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46v-1ZM43.5 33a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46v-1ZM43.5 38a.5.5 0 0 0 0-1v1Zm0-1h-46v1h46v-1Z" />
-                                    <path d="M27 3.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM25 8.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM23 13.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM21.5 18.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM20.5 23.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM22.5 28.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM25 33.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2ZM27 38.5a1 1 0 1 0 0-2v2Zm0-2h-46v2h46v-2Z" />
-                                </g>
-                            </svg> */}
-                            <Image src="/images/logo/logo.png" alt="Alok HealthCare Logo" className="mx-auto" height={64} width={64} />
-                            <h1 className="mt-4 text-xl font-medium tracking-tight text-zinc-950 text-center mx-auto">
-                                Sign in to Alok HealthCare
-                            </h1>
-                        </header>
-                        <Clerk.GlobalError className="block text-sm text-red-400" />
-                        <div>
-                            <Clerk.Field name="identifier" className="space-y-2">
-                                <Clerk.Label className="text-sm font-medium text-zinc-950">Username</Clerk.Label>
-                                <Clerk.Input
-                                    type="text"
-                                    required
-                                    className="w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 data-[invalid]:ring-red-400"
-                                />
-                                <Clerk.FieldError className="block text-sm text-red-400" />
-                            </Clerk.Field>
-                            <Clerk.Field name="password" className="space-y-2">
-                                <Clerk.Label className="text-sm  font-medium text-zinc-950">Password</Clerk.Label>
-                                <Clerk.Input
-                                    type="password"
-                                    required
-                                    className="w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 data-[invalid]:ring-red-400"
-                                />
-                                <Clerk.FieldError className="block text-sm text-red-400" />
-                            </Clerk.Field>
+                <div className="w-full space-y-6 rounded-2xl bg-white px-4 py-10 shadow-md ring-1 ring-black/5 sm:w-96 sm:px-8">
+                    <header>
+                        <div className="relative h-16 w-16 mx-auto">
+                            <Image 
+                                src="/images/logo/logo.png" 
+                                alt="Alok HealthCare Logo" 
+                                fill
+                                className="object-contain"
+                                priority
+                                sizes="(max-width: 768px) 64px, 64px"
+                                // onError={(e) => {
+                                //     // Fallback to a text logo if image fails to load
+                                //     const target = e.target as HTMLImageElement;
+                                //     target.style.display = 'none';
+                                //     const parent = target.parentElement;
+                                //     if (parent) {
+                                //         const fallback = document.createElement('div');
+                                //         fallback.className = 'text-2xl font-bold text-zinc-950';
+                                //         fallback.textContent = 'AHC';
+                                //         parent.appendChild(fallback);
+                                //     }
+                                // }}
+                            />
                         </div>
-                        <SignIn.Action
-                            submit
-                            className="w-full rounded-md bg-zinc-950 px-3.5 py-1.5 text-center text-sm font-medium text-white shadow outline-none ring-1 ring-inset ring-zinc-950 hover:bg-zinc-800 focus-visible:outline-[1.5px] focus-visible:outline-offset-2 focus-visible:outline-zinc-950 active:text-white/70"
+                        <h1 className="mt-4 text-xl font-medium tracking-tight text-zinc-950 text-center mx-auto">
+                            Sign in to Alok HealthCare
+                        </h1>
+                    </header>
+                    <form onSubmit={handleSignIn} className="space-y-4">
+                        <div className="space-y-2">
+                            <label htmlFor="identifier" className="text-sm font-medium text-zinc-950">
+                                Username or Email
+                            </label>
+                            <input
+                                id="identifier"
+                                type="text"
+                                value={identifier}
+                                onChange={(e) => setIdentifier(e.target.value)}
+                                required
+                                className="w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 data-[invalid]:ring-red-400"
+                                placeholder="Enter your username or email"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="password" className="text-sm font-medium text-zinc-950">
+                                Password
+                            </label>
+                            <input
+                                id="password"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                className="w-full rounded-md bg-white px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 data-[invalid]:ring-red-400"
+                                placeholder="Enter your password"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full rounded-md bg-zinc-950 px-3.5 py-2 text-center text-sm font-medium text-white shadow outline-none ring-1 ring-inset ring-zinc-950 hover:bg-zinc-800 focus-visible:outline-[1.5px] focus-visible:outline-offset-2 focus-visible:outline-zinc-950 disabled:bg-zinc-400"
                         >
-                            Sign In
-                        </SignIn.Action>
-                    </SignIn.Step>
-                </SignIn.Root>
+                            {isLoading ? 'Signing in...' : 'Sign In'}
+                        </button>
+                    </form>
+                </div>
             ) : (
                 <div className="w-full space-y-6 rounded-2xl bg-white px-4 py-10 shadow-md ring-1 ring-black/5 sm:w-96 sm:px-8">
                     <div className="flex flex-col items-center">
@@ -116,5 +158,5 @@ export default function SignInPage() {
                 </div>
             )}
         </div>
-    )
+    );
 }

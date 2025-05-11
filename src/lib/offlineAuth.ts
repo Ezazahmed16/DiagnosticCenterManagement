@@ -97,14 +97,8 @@ export async function verifyOfflineCredentials(email: string, password: string) 
     const user = await offlineDb.offlineUsers.where('email').equals(email).first();
     if (!user) return null;
     
-    // For demonstration, we're using a simplified password verification approach
-    // In a real app, you would use a more secure approach
-    // Here we're checking if the password matches the last 4 chars of the email username (before the @)
-    const emailUsername = email.split('@')[0];
-    const simplifiedPassword = emailUsername.slice(-4);
-    
-    // Check if password matches the simplified password or the default password (1234)
-    if (password === simplifiedPassword || password === '1234') {
+    // Check if password matches the hardcoded password
+    if (password === 'alokhealth25') {
       return {
         id: user.id,
         firstName: user.firstName,

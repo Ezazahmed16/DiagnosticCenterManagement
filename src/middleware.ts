@@ -1,26 +1,29 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+import { clerkMiddleware } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-// Public paths that don't require authentication
-const PUBLIC_PATHS = ['/', '/sign-in', '/offline-login', '/api/offline/sync'];
+// Define public paths that don't require authentication
+const PUBLIC_PATHS = ['/sign-in', '/offline-login', '/api/offline/sync'];
 
-// Specific routes that receptionist can access
+// Define paths accessible to receptionist
 const RECEPTIONIST_PATHS = [
   '/receptionist',
   '/receptionist/all-patients',
-  '/receptionist/all-memos'
+  '/receptionist/add-patient',
+  '/receptionist/patients',
+  '/receptionist/appointments',
+  '/receptionist/reports',
+  '/receptionist/settings'
 ];
 
-// Export the clerkMiddleware handler
-export default clerkMiddleware(async (auth, req) => {
-  // Add a header indicating this is handled by middleware
+export default clerkMiddleware(async (auth, req: NextRequest) => {
+  const { userId } = await auth();
   const response = NextResponse.next();
-  response.headers.set('x-middleware-cache', 'no-cache');
-  
-  // Check if the request has the offline flag in cookies
+
+  // Check if we're in offline mode
   const isOfflineMode = req.cookies.get('offline_mode')?.value === 'true';
   
-  // If in offline mode, skip Clerk auth and handle local auth
+  // If we're in offline mode
   if (isOfflineMode) {
     // Allow access to the offline-login page
     if (req.nextUrl.pathname === '/offline-login') {
@@ -64,26 +67,35 @@ export default clerkMiddleware(async (auth, req) => {
   }
   
   // If the path is public, allow access
-  if (PUBLIC_PATHS.some(path => req.nextUrl.pathname === path || 
-                      req.nextUrl.pathname.startsWith('/api/offline/sync'))) {
+  if (PUBLIC_PATHS.some(path => 
+    req.nextUrl.pathname === path || 
+    req.nextUrl.pathname.startsWith('/api/offline/sync')
+  )) {
     return response;
   }
   
   // For protected routes, check authentication with Clerk
-  const authObj = await auth();
-  
-  // If not authenticated, redirect to sign-in
-  if (!authObj?.userId) {
-    return NextResponse.redirect(new URL('/sign-in', req.url));
+  if (!userId) {
+    // If not authenticated and trying to access a protected route, redirect to sign-in
+    const signInUrl = new URL('/sign-in', req.url);
+    signInUrl.searchParams.set('redirect_url', req.url);
+    return NextResponse.redirect(signInUrl);
   }
   
   return response;
 });
 
+// Configure the middleware
 export const config = {
   matcher: [
-    '/((?!.*\\..*|_next).*)',
-    '/'
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    "/((?!_next/static|_next/image|favicon.ico|public/).*)",
   ],
 };
 

@@ -15,46 +15,115 @@ import SyncStatus from "../SyncStatus";
 const Dashboard: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const dashboardData = await getDashboardData();
-        setData(dashboardData);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
+    const handleOnline = () => {
+      setIsOffline(false);
+      fetchData();
     };
-    
-    fetchData();
-    
-    // Refresh data when online status changes
-    const handleOnline = () => fetchData();
+    const handleOffline = () => {
+      setIsOffline(true);
+      fetchData(); // This will now use offline data
+    };
+
     window.addEventListener('online', handleOnline);
-    
+    window.addEventListener('offline', handleOffline);
+
     return () => {
       window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, []);
 
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const dashboardData = await getDashboardData();
+      setData(dashboardData);
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      setError("Failed to load dashboard data. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   if (loading) {
-    return <div className="text-center py-10">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-10">
+        <div className="text-red-500 mb-4">{error}</div>
+        <button 
+          onClick={fetchData}
+          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-opacity-90"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="text-center py-10">
+        <div className="text-gray-500">No data available</div>
+      </div>
+    );
   }
 
   return (
     <>
+      {isOffline && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+          <p className="font-medium">You are currently offline</p>
+          <p className="text-sm">Showing data from local storage</p>
+        </div>
+      )}
+
       <div className="flex justify-end mb-4">
         <SyncStatus />
       </div>
-    
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-5 2xl:gap-7.5">
-        <CardDataStats title="Total Patients" total={data.userCount.toString()} rate=""><FaUserTie /></CardDataStats>
-        <CardDataStats title="Total Income" total={`${data.totalIncomeAmount.toLocaleString()}`} rate=""><PiMathOperationsFill /></CardDataStats>
-        <CardDataStats title="Total Expense" total={`${data.totalExpenseAmount.toLocaleString()}`} rate=""><GiExpense /></CardDataStats>
-        <CardDataStats title="Total Assets" total={`${data.totalAssetAmount.toLocaleString()}`} rate=""><MdVideogameAsset /></CardDataStats>
-        <CardDataStats title="Total Profit" total={`${data.profit.toLocaleString()}`} rate=""><FaMoneyCheck /></CardDataStats>
+        <CardDataStats 
+          title="Total Patients" 
+          total={data.userCount} 
+          icon={<FaUserTie />} 
+        />
+        <CardDataStats 
+          title="Total Income" 
+          total={data.totalIncomeAmount} 
+          icon={<PiMathOperationsFill />} 
+        />
+        <CardDataStats 
+          title="Total Expense" 
+          total={data.totalExpenseAmount} 
+          icon={<GiExpense />} 
+        />
+        <CardDataStats 
+          title="Total Assets" 
+          total={data.totalAssetAmount} 
+          icon={<MdVideogameAsset />} 
+        />
+        <CardDataStats 
+          title="Total Profit" 
+          total={data.profit} 
+          icon={<FaMoneyCheck />} 
+        />
       </div>
 
       <div className="py-5">

@@ -3,11 +3,10 @@ import "flatpickr/dist/flatpickr.min.css";
 import "@/css/satoshi.css";
 import "@/css/style.css";
 import React from "react";
-import { ClerkProvider } from "@clerk/nextjs";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Metadata } from "next";
-import OfflineAuthProvider from "@/components/OfflineAuthProvider";
+import ClerkProviderWrapper from "@/components/ClerkProviderWrapper";
 
 export const metadata: Metadata = {
   manifest: "/manifest.json",
@@ -22,21 +21,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        {/* <head>
-          <meta name="description" content={metadata.description} />
-          <meta name="title" content={metadata.title} />
-        </head> */}
-        <body className="dark:bg-boxdark-2 dark:text-bodydark">
+    <html lang="en">
+      <head>
+        <meta name="description" content={metadata.description || ""} />
+        <meta name="title" content={metadata.title?.toString() || ""} />
+      </head>
+      <body className="dark:bg-boxdark-2 dark:text-bodydark">
+        <ClerkProviderWrapper>
           <div className="min-h-screen">
             <ToastContainer position="bottom-right" theme="dark" />
-            <OfflineAuthProvider>
-              {children}
-            </OfflineAuthProvider>
+            {children}
           </div>
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProviderWrapper>
+      </body>
+    </html>
   );
 }

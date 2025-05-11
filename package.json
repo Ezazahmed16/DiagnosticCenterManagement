@@ -9,8 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@clerk/elements": "^0.22.1",
-    "@clerk/nextjs": "^6.9.1",
+    "@clerk/elements": "^0.22.23",
+    "@clerk/nextjs": "^6.19.2",
     "@ducanh2912/next-pwa": "^10.2.9",
     "@hookform/resolvers": "^3.9.1",
     "@prisma/client": "^6.0.1",
@@ -51,5 +51,10 @@
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
+  "resolutions": {
+    "@clerk/shared": "3.8.2",
+    "@clerk/elements": "0.22.23",
+    "@clerk/nextjs": "6.19.2"
   }
 }

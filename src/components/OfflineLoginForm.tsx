@@ -6,6 +6,7 @@ import { verifyOfflineCredentials, setActiveOfflineUser } from '@/lib/offlineAut
 import { offlineDb } from '@/lib/offlineDb';
 import { MdWifiOff, MdLockOutline, MdOutlineEmail } from 'react-icons/md';
 import type { OfflineUser } from '@/lib/offlineDb';
+import { toast } from 'react-toastify';
 
 export default function OfflineLoginForm() {
   const router = useRouter();
@@ -55,10 +56,13 @@ export default function OfflineLoginForm() {
           await offlineDb.offlineUsers.add(receptionistUser);
         }
         
-        console.log('Offline users initialized automatically');
+        console.log('Offline users initialized successfully');
         setIsInitialized(true);
+        toast.success('Offline mode ready');
       } catch (error) {
         console.error('Error initializing offline users:', error);
+        toast.error('Failed to initialize offline mode');
+        setError('Failed to initialize offline mode. Please try refreshing the page.');
       }
     };
 
@@ -67,12 +71,18 @@ export default function OfflineLoginForm() {
 
   const handleOfflineLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isInitialized) {
+      setError('Offline mode is not ready yet. Please wait...');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
     try {
       // Get all stored users
       const users = await offlineDb.offlineUsers.toArray();
+      console.log('Available offline users:', users);
       
       // First check if input matches any email
       let user = users.find((u: OfflineUser) => 
@@ -98,6 +108,7 @@ export default function OfflineLoginForm() {
 
       if (!user) {
         setError('User not found in offline storage');
+        toast.error('User not found');
         setIsLoading(false);
         return;
       }
@@ -106,7 +117,8 @@ export default function OfflineLoginForm() {
       const isPasswordValid = password === 'alokhealth25';
       
       if (!isPasswordValid) {
-        setError('Incorrect password.');
+        setError('Incorrect password');
+        toast.error('Incorrect password');
         setIsLoading(false);
         return;
       }
@@ -118,6 +130,8 @@ export default function OfflineLoginForm() {
       document.cookie = `offline_mode=true; path=/; max-age=86400`;
       document.cookie = `isOfflineAuthenticated=true; path=/; max-age=86400`;
       document.cookie = `offlineUserRole=${user.role}; path=/; max-age=86400`;
+      
+      toast.success('Offline login successful');
       
       // Determine where to redirect based on role
       if (user.role === 'admin') {
@@ -132,6 +146,7 @@ export default function OfflineLoginForm() {
     } catch (error) {
       console.error('Error during offline login:', error);
       setError('An error occurred during offline login');
+      toast.error('Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -147,6 +162,11 @@ export default function OfflineLoginForm() {
         <h1 className="mt-4 text-xl font-medium tracking-tight text-zinc-950">
           Sign in to continue
         </h1>
+        {!isInitialized && (
+          <p className="text-sm text-yellow-600 mt-2">
+            Initializing offline mode...
+          </p>
+        )}
       </div>
 
       {error && (
@@ -155,7 +175,7 @@ export default function OfflineLoginForm() {
         </div>
       )}
 
-      <form onSubmit={handleOfflineLogin} className="space-y-6">
+      <form onSubmit={handleOfflineLogin} className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium text-zinc-950">Username</label>
           <div className="relative">
@@ -165,7 +185,8 @@ export default function OfflineLoginForm() {
             <input
               type="text"
               required
-              className="w-full rounded-md bg-white pl-10 px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950"
+              disabled={!isInitialized}
+              className="w-full rounded-md bg-white pl-10 px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 disabled:bg-gray-100 disabled:cursor-not-allowed"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="alokhealthadmin or receptionist"
@@ -182,7 +203,8 @@ export default function OfflineLoginForm() {
             <input
               type="password"
               required
-              className="w-full rounded-md bg-white pl-10 px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950"
+              disabled={!isInitialized}
+              className="w-full rounded-md bg-white pl-10 px-3.5 py-2 text-sm outline-none ring-1 ring-inset ring-zinc-300 hover:ring-zinc-400 focus:ring-[1.5px] focus:ring-zinc-950 disabled:bg-gray-100 disabled:cursor-not-allowed"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
@@ -192,21 +214,20 @@ export default function OfflineLoginForm() {
 
         <button
           type="submit"
-          disabled={isLoading}
-          className="w-full rounded-md bg-zinc-950 px-3.5 py-1.5 text-center text-sm font-medium text-white shadow outline-none ring-1 ring-inset ring-zinc-950 hover:bg-zinc-800 focus-visible:outline-[1.5px] focus-visible:outline-offset-2 focus-visible:outline-zinc-950 disabled:bg-gray-400"
+          disabled={isLoading || !isInitialized}
+          className="w-full rounded-md bg-zinc-950 px-3.5 py-1.5 text-center text-sm font-medium text-white shadow outline-none ring-1 ring-inset ring-zinc-950 hover:bg-zinc-800 focus-visible:outline-[1.5px] focus-visible:outline-offset-2 focus-visible:outline-zinc-950 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Logging in...' : 'Sign In Offline'}
+          {isLoading ? 'Logging in...' : !isInitialized ? 'Initializing...' : 'Sign In Offline'}
         </button>
       </form>
 
-      {/* <div className="text-xs text-gray-500 mt-4">
+      <div className="text-xs text-gray-500 mt-4">
         <p className="mb-1">To use offline mode:</p>
         <ul className="list-disc pl-5 space-y-1">
           <li>Username: <strong>alokhealthadmin</strong> (admin) or <strong>receptionist</strong></li>
           <li>Password: <strong>alokhealth25</strong></li>
         </ul>
-      </div> */}
-
+      </div>
     </div>
   );
 } 
