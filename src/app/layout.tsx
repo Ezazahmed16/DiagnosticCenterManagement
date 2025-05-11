@@ -23,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+<<<<<<< HEAD
         <meta name="description" content={metadata.description || ""} />
         <meta name="title" content={metadata.title?.toString() || ""} />
       </head>
@@ -33,6 +34,28 @@ export default function RootLayout({
             {children}
           </div>
         </ClerkProviderWrapper>
+=======
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <meta name="theme-color" content="#000000" />
+      </head>
+      <body className="dark:bg-boxdark-2 dark:text-bodydark">
+        <div className="min-h-screen">
+          <ClerkProvider
+            appearance={{
+              baseTheme: undefined,
+              elements: {
+                formButtonPrimary: 'bg-primary hover:bg-primary/90',
+                footerActionLink: 'text-primary hover:text-primary/90',
+              },
+            }}
+          >
+            <ToastContainer position="bottom-right" theme="dark" />
+            <OfflineAuthProvider>
+              {children}
+            </OfflineAuthProvider>
+          </ClerkProvider>
+        </div>
+>>>>>>> 5925c4ff58a07d8bd391652aafae6dd7cd9ceb4e
       </body>
     </html>
   );
