@@ -68,9 +68,22 @@ const nextConfig = {
       },
     ],
   },
-  // Add this to help with the trace file issue
+  webpack: (config, { isServer }) => {
+    // Fix for Clerk vendor chunks issue
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    
+    return config;
+  },
+  // Remove the invalid trace option
   experimental: {
-    trace: false,
+    // trace: false, // This was causing the build warning
   },
 };
 

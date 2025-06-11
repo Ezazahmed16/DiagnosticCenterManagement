@@ -20,6 +20,7 @@ export default function OfflineAuthProvider({ children }: OfflineAuthProviderPro
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
   const [authChecked, setAuthChecked] = useState(false);
   const [isOfflineMode, setIsOfflineMode] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Monitor online/offline status
   useEffect(() => {
@@ -73,92 +74,100 @@ export default function OfflineAuthProvider({ children }: OfflineAuthProviderPro
   // Handle authentication and redirect as needed
   useEffect(() => {
     const checkAccess = async () => {
-      // Skip check if auth isn't loaded yet
-      if (!isLoaded && !isOfflineMode) return;
+      try {
+        // Skip check if auth isn't loaded yet
+        if (!isLoaded && !isOfflineMode) return;
 
-      // Check for public paths
-      if (PUBLIC_PATHS.includes(pathname)) {
-        setAuthChecked(true);
-        return;
-      }
+        // Check for public paths
+        if (PUBLIC_PATHS.includes(pathname)) {
+          setAuthChecked(true);
+          setIsInitialized(true);
+          return;
+        }
 
-      // When online, rely on Clerk auth
-      if (isOnline && !isOfflineMode) {
-        if (!isSignedIn) {
-          // If not signed in and not on sign-in page, redirect to sign-in
-          router.push('/sign-in');
-        } else {
-          // If signed in, check role-based access
-          const userRole = user?.publicMetadata.role as string;
-          
-          // First, handle initial redirect after sign in
-          if (pathname === '/') {
-            router.push(`/${userRole}`);
-            return;
-          }
-          
-          // Check if current path is allowed for user's role
-          let hasAccess = false;
-          for (const [route, allowedRoles] of Object.entries(routeAccessMap)) {
-            if (new RegExp(route).test(pathname) && allowedRoles.includes(userRole)) {
-              hasAccess = true;
-              break;
+        // When online, rely on Clerk auth
+        if (isOnline && !isOfflineMode) {
+          if (!isSignedIn) {
+            // If not signed in and not on sign-in page, redirect to sign-in
+            router.push('/sign-in');
+          } else {
+            // If signed in, check role-based access
+            const userRole = user?.publicMetadata.role as string;
+            
+            // First, handle initial redirect after sign in
+            if (pathname === '/') {
+              router.push(`/${userRole}`);
+              return;
+            }
+            
+            // Check if current path is allowed for user's role
+            let hasAccess = false;
+            for (const [route, allowedRoles] of Object.entries(routeAccessMap)) {
+              if (new RegExp(route).test(pathname) && allowedRoles.includes(userRole)) {
+                hasAccess = true;
+                break;
+              }
+            }
+            
+            if (!hasAccess) {
+              router.push(`/${userRole}`);
             }
           }
+        } else {
+          // When offline or in offline mode
+          const offlineUser = await getOfflineUser();
           
-          if (!hasAccess) {
-            router.push(`/${userRole}`);
+          if (!offlineUser) {
+            // If no offline user credentials, redirect to offline login
+            if (pathname !== '/offline-login') {
+              router.push('/offline-login');
+            }
+          } else {
+            // When offline with stored credentials
+            if (pathname === '/') {
+              // If on homepage, redirect to appropriate section based on role
+              const role = offlineUser.publicMetadata.role;
+              if (role === 'admin') {
+                router.push('/admin');
+              } else if (role === 'receptionist') {
+                router.push('/receptionist/all-patients');
+              } else if (role === 'doctor') {
+                router.push('/doctor');
+              } else {
+                router.push('/dashboard');
+              }
+              return;
+            }
+
+            // Admin can access all routes
+            if (offlineUser.publicMetadata.role === 'admin') {
+              // No need to redirect, admin has access to all pages
+            } 
+            // Check path access for non-admin roles
+            else if (pathname.startsWith('/receptionist')) {
+              if (offlineUser.publicMetadata.role !== 'receptionist') {
+                // If receptionist access not allowed, redirect to appropriate page
+                router.push(`/${offlineUser.publicMetadata.role}`);
+              }
+            } else if (pathname.startsWith('/admin')) {
+              // Only admin can access admin routes, redirect others
+              router.push(`/${offlineUser.publicMetadata.role}`);
+            } else if (pathname.startsWith('/doctor')) {
+              if (offlineUser.publicMetadata.role !== 'doctor') {
+                // If doctor access not allowed, redirect to appropriate page
+                router.push(`/${offlineUser.publicMetadata.role}`);
+              }
+            }
           }
         }
-      } else {
-        // When offline or in offline mode
-        const offlineUser = await getOfflineUser();
         
-        if (!offlineUser) {
-          // If no offline user credentials, redirect to offline login
-          if (pathname !== '/offline-login') {
-            router.push('/offline-login');
-          }
-        } else {
-          // When offline with stored credentials
-          if (pathname === '/') {
-            // If on homepage, redirect to appropriate section based on role
-            const role = offlineUser.publicMetadata.role;
-            if (role === 'admin') {
-              router.push('/admin');
-            } else if (role === 'receptionist') {
-              router.push('/receptionist/all-patients');
-            } else if (role === 'doctor') {
-              router.push('/doctor');
-            } else {
-              router.push('/dashboard');
-            }
-            return;
-          }
-
-          // Admin can access all routes
-          if (offlineUser.publicMetadata.role === 'admin') {
-            // No need to redirect, admin has access to all pages
-          } 
-          // Check path access for non-admin roles
-          else if (pathname.startsWith('/receptionist')) {
-            if (offlineUser.publicMetadata.role !== 'receptionist') {
-              // If receptionist access not allowed, redirect to appropriate page
-              router.push(`/${offlineUser.publicMetadata.role}`);
-            }
-          } else if (pathname.startsWith('/admin')) {
-            // Only admin can access admin routes, redirect others
-            router.push(`/${offlineUser.publicMetadata.role}`);
-          } else if (pathname.startsWith('/doctor')) {
-            if (offlineUser.publicMetadata.role !== 'doctor') {
-              // If doctor access not allowed, redirect to appropriate page
-              router.push(`/${offlineUser.publicMetadata.role}`);
-            }
-          }
-        }
+        setAuthChecked(true);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setAuthChecked(true);
+        setIsInitialized(true);
       }
-      
-      setAuthChecked(true);
     };
     
     checkAccess();
@@ -167,6 +176,11 @@ export default function OfflineAuthProvider({ children }: OfflineAuthProviderPro
   // Show nothing until auth is checked to prevent flashes of incorrect content
   if (!authChecked && !PUBLIC_PATHS.includes(pathname)) {
     return <div className="h-screen w-full flex items-center justify-center">Loading...</div>;
+  }
+
+  // Only render children when fully initialized to prevent toggle errors
+  if (!isInitialized) {
+    return <div className="h-screen w-full flex items-center justify-center">Initializing...</div>;
   }
 
   return <>{children}</>;

@@ -12,14 +12,38 @@ import PerformersForm from "./forms/PerformerForm";
 // import AssetsForm from "./forms/AssetsForm";
 
 // Lazy load form components
-const MemoForm = dynamic(() => import("./forms/MemoForm"), { loading: () => <h1>Loading...</h1> });
-const PatientForm = dynamic(() => import("./forms/AddPatientForm"), { loading: () => <h1>Loading...</h1> });
-const ExpenseForm = dynamic(() => import("./forms/ExpenseForm"), { loading: () => <h1>Loading...</h1> });
-const AddTestForm = dynamic(() => import("./forms/AddTestForm"), { loading: () => <h1>Loading...</h1> });
-const ReferalForm = dynamic(() => import("./forms/ReferalForm"), { loading: () => <h1>Loading...</h1> });
-const PerformerData = dynamic(() => import("./forms/PerformerForm"), { loading: () => <h1>Loading...</h1> });
-const ExpenseTypeForm = dynamic(() => import("./forms/ExpenseTypeForm "), { loading: () => <h1>Loading...</h1> });
-const AssetsForm = dynamic(() => import("./forms/AssetsForm"), { loading: () => <h1>Loading...</h1> });
+const MemoForm = dynamic(() => import("./forms/MemoForm"), { 
+    loading: () => <h1>Loading...</h1>,
+    ssr: false 
+});
+const PatientForm = dynamic(() => import("./forms/AddPatientForm"), { 
+    loading: () => <h1>Loading...</h1>,
+    ssr: false 
+});
+const ExpenseForm = dynamic(() => import("./forms/ExpenseForm"), { 
+    loading: () => <h1>Loading...</h1>,
+    ssr: false 
+});
+const AddTestForm = dynamic(() => import("./forms/AddTestForm"), { 
+    loading: () => <h1>Loading...</h1>,
+    ssr: false 
+});
+const ReferalForm = dynamic(() => import("./forms/ReferalForm"), { 
+    loading: () => <h1>Loading...</h1>,
+    ssr: false 
+});
+const PerformerData = dynamic(() => import("./forms/PerformerForm"), { 
+    loading: () => <h1>Loading...</h1>,
+    ssr: false 
+});
+const ExpenseTypeForm = dynamic(() => import("./forms/ExpenseTypeForm "), { 
+    loading: () => <h1>Loading...</h1>,
+    ssr: false 
+});
+const AssetsForm = dynamic(() => import("./forms/AssetsForm"), { 
+    loading: () => <h1>Loading...</h1>,
+    ssr: false 
+});
 
 // const AddRoleForm = dynamic(() => import("./forms/AddRole"), { loading: () => <h1>Loading...</h1> });
 

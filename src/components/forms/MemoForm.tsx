@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Dispatch, SetStateAction, useState, ChangeEvent, useEffect, ReactNode } from "react";
+import { Dispatch, SetStateAction, useState, ChangeEvent, useEffect, ReactNode, useMemo } from "react";
 import InputFields from "../InputFields";
 import { MdCancelPresentation } from "react-icons/md";
 import { memoSchema, MemoSchema } from "@/lib/FormValidationSchemas";
@@ -66,7 +66,10 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
     },
   });
   const router = useRouter();
-  const referralMemo = Array.isArray(relatedData?.referral) ? relatedData.referral : [];
+  const referralMemo = useMemo(() => 
+    Array.isArray(relatedData?.referral) ? relatedData.referral : [], 
+    [relatedData?.referral]
+  );
 
   const patientTests = Array.isArray(relatedData?.tests) ? relatedData.tests : [];
   const selectedTestsInitial =
@@ -80,12 +83,18 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
   const [selectedReferral, setSelectedReferral] = useState<Referral | null>(null);
 
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [referralSearchTerm, setReferralSearchTerm] = useState<string>("");
+  const [isSearchingReferral, setIsSearchingReferral] = useState<boolean>(false);
 
 
   const availableTests = Array.isArray(relatedData?.tests) ? relatedData.tests : [];
 
   const filteredTests = availableTests.filter((test) =>
     test.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredReferrals = referralMemo.filter((referral) =>
+    referral.name.toLowerCase().includes(referralSearchTerm.toLowerCase())
   );
 
   useEffect(() => {
@@ -193,13 +202,7 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
               hidden
             />
           )}
-          {/* <InputFields
-            label="Memo No"
-            name="memoNo"
-            register={register("memoNo")}
-            error={errors.memoNo}
-            hidden
-          /> */}
+
           <InputFields
             label="Patient Name"
             name="name"
@@ -245,37 +248,56 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
             register={register("address")}
             error={errors.address}
           />
+          
+          {/* Available Referral List with Search Filter */}
           <div className="">
             <label className="text-xs text-gray-500 block mb-1">Referral</label>
-            <select
-              className={`p-2 border rounded-md ${errors.referredBy ? "border-red-400" : "border-gray-300"
-                }`}
-              {...register("referredBy")}
-              value={selectedReferral?.id || ""}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                const referral = referralMemo.find((ref) => ref.id === e.target.value);
-                setSelectedReferral(referral || null);
-                setValue("referredBy", referral?.id || "");
-              }}
-            >
-              <option disabled value="">
-                Select Reference
-              </option>
-              {referralMemo.length ? (
-                referralMemo.map((ref) => (
-                  <option key={ref.id} value={ref.id}>
-                    {ref.name}
-                  </option>
-                ))
-              ) : (
-                <option disabled>No references available</option>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search referrals..."
+                className={`w-full p-2 border rounded-md focus:outline-none text-xs ${errors.referredBy ? "border-red-400" : "border-gray-300"}`}
+                value={selectedReferral ? selectedReferral.name : referralSearchTerm}
+                onChange={(e) => {
+                  setReferralSearchTerm(e.target.value);
+                  setIsSearchingReferral(true);
+                  setSelectedReferral(null);
+                  setValue("referredBy", null);
+                }}
+                onFocus={() => {
+                  if (!selectedReferral) {
+                    setReferralSearchTerm("");
+                    setIsSearchingReferral(true);
+                  }
+                }}
+              />
+              {isSearchingReferral && referralSearchTerm && (
+                <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-32 overflow-y-auto">
+                  {filteredReferrals.length ? (
+                    filteredReferrals.map((ref) => (
+                      <div
+                        key={ref.id}
+                        className="p-2 cursor-pointer hover:bg-gray-200 text-xs"
+                        onClick={() => {
+                          setSelectedReferral(ref);
+                          setValue("referredBy", ref.id);
+                          setReferralSearchTerm("");
+                          setIsSearchingReferral(false);
+                        }}
+                      >
+                        {ref.name}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-center p-2">No referrals found</p>
+                  )}
+                </div>
               )}
-            </select>
+            </div>
             {errors.referredBy && (
               <p className="text-xs text-red-400 mt-1">{errors.referredBy.message}</p>
             )}
           </div>
-
 
         </div>
       </div>
@@ -317,8 +339,6 @@ const MemoForm = ({ type, data, setOpen, relatedData }: MemoFormProps) => {
                 </div>
               </div>
             </div>
-
-
 
 
             {/* Selected Tests List */}
